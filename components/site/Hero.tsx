@@ -12,19 +12,19 @@ export default async function Hero() {
   return (
     <section className="mx-auto w-full max-w-[90rem] px-5 pt-8 md:px-10 md:pt-12 xl:px-16">
       <div className="flex flex-col justify-between gap-4 border-b border-ink/10 pb-6 md:flex-row md:items-end">
-        <div>
-          <p className="label-red intro font-medium">
+        <div className="max-w-5xl">
+          <p className="label-red intro font-semibold">
             CHERRYL MEDIA · DAILY EDITION
           </p>
           <h1
-            className="intro mt-3 max-w-[26ch] text-[clamp(2.1rem,4.2vw,3.6rem)] font-normal leading-[1.02] tracking-[-0.02em] text-ink"
+            className="intro mt-4 max-w-[22ch] text-[clamp(3.2rem,6.8vw,6.2rem)] font-bold leading-[0.94] tracking-[-0.035em] text-ink"
             style={{ animationDelay: "100ms" }}
           >
-            <span className="font-sans font-normal">Independent </span>
-            <span className="font-display font-normal italic text-brand-red">
+            <span className="font-sans font-bold">Independent </span>
+            <span className="font-display font-medium italic text-brand-red">
               journalism
             </span>
-            <span className="font-sans font-normal"> &amp; digital media network.</span>
+            <span className="font-sans font-bold"> &amp; digital media network.</span>
           </h1>
         </div>
 

@@ -30,9 +30,63 @@ export default function AdminEditorPage() {
   const [liPost, setLiPost] = useState(CANONICAL_ARTICLES[0].channelVariants?.linkedin || "");
   const [nlPost, setNlPost] = useState(CANONICAL_ARTICLES[0].channelVariants?.newsletter || "");
 
+  const [sources, setSources] = useState<Array<{ url: string; publisher: string; claimSummary?: string }>>([
+    {
+      url: "https://statehouse.gov.ng",
+      publisher: "State House Communications",
+      claimSummary: "Federal Executive Council approval of national clean energy transition framework.",
+    },
+    {
+      url: "https://nerc.gov.ng",
+      publisher: "NERC Official Gazette",
+      claimSummary: "Decentralized sub-national mini-grid guidelines and tariff ring-fencing for Band A.",
+    },
+  ]);
+
   const [savedNotice, setSavedNotice] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  const [copiedAI, setCopiedAI] = useState(false);
+
+  const handleCopyAIContext = () => {
+    const prompt = `# EDITORIAL CONTEXT & SOURCE BRIEF FOR FACT-CHECKING / REFINEMENT
+
+## TITLE: ${title}
+## SUBTITLE / DECK: ${deck}
+## CATEGORY: ${category}
+## AUTHOR: ${authorName} (${authorRole})
+
+### PRIMARY SOURCES & CITATIONS:
+${sources.map((s, i) => `${i + 1}. **${s.publisher}**\n   - URL: ${s.url}\n   - Verified Claim: ${s.claimSummary || "Primary source document"}`).join("\n\n") || "No external sources attached yet."}
+
+### FULL ARTICLE BODY:
+${blocks.map((b) => {
+  if (b.type === "paragraph") return b.text;
+  if (b.type === "heading") return `### ${b.text}`;
+  if (b.type === "quote") return `> "${b.quote}"\n> — ${b.author} (${b.context})`;
+  if (b.type === "link" || b.type === "internal_link") return `[Link: ${b.title} - ${b.url || b.slug}]`;
+  if (b.type === "image") return `[Photo: ${b.caption || b.alt} (${b.src})]`;
+  return "";
+}).filter(Boolean).join("\n\n")}
+
+### SOCIAL MEDIA CHANNELS DRAFTS:
+- X / Twitter: ${xPost || "None drafted yet"}
+- Facebook: ${fbPost || "None drafted yet"}
+- LinkedIn: ${liPost || "None drafted yet"}
+- Newsletter: ${nlPost || "None drafted yet"}
+
+---
+### INSTRUCTIONS FOR EDITORIAL AI REVIEWER:
+1. Cross-reference all claims in the body against the attached sources. Flag any unverified assertions.
+2. Polish the tone for a sharp, authoritative Nigerian digital media publication.
+3. Highlight any factual errors, ungrounded speculation, or spelling of Nigerian institutions and public officials.
+4. Provide refined body paragraphs or improved social media angles if appropriate.
+`;
+
+    navigator.clipboard.writeText(prompt);
+    setCopiedAI(true);
+    setTimeout(() => setCopiedAI(false), 3500);
+  };
 
   const handleSave = async (newStatus?: PublishingStatus) => {
     const targetStatus = newStatus || status;
@@ -65,13 +119,16 @@ export default function AdminEditorPage() {
         linkedin: liPost,
         newsletter: nlPost,
       },
-      sourceLinks: [
-        {
-          url: "https://statehouse.gov.ng",
-          publisher: "Official Gazette",
-          accessedAt: new Date().toISOString(),
-        },
-      ],
+      sources: sources.map((s) => ({
+        sourceName: s.publisher,
+        url: s.url,
+        claimSummary: s.claimSummary || "",
+      })),
+      sourceLinks: sources.map((s) => ({
+        url: s.url,
+        publisher: s.publisher,
+        accessedAt: new Date().toISOString(),
+      })),
       publishedAt: new Date().toISOString(),
     };
 
@@ -173,6 +230,20 @@ export default function AdminEditorPage() {
               {saveMessage}
             </span>
           )}
+
+          {/* Copy Context for AI button */}
+          <button
+            type="button"
+            onClick={handleCopyAIContext}
+            className="flex items-center gap-1.5 rounded-lg border border-purple-500/40 bg-purple-500/15 px-3.5 py-1.5 text-xs font-medium text-purple-200 hover:bg-purple-500/25 hover:text-white transition-all shadow-sm"
+            title="Copy complete editorial brief, verified sources, and text to paste into ChatGPT, Claude or Gemini for vetting and refinement"
+          >
+            <svg className="w-3.5 h-3.5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+            </svg>
+            {copiedAI ? "✓ Context Copied for AI!" : "Copy Context for AI"}
+          </button>
+
           <button
             type="button"
             disabled={isSubmitting}
@@ -748,43 +819,134 @@ export default function AdminEditorPage() {
 
       {/* TAB 3: Sources & Citations */}
       {activeTab === "sources" && (
-        <div className="rounded-2xl border border-slate-800 bg-[#131B2B] p-6 space-y-4 shadow-sm">
-          <div>
-            <h2 className="font-display text-xl font-normal text-white">
-              Sources &amp; Fact Checking
-            </h2>
-            <p className="mt-0.5 text-xs text-slate-400">
-              Verified references, government gazettes, and official releases linked to this story.
-            </p>
+        <div className="space-y-6">
+          {/* AI Workflow Card */}
+          <div className="rounded-2xl border border-purple-500/30 bg-purple-950/20 p-6 space-y-4 shadow-sm">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <span className="label font-medium text-purple-400">AI EDITORIAL COLLABORATION</span>
+                <h3 className="font-display text-lg font-normal text-white mt-1">
+                  Export Editorial Brief &amp; Context for External AI
+                </h3>
+                <p className="text-xs text-slate-300 mt-1 max-w-2xl">
+                  Copy this story&apos;s full brief (headline, deck, attached sources, verified claims, body text, and social drafts) to paste directly into ChatGPT, Claude, or Gemini to fact-check, refine phrasing, and ensure local accuracy.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleCopyAIContext}
+                className="inline-flex items-center gap-2 rounded-xl bg-purple-600 px-5 py-2.5 text-xs font-medium text-white shadow hover:bg-purple-500 transition-colors shrink-0"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                </svg>
+                {copiedAI ? "✓ Copied to Clipboard!" : "Copy Context for AI"}
+              </button>
+            </div>
           </div>
 
-          <div className="space-y-3">
-            <div className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-900/60 p-4 text-xs">
+          {/* Primary Sources & Fact Citations */}
+          <div className="rounded-2xl border border-slate-800 bg-[#131B2B] p-6 space-y-4 shadow-sm">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
               <div>
-                <span className="font-medium text-white block">
-                  Official Government Gazette
-                </span>
-                <span className="font-mono text-slate-400 text-[0.7rem]">
-                  https://statehouse.gov.ng
-                </span>
+                <h2 className="font-display text-xl font-normal text-white">
+                  Primary Sources &amp; Citations
+                </h2>
+                <p className="mt-0.5 text-xs text-slate-400">
+                  Every claim must be traceable to official gazettes, ministerial releases, or verified data.
+                </p>
               </div>
-              <span className="rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 text-[0.68rem] font-medium text-emerald-400">
-                Verified 100%
-              </span>
+              <button
+                type="button"
+                onClick={() =>
+                  setSources((prev) => [
+                    ...prev,
+                    {
+                      url: "",
+                      publisher: "New Source / Gazette",
+                      claimSummary: "",
+                    },
+                  ])
+                }
+                className="rounded-lg border border-slate-700 bg-slate-800 px-3.5 py-1.5 text-xs font-medium text-slate-200 hover:bg-slate-700 hover:text-white transition-colors"
+              >
+                + Add Source Link
+              </button>
             </div>
 
-            <div className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-900/60 p-4 text-xs">
-              <div>
-                <span className="font-medium text-white block">
-                  Regulatory Commission Filing
-                </span>
-                <span className="font-mono text-slate-400 text-[0.7rem]">
-                  https://nerc.gov.ng
-                </span>
-              </div>
-              <span className="rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 text-[0.68rem] font-medium text-emerald-400">
-                Verified 100%
-              </span>
+            <div className="space-y-3">
+              {sources.map((s, idx) => (
+                <div
+                  key={idx}
+                  className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 space-y-3"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-brand-red">
+                      Source #{idx + 1}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setSources((prev) => prev.filter((_, i) => i !== idx))}
+                      className="text-xs text-slate-500 hover:text-red-400 transition-colors"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div>
+                      <label className="block text-[0.68rem] uppercase tracking-wider text-slate-400 mb-1">
+                        Publisher / Institution
+                      </label>
+                      <input
+                        type="text"
+                        value={s.publisher}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setSources((prev) =>
+                            prev.map((item, i) => (i === idx ? { ...item, publisher: val } : item))
+                          );
+                        }}
+                        className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-xs text-white focus:border-brand-red focus:outline-none"
+                        placeholder="e.g. State House Official Gazette"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[0.68rem] uppercase tracking-wider text-slate-400 mb-1">
+                        Source URL
+                      </label>
+                      <input
+                        type="text"
+                        value={s.url}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setSources((prev) =>
+                            prev.map((item, i) => (i === idx ? { ...item, url: val } : item))
+                          );
+                        }}
+                        className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-xs text-white focus:border-brand-red focus:outline-none"
+                        placeholder="https://..."
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-[0.68rem] uppercase tracking-wider text-slate-400 mb-1">
+                      Verified Fact / Claim Summary
+                    </label>
+                    <input
+                      type="text"
+                      value={s.claimSummary || ""}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setSources((prev) =>
+                          prev.map((item, i) => (i === idx ? { ...item, claimSummary: val } : item))
+                        );
+                      }}
+                      className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-xs text-white focus:border-brand-red focus:outline-none"
+                      placeholder="e.g. Official confirmation of tariff stabilization starting November 1"
+                    />
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
