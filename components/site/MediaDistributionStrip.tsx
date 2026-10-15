@@ -30,7 +30,7 @@ export default function MediaDistributionStrip() {
             Get the Cherryl Media <em className="font-display italic font-light text-brand-red">Morning Edition</em> in your inbox.
           </h2>
           <p className="mt-4 text-sm md:text-base font-normal leading-relaxed text-paper/75">
-            Key policy developments, practical Nigerian consumer updates, and cultural essays delivered every morning at 6:00 AM.
+            Key policy developments, practical consumer updates, and cultural essays delivered every morning at 6:00 AM.
           </p>
 
           <form onSubmit={handleSubmit} className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3 max-w-md mx-auto">

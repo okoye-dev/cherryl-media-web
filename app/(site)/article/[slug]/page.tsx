@@ -99,10 +99,24 @@ export default async function ArticlePage({ params }: { params: Params }) {
       />
       <article className="pb-24">
         <PageHeader
-          label={`${formatCategoryName(article.categoryName || article.category)} · By ${article.author.name} · ${formatDate(article.publishedAt)} · ${article.readTime}`}
+          label={article.kicker || formatCategoryName(article.categoryName || article.category)}
           title={article.title}
           intro={article.deck}
           compact
+          byline={
+            <>
+              <div className="flex items-center gap-2">
+                <span>
+                  By <strong className="font-semibold text-ink">{article.author.name}</strong>
+                </span>
+                <span>·</span>
+                <span className="font-num">{formatDate(article.publishedAt)}</span>
+              </div>
+              <span className="font-num text-[0.72rem] text-ink-soft">
+                {article.readTime || "4 min read"}
+              </span>
+            </>
+          }
         />
 
         <div className="mx-auto w-full max-w-[55rem] px-5 pt-8 md:px-10">

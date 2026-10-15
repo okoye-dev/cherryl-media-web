@@ -36,7 +36,7 @@ export const DEFAULT_EDITORIAL_COPY: EditorialCopy = {
     titleAccent: "journalism",
     titleTrail: " & digital media network.",
     description:
-      "Leading digital newsroom and new-age media distribution network covering Nigerian state affairs, business, culture, politics, and dispatches across Africa.",
+      "Leading digital newsroom and new-age media distribution network covering state affairs, business, culture, politics, and dispatches across Africa and globally.",
   },
   ticker: {
     label: "LIVE WIRE",
@@ -47,7 +47,7 @@ export const DEFAULT_EDITORIAL_COPY: EditorialCopy = {
     issueBadge: "WEEKEND EDITION · ISSUE #18",
     heading: "Culture, Cinema & In-Depth Features",
     subheading:
-      "Features, music chronicles, food heritage, and modern Nigerian narratives.",
+      "Features, music chronicles, food heritage, and modern narratives across Africa and the diaspora.",
   },
   network: {
     headline: "Multi-Channel Media Distribution Network",

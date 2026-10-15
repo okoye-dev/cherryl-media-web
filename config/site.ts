@@ -3,7 +3,7 @@ export const SITE = {
   shortName: "Cherryl",
   title: "CHERRYL MEDIA | New Age Media & Independent Journalism",
   description:
-    "Leading digital newsroom and new-age media distribution network covering Nigerian state affairs, business, culture, politics, and dispatches across Africa.",
+    "Leading digital newsroom and new-age media distribution network covering state affairs, business, culture, politics, and dispatches across Africa and globally.",
   tagline: "New-Age Media Distribution & Independent Journalism",
   location: "Abuja · Lagos · London",
   email: "cherrylmedia1@gmail.com",
@@ -23,7 +23,7 @@ export const SITE = {
   categories: [
     {
       slug: "nigerian-current-affairs",
-      name: "Nigerian Current Affairs",
+      name: "Current Affairs",
       shortName: "Current Affairs",
       summary: "Confirmed announcements, policy changes, executive governance, and major national developments.",
       subcategories: ["Confirmed Announcements", "Policy Changes", "Federal Affairs", "Security"],
@@ -41,7 +41,7 @@ export const SITE = {
     },
     {
       slug: "practical-nigerian-updates",
-      name: "Practical Nigerian Updates",
+      name: "Practical Updates",
       shortName: "Practical Updates",
       summary: "Education, transport routes, electricity tariffs, consumer advisories, and public-service changes.",
       subcategories: ["Education & Exams", "Transport & Transit", "Power & Utilities", "Public Service"],

@@ -13,7 +13,7 @@ const INGESTED_CANDIDATES = [
     source: "Federal Gazette Feed",
     freshness: "14m ago",
     confidence: "Confirmed",
-    category: "Nigerian Current Affairs",
+    category: "Current Affairs",
     status: "Ready to write",
   },
   {
@@ -22,7 +22,7 @@ const INGESTED_CANDIDATES = [
     source: "NERC Official Feed",
     freshness: "42m ago",
     confidence: "Official Release",
-    category: "Practical Nigerian Updates",
+    category: "Practical Updates",
     status: "Draft Ready",
   },
   {

@@ -742,9 +742,9 @@ ${blocks.map((b) => {
                   onChange={(e) => setCategory(e.target.value as PillarCategory)}
                   className="h-11 w-full rounded-xl border border-white/10 bg-[#1A1D24] px-3.5 py-2.5 text-sm font-medium text-white focus:border-brand-red focus:outline-none transition-colors"
                 >
-                  <option value="nigerian-current-affairs">Nigerian Current Affairs</option>
+                  <option value="nigerian-current-affairs">Current Affairs</option>
                   <option value="entertainment-internet-culture">Entertainment &amp; Internet Culture</option>
-                  <option value="practical-nigerian-updates">Practical Nigerian Updates</option>
+                  <option value="practical-nigerian-updates">Practical Updates</option>
                   <option value="business-institutions">Business &amp; Institutions</option>
                   <option value="stories-romance">Stories &amp; Romance</option>
                 </select>

@@ -42,8 +42,8 @@ export default async function SiteFooter() {
           <div>
             <h3 className="label text-brand-red">Core Desks</h3>
             <ul className="mt-3 flex flex-col gap-2 text-xs font-light text-paper/75">
-              <li><Link href="/category/nigerian-current-affairs" className="hover:text-brand-red">Nigerian Current Affairs</Link></li>
-              <li><Link href="/category/practical-nigerian-updates" className="hover:text-brand-red">Practical Nigerian Updates</Link></li>
+              <li><Link href="/category/nigerian-current-affairs" className="hover:text-brand-red">Current Affairs</Link></li>
+              <li><Link href="/category/practical-nigerian-updates" className="hover:text-brand-red">Practical Updates</Link></li>
               <li><Link href="/category/business-institutions" className="hover:text-brand-red">Business &amp; Institutions</Link></li>
             </ul>
           </div>
