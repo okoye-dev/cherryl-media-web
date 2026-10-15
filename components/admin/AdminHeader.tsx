@@ -47,6 +47,14 @@ export default function AdminHeader() {
           All Stories
         </Link>
         <Link
+          href="/admin/sections"
+          className={`hidden sm:inline-block transition-colors px-2 py-1 ${
+            pathname === "/admin/sections" ? "text-white font-semibold" : "text-zinc-400 hover:text-white"
+          }`}
+        >
+          Curated Sections
+        </Link>
+        <Link
           href="/admin/settings"
           className={`hidden sm:inline-block transition-colors px-2 py-1 ${
             pathname === "/admin/settings" ? "text-white font-semibold" : "text-zinc-400 hover:text-white"

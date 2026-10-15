@@ -1,6 +1,5 @@
 import Link from "next/link";
 import Arrow from "./Arrow";
-import Placeholder from "./Placeholder";
 
 export default function FigureCard({
   index,
@@ -8,21 +7,34 @@ export default function FigureCard({
   category = "DISPATCH",
   href = "/category/state-affairs-environs",
   readTime = "4 min",
+  imageUrl,
 }: {
   index: number;
   name: string;
   category?: string;
   href?: string;
   readTime?: string;
+  imageUrl?: string;
 }) {
   return (
     <Link href={href} className="group block">
-      <Placeholder className="aspect-[16/10] rounded-[1.25rem] text-[0.8rem] relative overflow-hidden transition-all duration-500 group-hover:border-brand-red/30">
-        <span className="font-display italic text-ink-soft/40">Cherryl Media</span>
-        <span className="absolute bottom-3 left-3 rounded-full bg-ink/70 backdrop-blur px-2.5 py-0.5 font-num text-[0.65rem] text-paper uppercase">
+      <div className="aspect-[16/10] rounded-[1.25rem] text-[0.8rem] relative overflow-hidden transition-all duration-500 group-hover:border-brand-red/30 border border-ink/10 bg-paper-deep/60">
+        {imageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={imageUrl}
+            alt={name}
+            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+          />
+        ) : (
+          <div className="h-full w-full flex items-center justify-center font-display italic text-ink-soft/40">
+            Cherryl Media
+          </div>
+        )}
+        <span className="absolute bottom-3 left-3 rounded-full bg-ink/80 backdrop-blur px-2.5 py-0.5 font-num text-[0.65rem] text-paper uppercase z-10">
           {category}
         </span>
-      </Placeholder>
+      </div>
       <div className="mt-3.5 flex items-baseline justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2">

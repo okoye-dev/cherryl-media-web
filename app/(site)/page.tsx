@@ -6,31 +6,12 @@ import FigureCard from "@/components/site/FigureCard";
 import MediaDistributionStrip from "@/components/site/MediaDistributionStrip";
 import EditorialDossier from "@/components/site/EditorialDossier";
 import Pill from "@/components/site/Pill";
+import { getCuratedSections } from "@/lib/sections";
 
-const FEATURED_STORIES = [
-  {
-    name: "Federal Ministry of Transport Finalizes Comprehensive Inter-State Safety Standard",
-    category: "CURRENT AFFAIRS",
-    readTime: "3 min",
-  },
-  {
-    name: "Practical Advisory: Distribution Companies Commence Phase 2 Direct Meter Rollout",
-    category: "PRACTICAL UPDATES",
-    readTime: "4 min",
-  },
-  {
-    name: "Commercial Lenders Expand Sovereign Local-Currency Trade Facilities",
-    category: "BUSINESS & INSTITUTIONS",
-    readTime: "5 min",
-  },
-  {
-    name: "Stories & Romance: Letters on Awolowo Road and the Intimacy of Modern Distance",
-    category: "STORIES & ROMANCE",
-    readTime: "4 min",
-  },
-];
+export default async function Home() {
+  const curated = await getCuratedSections();
+  const featuredStories = curated.byKey?.featured_updates?.articles || [];
 
-export default function Home() {
   return (
     <>
       <Ticker />
@@ -49,13 +30,15 @@ export default function Home() {
             </Pill>
           </div>
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:gap-6">
-            {FEATURED_STORIES.map((story, i) => (
+            {featuredStories.map((story, i) => (
               <FigureCard
-                key={story.name}
+                key={story.slug || story.id}
                 index={i + 1}
-                name={story.name}
-                category={story.category}
+                name={story.title}
+                category={story.categoryName || story.category}
+                href={`/article/${story.slug}`}
                 readTime={story.readTime}
+                imageUrl={story.featuredImage?.url}
               />
             ))}
           </div>

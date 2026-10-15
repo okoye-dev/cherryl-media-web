@@ -1,10 +1,20 @@
 import Link from "next/link";
 import { getOpinionColumns } from "@/lib/news";
+import { getCuratedSections } from "@/lib/sections";
 import Arrow from "./Arrow";
 import Pill from "./Pill";
 
 export default async function FieldNotes() {
-  const opinionColumns = await getOpinionColumns();
+  const [curated, defaultOpinion] = await Promise.all([
+    getCuratedSections(),
+    getOpinionColumns(),
+  ]);
+
+  const opinionColumns =
+    curated.byKey?.perspectives?.articles &&
+    curated.byKey.perspectives.articles.length > 0
+      ? curated.byKey.perspectives.articles
+      : defaultOpinion;
 
   return (
     <section aria-labelledby="opinion-notes">

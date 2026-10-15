@@ -3,13 +3,22 @@ import Pill from "./Pill";
 import Arrow from "./Arrow";
 import { getLeadStory, getDispatches } from "@/lib/news";
 import { getEditorialCopy } from "@/lib/settings";
+import { getCuratedSections } from "@/lib/sections";
 
 export default async function Hero() {
-  const [leadStory, dispatches, copy] = await Promise.all([
+  const [curated, defaultLead, defaultDispatches, copy] = await Promise.all([
+    getCuratedSections(),
     getLeadStory(),
     getDispatches(),
     getEditorialCopy(),
   ]);
+
+  const leadStory = curated.byKey?.hero_lead?.articles?.[0] || defaultLead;
+  const trendingStories =
+    curated.byKey?.hero_trending?.articles &&
+    curated.byKey.hero_trending.articles.length > 0
+      ? curated.byKey.hero_trending.articles
+      : defaultDispatches.slice(0, 3);
 
   return (
     <section className="mx-auto w-full max-w-[90rem] px-5 pt-8 md:px-10 md:pt-12 xl:px-16">
@@ -118,7 +127,7 @@ export default async function Hero() {
           </div>
 
           <div className="flex flex-col">
-            {dispatches.slice(0, 3).map((story, i) => (
+            {trendingStories.slice(0, 3).map((story, i) => (
               <div key={story.slug} className="w-full">
                 {i > 0 && <div className="w-full border-t border-ink/10" />}
                 <article
