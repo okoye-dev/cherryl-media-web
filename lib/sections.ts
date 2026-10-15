@@ -102,9 +102,14 @@ function buildFallbackResponse(): CuratedSectionsResponse {
   const byKey: Record<string, CuratedSection> = {};
 
   for (const [key, ids] of Object.entries(defaultAllocations)) {
-    const articles = ids
+    let articles = ids
       .map((id) => byID[id])
       .filter((a): a is CanonicalArticle => Boolean(a));
+
+    if (articles.length === 0) {
+      // Safety guarantee: never leave a section empty
+      articles = CANONICAL_ARTICLES.slice(0, 4);
+    }
 
     const sec: CuratedSection = {
       sectionKey: key,
@@ -126,6 +131,8 @@ export async function getCuratedSections(): Promise<CuratedSectionsResponse> {
     process.env.BACKEND_URL ||
     "http://localhost:8080";
 
+  const fallback = buildFallbackResponse();
+
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 3500);
@@ -139,6 +146,16 @@ export async function getCuratedSections(): Promise<CuratedSectionsResponse> {
     if (res.ok) {
       const data = await res.json();
       if (data && data.byKey) {
+        // Guarantee all default sections have populated articles
+        for (const key of DEFAULT_SECTION_KEYS) {
+          if (
+            !data.byKey[key] ||
+            !Array.isArray(data.byKey[key].articles) ||
+            data.byKey[key].articles.length === 0
+          ) {
+            data.byKey[key] = fallback.byKey[key];
+          }
+        }
         return data as CuratedSectionsResponse;
       }
     }
@@ -146,7 +163,7 @@ export async function getCuratedSections(): Promise<CuratedSectionsResponse> {
     // Graceful fallback to verified canonical dataset if backend is unreachable during build
   }
 
-  return buildFallbackResponse();
+  return fallback;
 }
 
 export async function searchArticles(query: string, limit = 20): Promise<CanonicalArticle[]> {

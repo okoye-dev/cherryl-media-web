@@ -5,6 +5,8 @@ import FigureCard from "@/components/site/FigureCard";
 import Pill from "@/components/site/Pill";
 import { SITE } from "@/config/site";
 
+import { getArticlesByCategory } from "@/lib/articles";
+
 export function generateStaticParams() {
   return SITE.categories.map((c) => ({ slug: c.slug }));
 }
@@ -49,24 +51,7 @@ export default async function CategoryPage({ params }: { params: Params }) {
   const category = SITE.categories.find((c) => c.slug === slug);
   if (!category) notFound();
 
-  const sampleStories = [
-    {
-      name: `${category.name}: Comprehensive Regulatory & Policy Review`,
-      readTime: "4 min",
-    },
-    {
-      name: `Special Dispatch: Key Stakeholders Finalize Strategic 10-Year Roadmap`,
-      readTime: "5 min",
-    },
-    {
-      name: `Analysis: Emerging Fiscal Allocations Across Priority Sectors`,
-      readTime: "3 min",
-    },
-    {
-      name: `Field Brief: Infrastructure Milestones Recorded Ahead of Legislative Session`,
-      readTime: "6 min",
-    },
-  ];
+  const articles = await getArticlesByCategory(category.slug);
 
   return (
     <>
@@ -98,13 +83,15 @@ export default async function CategoryPage({ params }: { params: Params }) {
         </div>
 
         <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {sampleStories.map((story, i) => (
+          {articles.map((story, i) => (
             <FigureCard
-              key={story.name}
+              key={story.id || story.slug}
               index={i + 1}
-              name={story.name}
-              category={category.name}
-              readTime={story.readTime}
+              name={story.title}
+              category={story.kicker || category.name}
+              href={`/article/${story.slug}`}
+              readTime={story.readTime || "4 min"}
+              imageUrl={story.featuredImage?.url}
             />
           ))}
         </div>
