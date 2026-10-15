@@ -60,16 +60,16 @@ export default function SiteHeader() {
           </Link>
         </div>
 
-        <div className="flex items-center gap-6 md:gap-8 px-4">
+        <div className="flex items-center gap-4 lg:gap-6 xl:gap-8 px-2 sm:px-4 shrink-0">
           <nav
             aria-label="Primary"
-            className="hidden items-center gap-6 text-[0.88rem] tracking-[-0.01em] md:flex lg:gap-7"
+            className="hidden items-center gap-3.5 text-[0.76rem] font-medium tracking-[-0.01em] lg:flex xl:gap-5 xl:text-[0.85rem] 2xl:gap-7 2xl:text-[0.92rem] whitespace-nowrap"
           >
             {SITE.nav.slice(1, 6).map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="py-1 text-ink transition-all duration-200 hover:italic hover:text-brand-red"
+                className="py-1 text-ink transition-all duration-200 hover:italic hover:text-brand-red shrink-0"
               >
                 {item.label}
               </Link>
@@ -83,7 +83,7 @@ export default function SiteHeader() {
             aria-expanded={open}
             aria-controls="site-menu"
             aria-label={open ? "Close menu" : "Open menu"}
-            className="group relative z-50 grid h-10 w-10 place-items-center rounded-full bg-ink text-paper transition-colors duration-500 hover:bg-brand-red"
+            className="group relative z-50 grid h-10 w-10 min-w-10 min-h-10 shrink-0 aspect-square place-items-center rounded-full bg-ink text-paper transition-colors duration-500 hover:bg-brand-red"
           >
             <span
               className={cn(
@@ -156,9 +156,6 @@ export default function SiteHeader() {
                         {cat.name}
                       </span>
                     </div>
-                    <span className="hidden font-num text-xs font-medium text-ink-soft group-hover:text-brand-red sm:inline shrink-0">
-                      {cat.channels ? cat.channels.join(" · ") : "Section"}
-                    </span>
                   </Link>
                 </li>
               );
