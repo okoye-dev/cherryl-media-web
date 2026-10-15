@@ -97,11 +97,11 @@ export default async function CategoryPage({ params }: { params: Params }) {
         </div>
 
         <div className="mt-14 border-t border-ink/10 pt-8 flex items-center justify-between">
-          <Pill href="/" variant="ghost">
-            ← Return to Main Dispatch
+          <Pill href="/" variant="ghost" arrow="left">
+            Back to All Stories
           </Pill>
           <span className="font-num text-xs text-ink-soft">
-            Showing latest verified dispatches
+            Showing latest verified articles
           </span>
         </div>
       </div>

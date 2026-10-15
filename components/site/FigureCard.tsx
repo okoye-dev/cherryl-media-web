@@ -3,14 +3,12 @@ import Arrow from "./Arrow";
 import { formatCategoryName } from "@/lib/formatters";
 
 export default function FigureCard({
-  index,
   name,
   category = "DISPATCH",
   href = "/category/nigerian-current-affairs",
-  readTime = "4 min",
   imageUrl,
 }: {
-  index: number;
+  index?: number;
   name: string;
   category?: string;
   href?: string;
@@ -36,14 +34,8 @@ export default function FigureCard({
           {formatCategoryName(category)}
         </span>
       </div>
-      <div className="mt-3 flex items-start justify-between gap-3">
+      <div className="my-3 flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="font-num text-[0.68rem] font-semibold text-brand-red leading-none">
-              No. {String(index).padStart(2, "0")}
-            </span>
-            <span className="text-[0.65rem] font-medium text-ink-soft leading-none">· {readTime}</span>
-          </div>
           <span className="mt-1 block font-area text-[1.05rem] md:text-[1.15rem] font-semibold leading-snug tracking-[-0.02em] text-ink transition-all duration-200 group-hover:italic group-hover:text-brand-red">
             {name}
           </span>

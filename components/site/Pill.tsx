@@ -23,6 +23,7 @@ interface IProps {
   children: React.ReactNode;
   variant?: keyof typeof VARIANTS;
   className?: string;
+  arrow?: "up-right" | "left" | "none";
 }
 
 export default function Pill({
@@ -30,32 +31,43 @@ export default function Pill({
   children,
   variant = "solid",
   className,
+  arrow = "up-right",
 }: IProps) {
   const classes = cn(BASE, VARIANTS[variant], className);
-  const arrow = (
+  const forwardArrow = (
     <Arrow className="h-[0.8em] w-[0.8em] transition-transform duration-150 ease-out group-hover:translate-x-0.5 group-hover:rotate-[15deg]" />
+  );
+  const backArrow = (
+    <span aria-hidden="true" className="text-[0.9em] transition-transform duration-150 ease-out group-hover:-translate-x-0.5">
+      ←
+    </span>
+  );
+
+  const content = (
+    <>
+      {arrow === "left" && backArrow}
+      {children}
+      {arrow === "up-right" && forwardArrow}
+    </>
   );
 
   if (href.startsWith("mailto:")) {
     return (
       <a href={href} className={classes}>
-        {children}
-        {arrow}
+        {content}
       </a>
     );
   }
   if (/^https?:/.test(href)) {
     return (
       <a href={href} target="_blank" rel="noreferrer" className={classes}>
-        {children}
-        {arrow}
+        {content}
       </a>
     );
   }
   return (
     <Link href={href} className={classes}>
-      {children}
-      {arrow}
+      {content}
     </Link>
   );
 }

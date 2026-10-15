@@ -35,7 +35,7 @@ export default function PageHeader({
       )}
       {byline && (
         <div
-          className="intro mt-6 max-w-[55rem] border-t border-b border-ink/10 py-3 text-[0.75rem] font-medium text-ink-soft flex items-center justify-between"
+          className="intro mt-4 max-w-[55rem] text-[0.75rem] font-medium text-ink-soft flex items-center justify-between"
           style={{ animationDelay: "280ms" }}
         >
           {byline}
