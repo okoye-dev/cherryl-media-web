@@ -28,11 +28,6 @@ export default function AdminLoginPage() {
     }
   };
 
-  const fillDefaultAdmin = () => {
-    setEmail("admin@cherrylmedia.com");
-    setPassword("cherryl2026!");
-  };
-
   return (
     <div className="flex min-h-[80vh] items-center justify-center px-4">
       <div className="w-full max-w-md space-y-6">
@@ -97,17 +92,6 @@ export default function AdminLoginPage() {
           >
             {loading ? "Authenticating..." : "Sign In to Editorial Desk"}
           </button>
-
-          {/* Quick-fill helper for development / seed admin */}
-          <div className="pt-3 border-t border-white/[0.06] text-center">
-            <button
-              type="button"
-              onClick={fillDefaultAdmin}
-              className="text-[0.72rem] font-mono text-zinc-400 hover:text-brand-red transition-colors"
-            >
-              Click to use seed credentials (admin@cherrylmedia.com)
-            </button>
-          </div>
         </form>
 
         <div className="text-center">
