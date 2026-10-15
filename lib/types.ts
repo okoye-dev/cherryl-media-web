@@ -16,8 +16,8 @@ export type PublishingStatus =
 export type ContentBlock =
   | { type: "paragraph"; text: string; isDropCap?: boolean }
   | { type: "quote"; quote: string; author?: string; context?: string }
-  | { type: "image"; src: string; caption?: string; credit?: string; alt: string; aspectRatio?: string }
-  | { type: "video"; src: string; caption?: string; credit?: string; poster?: string }
+  | { type: "image"; src: string; storage_key?: string; caption?: string; credit?: string; alt: string; aspectRatio?: string }
+  | { type: "video"; src: string; storage_key?: string; caption?: string; credit?: string; poster?: string }
   | { type: "youtube"; url: string; caption?: string }
   | { type: "internal_link"; title: string; slug: string; category: string; deck?: string; readTime?: string }
   | { type: "external_link"; title: string; url: string; publisher: string; verified?: boolean }
@@ -38,6 +38,7 @@ export interface CanonicalArticle {
   };
   featuredImage: {
     url: string;
+    storage_key?: string;
     caption?: string;
     credit?: string;
   };

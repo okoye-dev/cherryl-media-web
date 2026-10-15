@@ -24,6 +24,7 @@ export interface PresignResponse {
   id: string;
   name: string;
   expires_in: number;
+  already_exists?: boolean;
 }
 
 export interface ConfirmResponse {
@@ -92,6 +93,17 @@ export async function uploadMediaWithProgress(
 
     if (presignRes.ok) {
       const data: PresignResponse = await presignRes.json();
+
+      // Idempotency check: if file already landed in S3 in previous upload/migration, skip PUT
+      if (data.already_exists) {
+        notify("done", 100, "Asset already confirmed in S3 storage");
+        let finalUrl = data.public_url;
+        if (finalUrl.startsWith("/")) {
+          finalUrl = `${BACKEND_URL}${finalUrl}`;
+        }
+        return finalUrl;
+      }
+
       let uploadTarget = data.upload_url;
       if (uploadTarget.startsWith("/")) {
         uploadTarget = `${BACKEND_URL}${uploadTarget}`;

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Arrow from "./Arrow";
 import type { ContentBlock } from "@/lib/types";
-import { getYouTubeEmbedUrl } from "@/lib/url-utils";
+import { getYouTubeEmbedUrl, resolveMediaUrl } from "@/lib/url-utils";
 
 export default function ArticleBody({ blocks }: { blocks: ContentBlock[] }) {
   return (
@@ -62,7 +62,7 @@ export default function ArticleBody({ blocks }: { blocks: ContentBlock[] }) {
                   {block.src ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
-                      src={block.src}
+                      src={resolveMediaUrl(block.src)}
                       alt={block.alt || "Story photo"}
                       className="h-full w-full object-cover"
                     />
@@ -84,8 +84,8 @@ export default function ArticleBody({ blocks }: { blocks: ContentBlock[] }) {
               <figure key={idx} className="my-8">
                 <div className="w-full overflow-hidden rounded-2xl border border-ink/10 bg-black aspect-video relative flex items-center justify-center">
                   <video
-                    src={block.src}
-                    poster={block.poster}
+                    src={resolveMediaUrl(block.src)}
+                    poster={block.poster ? resolveMediaUrl(block.poster) : undefined}
                     controls
                     preload="metadata"
                     playsInline

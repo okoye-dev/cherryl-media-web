@@ -5,6 +5,7 @@ import Pill from "@/components/site/Pill";
 import ArticleBody from "@/components/site/ArticleBody";
 import { SITE } from "@/config/site";
 import { getAllArticleSlugs, getArticleBySlug } from "@/lib/news";
+import { resolveMediaUrl } from "@/lib/url-utils";
 
 export async function generateStaticParams() {
   const slugs = await getAllArticleSlugs();
@@ -109,7 +110,7 @@ export default async function ArticlePage({ params }: { params: Params }) {
               {article.featuredImage.url && !article.featuredImage.url.includes("sample.webp") ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
-                  src={article.featuredImage.url}
+                  src={resolveMediaUrl(article.featuredImage.url)}
                   alt={article.title}
                   className="h-full w-full object-cover"
                 />
