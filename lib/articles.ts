@@ -318,22 +318,66 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [
   },
 ];
 
+const BACKEND_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  process.env.NEXT_PUBLIC_BACKEND_URL ||
+  "http://localhost:8080";
+
+async function fetchLiveArticles(): Promise<CanonicalArticle[]> {
+  if (process.env.NEXT_PHASE === "phase-production-build") {
+    return CANONICAL_ARTICLES;
+  }
+
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/articles?status=published`, {
+      next: { revalidate: 30 },
+      signal: AbortSignal.timeout(800),
+    });
+    if (!res.ok) return CANONICAL_ARTICLES;
+    const articles: CanonicalArticle[] = await res.json();
+    if (!Array.isArray(articles) || articles.length === 0) {
+      return CANONICAL_ARTICLES;
+    }
+    return articles;
+  } catch {
+    return CANONICAL_ARTICLES;
+  }
+}
+
 export async function getLeadStory(): Promise<CanonicalArticle> {
-  return CANONICAL_ARTICLES.find((a) => a.isLead) || CANONICAL_ARTICLES[0];
+  const articles = await fetchLiveArticles();
+  return articles.find((a) => a.isLead) || articles[0] || CANONICAL_ARTICLES[0];
 }
 
 export async function getDispatches(): Promise<CanonicalArticle[]> {
-  return CANONICAL_ARTICLES.filter((a) => !a.isLead);
+  const articles = await fetchLiveArticles();
+  return articles.filter((a) => !a.isLead);
 }
 
 export async function getArticleBySlug(slug: string): Promise<CanonicalArticle | null> {
+  if (process.env.NEXT_PHASE === "phase-production-build") {
+    return CANONICAL_ARTICLES.find((a) => a.slug === slug) || null;
+  }
+
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/articles/${encodeURIComponent(slug)}`, {
+      next: { revalidate: 30 },
+      signal: AbortSignal.timeout(800),
+    });
+    if (res.ok) {
+      const art: CanonicalArticle = await res.json();
+      if (art && art.slug) return art;
+    }
+  } catch {}
   return CANONICAL_ARTICLES.find((a) => a.slug === slug) || null;
 }
 
 export async function getArticlesByCategory(categorySlug: string): Promise<CanonicalArticle[]> {
-  return CANONICAL_ARTICLES.filter((a) => a.category === categorySlug);
+  const articles = await fetchLiveArticles();
+  return articles.filter((a) => a.category === categorySlug);
 }
 
 export async function getAllArticleSlugs(): Promise<string[]> {
   return CANONICAL_ARTICLES.map((a) => a.slug);
 }
+

@@ -28,3 +28,19 @@ export function normalizeStoryPath(url: string): string {
   } catch {}
   return url.startsWith("/") ? url : `/${url}`;
 }
+
+export function getYouTubeEmbedUrl(input: string): string | null {
+  if (!input) return null;
+  const trimmed = input.trim();
+  const match = trimmed.match(
+    /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
+  );
+  if (match && match[1]) {
+    return `https://www.youtube-nocookie.com/embed/${match[1]}`;
+  }
+  if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) {
+    return `https://www.youtube-nocookie.com/embed/${trimmed}`;
+  }
+  return null;
+}
+

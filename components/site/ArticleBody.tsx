@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Arrow from "./Arrow";
 import type { ContentBlock } from "@/lib/types";
+import { getYouTubeEmbedUrl } from "@/lib/url-utils";
 
 export default function ArticleBody({ blocks }: { blocks: ContentBlock[] }) {
   return (
@@ -77,6 +78,58 @@ export default function ArticleBody({ blocks }: { blocks: ContentBlock[] }) {
                 )}
               </figure>
             );
+
+          case "video":
+            return (
+              <figure key={idx} className="my-8">
+                <div className="w-full overflow-hidden rounded-2xl border border-ink/10 bg-black aspect-video relative flex items-center justify-center">
+                  <video
+                    src={block.src}
+                    poster={block.poster}
+                    controls
+                    preload="metadata"
+                    playsInline
+                    className="h-full w-full object-cover"
+                  >
+                    Your browser does not support the video tag.
+                  </video>
+                </div>
+                {(block.caption || block.credit) && (
+                  <figcaption className="mt-2.5 flex items-center justify-between text-xs text-ink-soft">
+                    <span className="font-medium text-ink/80">{block.caption}</span>
+                    {block.credit && <span className="font-mono text-[0.68rem]">{block.credit}</span>}
+                  </figcaption>
+                )}
+              </figure>
+            );
+
+          case "youtube": {
+            const embedUrl = getYouTubeEmbedUrl(block.url);
+            return (
+              <figure key={idx} className="my-8">
+                <div className="aspect-video w-full overflow-hidden rounded-2xl border border-ink/10 bg-black shadow-sm">
+                  {embedUrl ? (
+                    <iframe
+                      src={embedUrl}
+                      title={block.caption || "YouTube video player"}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                      className="h-full w-full border-0"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-xs font-mono text-ink-soft">
+                      Invalid YouTube URL
+                    </div>
+                  )}
+                </div>
+                {block.caption && (
+                  <figcaption className="mt-2.5 text-xs text-ink-soft font-medium text-ink/80">
+                    {block.caption}
+                  </figcaption>
+                )}
+              </figure>
+            );
+          }
 
           case "internal_link":
             return (

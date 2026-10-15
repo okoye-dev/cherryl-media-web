@@ -6,6 +6,8 @@ import { CANONICAL_ARTICLES } from "@/lib/articles";
 import AutoTextarea from "@/components/admin/AutoTextarea";
 import ImageUploadField from "@/components/admin/ImageUploadField";
 import type { ContentBlock, PillarCategory, PublishingStatus } from "@/lib/types";
+import { getYouTubeEmbedUrl } from "@/lib/url-utils";
+import { uploadMediaFile } from "@/lib/upload";
 
 interface SourceItem {
   url: string;
@@ -263,6 +265,30 @@ ${blocks.map((b) => {
         slug: "nigeria-electricity-regulatory-commission-updates-feeder-bands",
         category: "Practical Nigerian Updates",
         deck: "Brief sentence on why the reader should view this.",
+      },
+    ]);
+  };
+
+  const addVideo = () => {
+    setBlocks((prev) => [
+      ...prev,
+      {
+        type: "video",
+        src: "",
+        caption: "",
+        credit: "",
+        poster: "",
+      },
+    ]);
+  };
+
+  const addYouTube = () => {
+    setBlocks((prev) => [
+      ...prev,
+      {
+        type: "youtube",
+        url: "",
+        caption: "",
       },
     ]);
   };
@@ -575,6 +601,8 @@ ${blocks.map((b) => {
                       {block.type === "heading" && "Section Heading"}
                       {block.type === "quote" && "Pull Quote / Statement"}
                       {block.type === "image" && "Inline Story Photo"}
+                      {block.type === "video" && "Video Player (Direct Upload / MP4)"}
+                      {block.type === "youtube" && "YouTube Embed"}
                       {block.type === "internal_link" && "Story Link Card"}
                       {block.type === "external_link" && "External Source Card"}
                     </span>
@@ -674,6 +702,111 @@ ${blocks.map((b) => {
                     </div>
                   )}
 
+                  {/* Video Player Block */}
+                  {block.type === "video" && (
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-[0.7rem] font-medium text-zinc-300 mb-1">
+                          Video Source URL (or MP4/WebM URL)
+                        </label>
+                        <input
+                          type="text"
+                          value={block.src || ""}
+                          onChange={(e) => updateBlock(index, { ...block, src: e.target.value })}
+                          placeholder="https://storage... or /uploads/video.mp4"
+                          className="h-10 w-full rounded-lg border border-white/10 bg-[#141519] px-3 text-xs font-mono text-zinc-200 focus:border-brand-red focus:outline-none"
+                        />
+                      </div>
+
+                      {/* Video direct file upload button */}
+                      <div className="flex items-center gap-2">
+                        <label className="cursor-pointer inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-zinc-800 px-3 py-1.5 text-xs font-medium text-white hover:bg-zinc-700 transition-colors">
+                          <svg className="w-3.5 h-3.5 text-brand-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                          </svg>
+                          <span>Upload Video File (Max 100MB)</span>
+                          <input
+                            type="file"
+                            accept="video/mp4,video/webm,video/quicktime"
+                            className="hidden"
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+                              try {
+                                const url = await uploadMediaFile(file);
+                                if (url) updateBlock(index, { ...block, src: url });
+                              } catch (err: unknown) {
+                                const msg = err instanceof Error ? err.message : "Video upload failed";
+                                alert(msg);
+                              }
+                            }}
+                          />
+                        </label>
+                      </div>
+
+                      {block.src && (
+                        <div className="w-full aspect-video rounded-xl overflow-hidden bg-black border border-white/10 relative">
+                          <video src={block.src} controls className="h-full w-full object-cover" />
+                        </div>
+                      )}
+
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <input
+                          type="text"
+                          value={block.caption || ""}
+                          onChange={(e) => updateBlock(index, { ...block, caption: e.target.value })}
+                          placeholder="Video caption or title..."
+                          className="h-10 rounded-lg border border-white/10 bg-[#141519] px-3 text-xs text-white focus:border-brand-red focus:outline-none"
+                        />
+                        <input
+                          type="text"
+                          value={block.credit || ""}
+                          onChange={(e) => updateBlock(index, { ...block, credit: e.target.value })}
+                          placeholder="Video credit / Producer..."
+                          className="h-10 rounded-lg border border-white/10 bg-[#141519] px-3 text-xs text-white focus:border-brand-red focus:outline-none"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* YouTube Embed Block */}
+                  {block.type === "youtube" && (
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-[0.7rem] font-medium text-zinc-300 mb-1">
+                          YouTube Video URL or ID
+                        </label>
+                        <input
+                          type="text"
+                          value={block.url || ""}
+                          onChange={(e) => updateBlock(index, { ...block, url: e.target.value })}
+                          placeholder="https://www.youtube.com/watch?v=... or https://youtu.be/..."
+                          className="h-10 w-full rounded-lg border border-white/10 bg-[#141519] px-3 text-xs font-mono text-zinc-200 focus:border-brand-red focus:outline-none"
+                        />
+                      </div>
+
+                      {block.url && getYouTubeEmbedUrl(block.url) && (
+                        <div className="w-full aspect-video rounded-xl overflow-hidden bg-black border border-white/10 shadow-sm">
+                          <iframe
+                            src={getYouTubeEmbedUrl(block.url)!}
+                            title="YouTube Preview"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                            className="h-full w-full border-0"
+                          />
+                        </div>
+                      )}
+
+                      <input
+                        type="text"
+                        value={block.caption || ""}
+                        onChange={(e) => updateBlock(index, { ...block, caption: e.target.value })}
+                        placeholder="Video caption / summary for readers..."
+                        className="h-10 w-full rounded-lg border border-white/10 bg-[#141519] px-3 text-xs text-white focus:border-brand-red focus:outline-none"
+                      />
+                    </div>
+                  )}
+
                   {/* Internal Story Link Card */}
                   {block.type === "internal_link" && (
                     <div className="space-y-3">
@@ -765,6 +898,20 @@ ${blocks.map((b) => {
                   className="rounded-lg border border-white/15 bg-[#1A1D24] px-3.5 py-2 text-xs font-medium text-white hover:bg-zinc-800 transition-colors"
                 >
                   + Add link
+                </button>
+                <button
+                  type="button"
+                  onClick={addVideo}
+                  className="rounded-lg border border-white/15 bg-[#1A1D24] px-3.5 py-2 text-xs font-medium text-white hover:bg-zinc-800 transition-colors"
+                >
+                  + Add video
+                </button>
+                <button
+                  type="button"
+                  onClick={addYouTube}
+                  className="rounded-lg border border-white/15 bg-[#1A1D24] px-3.5 py-2 text-xs font-medium text-white hover:bg-zinc-800 transition-colors"
+                >
+                  + Add YouTube
                 </button>
               </div>
             </div>
