@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Arrow from "./Arrow";
 import Pill from "./Pill";
 import { getEditorialCopy } from "@/lib/settings";
 import { getCuratedSections } from "@/lib/sections";
@@ -85,7 +84,7 @@ export default async function EditorialDossier() {
 
             <div className="mt-6 flex items-center justify-between border-t border-ink/10 pt-4 text-xs font-medium text-ink-soft">
               <span>By {typeof leadStory.author === "string" ? leadStory.author : leadStory.author?.name} · {leadStory.author?.role || "Culture Bureau"}</span>
-              <Arrow className="h-3 w-3 text-brand-red transition-transform duration-200 group-hover:translate-x-1" />
+              <span className="font-num text-[0.7rem]">{formatDate(leadStory.publishedAt)}</span>
             </div>
           </article>
         )}
@@ -143,28 +142,45 @@ export default async function EditorialDossier() {
           )}
         </div>
 
-        {/* Right Culture Briefs Column */}
-        <div className="flex flex-col rounded-[1.75rem] border border-ink/10 bg-paper-deep/30 p-4 sm:p-5 md:p-6 lg:col-span-3">
-          <div className="flex items-center justify-between border-b border-ink/10 pb-3">
-            <span className="label text-brand-red">CULTURE BRIEFS</span>
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-brand-red" />
+        {/* Right Culture Briefs Column - Distinct editorial rail layout (no repetitive rounded box) */}
+        <div className="flex flex-col border-t border-ink/15 pt-6 lg:col-span-3 lg:border-t-0 lg:border-l lg:border-ink/15 lg:pl-7 lg:pt-0">
+          <div className="flex items-center justify-between border-b border-ink/15 pb-3">
+            <div className="flex items-center gap-2">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-red opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-red" />
+              </span>
+              <span className="label text-xs font-semibold tracking-wider text-ink">CULTURE BRIEFS</span>
+            </div>
+            <span className="font-num text-[0.68rem] font-medium uppercase tracking-widest text-ink-soft">
+              Dispatches
+            </span>
           </div>
 
-          <ul className="mt-4 divide-y divide-ink/10">
+          <ul className="mt-2 divide-y divide-ink/10">
             {radarStories.map((item, idx) => (
-              <li key={item.slug || item.id} className="group py-4 first:pt-2 last:pb-0">
+              <li key={item.slug || item.id} className="group py-3.5 first:pt-3 last:pb-1">
                 <Link href={`/article/${item.slug}`} className="block">
-                  <div className="flex items-center justify-between">
-                    <span className="label text-[0.62rem] text-brand-red truncate max-w-[150px]">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="label text-[0.66rem] font-medium text-brand-red tracking-wider">
                       {item.kicker || "RADAR"}
                     </span>
-                    <span className="font-num text-[0.68rem] text-ink-soft">
+                    <span className="font-num text-[0.68rem] text-ink-soft shrink-0">
                       {item.readTime ? formatReadTime(item.readTime) : `0${idx + 1}`}
                     </span>
                   </div>
-                  <h4 className="mt-1.5 font-area text-[0.95rem] font-medium leading-snug tracking-[-0.02em] text-ink transition-all duration-200 group-hover:italic group-hover:text-brand-red">
+                  <h4 className="mt-1.5 font-area text-[0.98rem] font-medium leading-snug tracking-[-0.02em] text-ink transition-all duration-200 group-hover:italic group-hover:text-brand-red">
                     {item.title}
                   </h4>
+                  {(item.deck || item.excerpt) && (
+                    <p className="mt-1.5 text-xs font-normal leading-relaxed text-ink/70 line-clamp-2">
+                      {item.deck || item.excerpt}
+                    </p>
+                  )}
+                  <div className="mt-2 flex items-center justify-between text-[0.7rem] text-ink-soft">
+                    <span>{typeof item.author === "string" ? item.author : item.author?.name || "Culture Desk"}</span>
+                    <span className="font-num text-[0.68rem]">{formatDate(item.publishedAt)}</span>
+                  </div>
                 </Link>
               </li>
             ))}

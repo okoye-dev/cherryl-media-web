@@ -1,6 +1,5 @@
 import Link from "next/link";
 import Pill from "./Pill";
-import Arrow from "./Arrow";
 import { getLeadStory, getDispatches } from "@/lib/news";
 import { getEditorialCopy } from "@/lib/settings";
 import { getCuratedSections } from "@/lib/sections";
@@ -112,10 +111,9 @@ export default async function Hero() {
             </span>
             <Link
               href={`/article/${leadStory.slug}`}
-              className="inline-flex items-center gap-1.5 font-medium text-brand-red transition-transform duration-200 group-hover:translate-x-1"
+              className="font-medium text-brand-red transition-colors hover:text-brand-red-deep hover:underline underline-offset-4"
             >
               Read full story
-              <Arrow className="h-3 w-3" />
             </Link>
           </div>
         </article>
@@ -155,12 +153,9 @@ export default async function Hero() {
                     </h4>
                   </Link>
 
-                  <div className="mt-3 flex items-center justify-between text-[0.72rem] text-ink-soft">
+                  <div className="mt-3 text-[0.72rem] text-ink-soft">
                     <span className="font-medium text-ink-soft/90">
                       {typeof story.author === "string" ? story.author : story.author.name} · {formatReadTime(story.readTime)}
-                    </span>
-                    <span className="text-brand-red transition-transform duration-200 group-hover:translate-x-1">
-                      <Arrow className="h-3 w-3" />
                     </span>
                   </div>
                 </article>

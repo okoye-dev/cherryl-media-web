@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Arrow from "./Arrow";
 import type { ContentBlock } from "@/lib/types";
 import { getYouTubeEmbedUrl, resolveMediaUrl } from "@/lib/url-utils";
 
@@ -153,7 +152,6 @@ export default function ArticleBody({ blocks }: { blocks: ContentBlock[] }) {
                   </div>
                   <div className="mt-3 flex items-center gap-1.5 text-xs font-medium text-brand-red sm:mt-0">
                     <span>Read story</span>
-                    <Arrow className="h-3 w-3 transition-transform group-hover:translate-x-1" />
                   </div>
                 </Link>
               </aside>

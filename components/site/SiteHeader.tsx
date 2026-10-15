@@ -120,60 +120,58 @@ export default function SiteHeader() {
           open ? "visible translate-x-0" : "invisible translate-x-full",
         )}
       >
-        <div className="flex flex-col gap-8">
-          <div className="flex items-center justify-between border-b border-ink/10 pb-4">
-            <span className="label font-medium text-ink-soft">
-              Editorial Categories &amp; Sections
-            </span>
-            <span className="font-num text-xs text-brand-red font-medium">
-              Daily Edition
-            </span>
-          </div>
-
-          <nav aria-label="Menu" className="flex-1">
-            <ul className="flex flex-col gap-2 md:gap-3">
-              {SITE.categories.map((cat, i) => {
-                const active = pathname === `/category/${cat.slug}`;
-                return (
-                  <li
-                    key={cat.slug}
-                    className="overflow-hidden"
-                    style={{ transitionDelay: `${open ? 120 + i * 40 : 0}ms` }}
-                  >
-                    <Link
-                      href={`/category/${cat.slug}`}
-                      onClick={close}
-                      className={cn(
-                        "group flex items-baseline justify-between gap-4 py-1 transition-all duration-[900ms] ease-[cubic-bezier(0.32,0.72,0,1)]",
-                        open ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0",
-                      )}
-                      style={{ transitionDelay: `${open ? 120 + i * 40 : 0}ms` }}
-                    >
-                      <div className="flex items-baseline gap-3 md:gap-5">
-                        <span className="w-6 shrink-0 font-num text-xs font-medium text-ink-soft md:w-8 md:text-sm">
-                          {String(i + 1).padStart(2, "0")}
-                        </span>
-                        <span
-                          className={cn(
-                            "font-area text-[length:clamp(1.35rem,min(3.8vw,3.8vh),2.3rem)] font-light leading-[1.1] tracking-[-0.025em] transition-all duration-300 group-hover:italic group-hover:text-brand-red",
-                            active ? "italic text-brand-red" : "text-ink",
-                          )}
-                        >
-                          {cat.name}
-                        </span>
-                      </div>
-                      <span className="hidden font-num text-xs font-medium text-ink-soft group-hover:text-brand-red sm:inline">
-                        {cat.channels ? cat.channels.join(" · ") : "Section"}
-                      </span>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </nav>
+        <div className="flex items-center justify-between border-b border-ink/10 pb-4 shrink-0">
+          <span className="label font-medium text-ink-soft">
+            Editorial Categories &amp; Sections
+          </span>
+          <span className="font-num text-xs text-brand-red font-medium">
+            Daily Edition
+          </span>
         </div>
 
-        <div className="mt-12 flex flex-col gap-6 border-t border-ink/10 pt-6 text-[0.88rem] sm:flex-row sm:items-end sm:justify-between">
+        <nav aria-label="Menu" className="my-auto flex flex-col justify-center py-6 sm:py-8">
+          <ul className="flex flex-col divide-y divide-ink/10 sm:divide-y-0 sm:gap-2">
+            {SITE.categories.map((cat, i) => {
+              const active = pathname === `/category/${cat.slug}`;
+              return (
+                <li
+                  key={cat.slug}
+                  className="overflow-hidden"
+                  style={{ transitionDelay: `${open ? 120 + i * 40 : 0}ms` }}
+                >
+                  <Link
+                    href={`/category/${cat.slug}`}
+                    onClick={close}
+                    className={cn(
+                      "group flex items-center justify-between gap-4 py-4 sm:py-3 transition-all duration-[900ms] ease-[cubic-bezier(0.32,0.72,0,1)]",
+                      open ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0",
+                    )}
+                    style={{ transitionDelay: `${open ? 120 + i * 40 : 0}ms` }}
+                  >
+                    <div className="flex items-baseline gap-4 md:gap-5 min-w-0">
+                      <span className="w-6 shrink-0 font-num text-xs sm:text-sm font-medium text-ink-soft md:w-8">
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                      <span
+                        className={cn(
+                          "font-area text-[clamp(1.75rem,5.5vw,2.5rem)] font-light leading-[1.15] tracking-[-0.025em] transition-all duration-300 group-hover:italic group-hover:text-brand-red group-active:text-brand-red",
+                          active ? "italic text-brand-red font-normal" : "text-ink",
+                        )}
+                      >
+                        {cat.name}
+                      </span>
+                    </div>
+                    <span className="hidden font-num text-xs font-medium text-ink-soft group-hover:text-brand-red sm:inline shrink-0">
+                      {cat.channels ? cat.channels.join(" · ") : "Section"}
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+
+        <div className="flex flex-col gap-6 border-t border-ink/10 pt-6 text-[0.88rem] shrink-0 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="label font-medium text-ink-soft">Cherryl Media Newsroom</p>
             <a

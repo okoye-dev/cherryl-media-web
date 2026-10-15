@@ -2,7 +2,6 @@ import Link from "next/link";
 import { getOpinionColumns } from "@/lib/news";
 import { getCuratedSections } from "@/lib/sections";
 import { formatCategoryName } from "@/lib/formatters";
-import Arrow from "./Arrow";
 import Pill from "./Pill";
 
 export default async function FieldNotes() {
@@ -32,7 +31,7 @@ export default async function FieldNotes() {
           <li key={col.slug}>
             <Link
               href={`/article/${col.slug}`}
-              className="group grid grid-cols-[1.75rem_1fr_auto] items-center gap-x-3 py-3 md:py-4 transition-colors"
+              className="group grid grid-cols-[1.75rem_1fr] items-baseline gap-x-3 py-3 md:py-4 transition-colors"
             >
               <span className="font-num text-[0.7rem] font-semibold text-brand-red leading-none">
                 0{i + 1}
@@ -45,7 +44,6 @@ export default async function FieldNotes() {
                   {col.title}
                 </span>
               </div>
-              <Arrow className="h-3 w-3 self-center text-ink-soft transition-all duration-150 ease-out group-hover:translate-x-0.5 group-hover:rotate-[15deg] group-hover:text-brand-red" />
             </Link>
           </li>
         ))}

@@ -31,7 +31,7 @@ export default function Pill({
   children,
   variant = "solid",
   className,
-  arrow = "up-right",
+  arrow = "none",
 }: IProps) {
   const classes = cn(BASE, VARIANTS[variant], className);
   const forwardArrow = (

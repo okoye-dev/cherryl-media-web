@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { SITE } from "@/config/site";
-import Arrow from "./Arrow";
 
 export default function IndexList() {
   return (
@@ -45,7 +44,6 @@ export default function IndexList() {
                 <span className="hidden font-num text-xs text-ink-soft group-hover:text-brand-red md:inline">
                   {cat.channels ? cat.channels.join(" · ") : "Desk"}
                 </span>
-                <Arrow className="h-3 w-3 text-ink-soft transition-all duration-200 group-hover:translate-x-1 group-hover:text-brand-red" />
               </div>
             </Link>
           </li>

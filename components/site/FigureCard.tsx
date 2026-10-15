@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Arrow from "./Arrow";
 import { formatCategoryName } from "@/lib/formatters";
 
 export default function FigureCard({
@@ -34,13 +33,10 @@ export default function FigureCard({
           {formatCategoryName(category)}
         </span>
       </div>
-      <div className="my-3 flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <span className="mt-1 block font-area text-[1.05rem] md:text-[1.15rem] font-semibold leading-snug tracking-[-0.02em] text-ink transition-all duration-200 group-hover:italic group-hover:text-brand-red">
-            {name}
-          </span>
-        </div>
-        <Arrow className="h-3 w-3 shrink-0 text-ink-soft transition-all duration-150 ease-out group-hover:translate-x-0.5 group-hover:rotate-[15deg] group-hover:text-brand-red" />
+      <div className="my-3">
+        <span className="block font-area text-[1.05rem] md:text-[1.15rem] font-semibold leading-snug tracking-[-0.02em] text-ink transition-all duration-200 group-hover:italic group-hover:text-brand-red">
+          {name}
+        </span>
       </div>
     </Link>
   );
