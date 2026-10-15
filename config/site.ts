@@ -1,0 +1,99 @@
+export const SITE = {
+  name: "Cherryl Media",
+  shortName: "Cherryl",
+  title: "CHERRYL MEDIA | New Age Media & Independent Journalism",
+  description:
+    "Leading digital newsroom and new-age media distribution network covering Nigerian state affairs, business, culture, politics, and dispatches across Africa.",
+  tagline: "New-Age Media Distribution & Independent Journalism",
+  location: "Abuja · Lagos · London",
+  email: "newsroom@local.dev",
+  edition: "Pan-African & Global",
+  url: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
+  
+  nav: [
+    { label: "Dispatch", href: "/" },
+    { label: "Current Affairs", href: "/category/nigerian-current-affairs", tag: "Policy" },
+    { label: "Entertainment & Culture", href: "/category/entertainment-internet-culture", tag: "Trending" },
+    { label: "Practical Updates", href: "/category/practical-nigerian-updates", tag: "Public Service" },
+    { label: "Business & Institutions", href: "/category/business-institutions", tag: "Markets" },
+    { label: "Stories & Romance", href: "/category/stories-romance", tag: "Essays" },
+    { label: "About", href: "/about" },
+  ],
+
+  categories: [
+    {
+      slug: "nigerian-current-affairs",
+      name: "Nigerian Current Affairs",
+      shortName: "Current Affairs",
+      summary: "Confirmed announcements, policy changes, executive governance, and major national developments.",
+      subcategories: ["Confirmed Announcements", "Policy Changes", "Federal Affairs", "Security"],
+      channels: ["Website", "Facebook", "X"],
+      automation: "Medium",
+    },
+    {
+      slug: "entertainment-internet-culture",
+      name: "Entertainment & Internet Culture",
+      shortName: "Entertainment",
+      summary: "Releases, public announcements, Nollywood & music, trending stories, and internet culture explainers.",
+      subcategories: ["Releases & Premieres", "Music & Nollywood", "Trending Explainers", "Creator Economy"],
+      channels: ["Facebook", "X", "TikTok", "Website"],
+      automation: "Medium–High",
+    },
+    {
+      slug: "practical-nigerian-updates",
+      name: "Practical Nigerian Updates",
+      shortName: "Practical Updates",
+      summary: "Education, transport routes, electricity tariffs, consumer advisories, and public-service changes.",
+      subcategories: ["Education & Exams", "Transport & Transit", "Power & Utilities", "Public Service"],
+      channels: ["Website", "Facebook", "Newsletter"],
+      automation: "High",
+    },
+    {
+      slug: "business-institutions",
+      name: "Business & Institutions",
+      shortName: "Business",
+      summary: "Company announcements, industry developments, banking & fintech, public earnings, and economic reports.",
+      subcategories: ["Company Announcements", "Banking & Fintech", "Industry Trends", "Public Reports"],
+      channels: ["Website", "LinkedIn", "X", "Newsletter"],
+      automation: "Medium–High",
+    },
+    {
+      slug: "stories-romance",
+      name: "Stories & Romance",
+      shortName: "Stories",
+      summary: "Human-interest narratives, modern love, relationship chronicles, literary dispatches, and personal memoirs.",
+      subcategories: ["Modern Love", "Relationship Chronicles", "Personal Essays", "Fiction & Memoirs"],
+      channels: ["Website", "Socials", "Weekend Edition"],
+      automation: "Curated",
+    },
+  ],
+
+  socials: [
+    { label: "Instagram", href: "https://instagram.com/cherrylmedia", handle: "@cherrylmedia" },
+    { label: "Facebook", href: "https://www.facebook.com/pg/Cherryl-Media-Ent-102473181509294/about/", handle: "Cherryl Media" },
+    { label: "YouTube", href: "https://www.youtube.com/channel/UCJ9Tyh66EEmnLren9EZ8jGA", handle: "Cherryl Media TV" },
+    { label: "Twitter / X", href: "https://x.com/cherrylmedia", handle: "@cherrylmedia" },
+    { label: "LinkedIn", href: "https://linkedin.com/company/cherrylmedia", handle: "Cherryl Media" },
+  ],
+
+  mediaDistribution: [
+    {
+      title: "Daily Briefing Audio",
+      format: "Podcast & RSS",
+      description: "A 7-minute morning intelligence audio brief on market shifts and policy decisions.",
+      status: "Daily at 06:00 WAT",
+    },
+    {
+      title: "State Wire Wire-Service",
+      format: "Syndication API",
+      description: "Direct real-time newsfeed distribution for institutional partners, aggregators, and newsrooms.",
+      status: "Live Webhook & REST",
+    },
+    {
+      title: "Weekend Culture Paper",
+      format: "Longform & Print PDF",
+      description: "Curated Saturday dispatches on art, architecture, literature, and African gastronomy.",
+      status: "Weekly Edition",
+    },
+  ],
+};

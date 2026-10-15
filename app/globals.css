@@ -1,0 +1,138 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Auto Images Carousel */
+@keyframes swipe {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes swipe-reverse {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.animate-swipe {
+  animation: swipe 20s linear infinite;
+}
+
+.animate-swipe-reverse {
+  animation: swipe-reverse 20s linear infinite;
+}
+
+/* ---------- New site: paper, ink and a dull purple accent ---------- */
+:root {
+  --ease: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+body {
+  /* The trial Area font drops the "i" in its "fi" ligature */
+  font-variant-ligatures: none;
+}
+
+html {
+  background: #f4f3ee;
+  scroll-behavior: smooth;
+}
+
+html[data-menu="open"] {
+  overflow: hidden;
+}
+
+::selection {
+  background: #e01e1e;
+  color: #f4f3ee;
+}
+
+.label {
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.label-red {
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #e01e1e;
+  font-weight: 500;
+}
+
+@keyframes ticker {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-50%, 0, 0); }
+}
+
+.animate-ticker {
+  display: flex;
+  width: max-content;
+  animation: ticker 30s linear infinite;
+}
+
+.animate-ticker:hover {
+  animation-play-state: paused;
+}
+
+/* Page content slides aside when the menu opens */
+#page {
+  transition:
+    transform 0.9s var(--ease),
+    opacity 0.9s var(--ease);
+}
+html[data-menu="open"] #page {
+  transform: translateX(-6vw);
+  opacity: 0.55;
+}
+
+/* Hero entrance, plays once on load */
+.intro {
+  opacity: 0;
+  animation: rise 1.2s var(--ease) forwards;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Sections ease in as they scroll into view (no JavaScript needed) */
+@supports (animation-timeline: view()) {
+  .reveal {
+    animation: rise linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 45%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .intro {
+    opacity: 1;
+    animation: none;
+  }
+  .reveal {
+    animation: none;
+  }
+  #page,
+  html[data-menu="open"] #page {
+    transition: none;
+    transform: none;
+  }
+}
