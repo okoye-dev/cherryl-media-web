@@ -96,47 +96,43 @@ export default async function Hero() {
           </div>
         </article>
 
-        <div className="flex flex-col space-y-2">
-          <div className="flex items-center justify-between border-b border-ink/10 pb-3">
-            <h3 className="label font-semibold text-brand-red tracking-wider">TRENDING STORIES</h3>
-            <span className="text-[0.68rem] font-medium text-ink-soft">Latest Dispatches</span>
+        <div className="flex flex-col justify-between">
+          <div className="flex items-center justify-between border-b border-ink/10 pb-3.5 mb-1">
+            <h3 className="label font-bold text-brand-red tracking-wider">TRENDING STORIES</h3>
+            <span className="text-[0.68rem] font-semibold text-ink-soft uppercase tracking-wider">Top Dispatches</span>
           </div>
 
-          <div className="flex flex-col divide-y divide-ink/10 pt-1">
-            {dispatches.map((story, i) => (
+          <div className="flex flex-col divide-y divide-ink/10">
+            {dispatches.slice(0, 3).map((story, i) => (
               <article
                 key={story.slug}
-                className="group relative flex flex-col justify-between -mx-3.5 px-3.5 py-4.5 rounded-xl transition-colors duration-200 hover:bg-ink/[0.05]"
+                className="group relative -mx-4 px-4 py-5 sm:py-6 rounded-2xl transition-colors duration-200 hover:bg-ink/[0.05]"
               >
-                <div>
-                  <div className="flex items-center gap-2.5 text-xs">
-                    <span className="font-num text-xs font-semibold text-brand-red">
-                      0{i + 1}
+                <div className="flex items-center gap-2.5 text-xs">
+                  <span className="font-num text-xs font-bold text-brand-red">
+                    0{i + 1}
+                  </span>
+                  <span className="label text-[0.6rem] font-bold uppercase tracking-wider text-ink-soft">
+                    {story.categoryName || story.category}
+                  </span>
+                  {story.urgent && (
+                    <span className="rounded bg-brand-red/10 px-1.5 py-0.5 text-[0.58rem] font-bold text-brand-red tracking-wider">
+                      URGENT
                     </span>
-                    <span className="label text-[0.6rem] font-semibold uppercase tracking-wider text-ink-soft">
-                      {story.categoryName || story.category}
-                    </span>
-                    {story.urgent && (
-                      <span className="rounded bg-brand-red/10 px-1.5 py-0.5 text-[0.58rem] font-semibold text-brand-red tracking-wider">
-                        URGENT
-                      </span>
-                    )}
-                  </div>
-
-                  <Link href={`/article/${story.slug}`} className="mt-2 block">
-                    <h4 className="font-display text-[1.08rem] md:text-[1.18rem] font-semibold leading-snug tracking-[-0.015em] text-ink transition-colors duration-200 group-hover:text-brand-red">
-                      {story.title}
-                    </h4>
-                  </Link>
-
-                  <p className="mt-1.5 line-clamp-2 text-xs font-normal leading-relaxed text-ink/75">
-                    {story.deck}
-                  </p>
+                  )}
                 </div>
 
+                <Link href={`/article/${story.slug}`} className="mt-2.5 block">
+                  <h4 className="font-display text-[1.12rem] md:text-[1.24rem] font-bold leading-snug tracking-[-0.015em] text-ink transition-colors duration-200 group-hover:text-brand-red">
+                    {story.title}
+                  </h4>
+                </Link>
+
                 <div className="mt-3.5 flex items-center justify-between text-[0.72rem] text-ink-soft">
-                  <span className="font-medium">{typeof story.author === "string" ? story.author : story.author.name} · {story.readTime}</span>
-                  <span className="transition-transform duration-200 group-hover:translate-x-1 group-hover:text-brand-red">
+                  <span className="font-medium text-ink-soft/90">
+                    {typeof story.author === "string" ? story.author : story.author.name} · {story.readTime}
+                  </span>
+                  <span className="text-brand-red transition-transform duration-200 group-hover:translate-x-1">
                     <Arrow className="h-3 w-3" />
                   </span>
                 </div>
