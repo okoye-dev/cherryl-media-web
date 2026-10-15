@@ -32,10 +32,10 @@ export default async function EditorialDossier() {
         </Pill>
       </div>
 
-      <div className="mt-8 grid gap-8 lg:grid-cols-12 lg:gap-8">
+      <div className="mt-8 grid gap-8 lg:grid-cols-12 lg:gap-4 xl:gap-5">
         {/* The Feature Lead Column */}
         {leadStory && (
-          <article className="group flex flex-col justify-between rounded-[1.75rem] border border-ink/10 bg-cream p-4 sm:p-5 transition-all duration-300 hover:border-brand-red/40 lg:col-span-5 lg:p-8">
+          <article className="group flex flex-col justify-between rounded-[1.75rem] border border-ink/10 bg-cream p-4 sm:p-5 transition-all duration-300 hover:border-brand-red/40 lg:col-span-5 lg:p-6 xl:p-7">
             <div>
               <div className="flex items-center justify-between text-xs text-ink-soft">
                 <span className="label text-brand-red font-semibold">FEATURE STORY</span>
@@ -90,7 +90,7 @@ export default async function EditorialDossier() {
         )}
 
         {/* Center Features Column: Soundscapes & Gastronomy */}
-        <div className="flex flex-col justify-between gap-6 lg:col-span-4">
+        <div className="flex flex-col justify-between gap-5 lg:col-span-4">
           {soundscapesStory && (
             <article className="group flex flex-1 flex-col justify-between rounded-[1.75rem] border border-ink/10 bg-cream p-4 sm:p-5 md:p-6 transition-all duration-300 hover:border-brand-red/40">
               <div>
@@ -143,7 +143,7 @@ export default async function EditorialDossier() {
         </div>
 
         {/* Right Culture Briefs Column - Distinct editorial rail layout (no repetitive rounded box) */}
-        <div className="flex flex-col mt-12 sm:mt-16 lg:mt-0 lg:col-span-3 lg:border-l lg:border-ink/15 lg:pl-8">
+        <div className="flex flex-col mt-12 sm:mt-16 lg:mt-0 lg:col-span-3 lg:border-l lg:border-ink/15 lg:pl-4 xl:pl-5">
           <div className="flex items-center justify-between border-b border-ink/15 pb-3">
             <div className="flex items-center gap-2">
               <span className="relative flex h-2 w-2">
