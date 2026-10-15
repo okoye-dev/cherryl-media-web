@@ -58,14 +58,9 @@ export default function SiteHeader() {
               <span className="inline-block h-1.5 w-1.5 rounded-full bg-brand-red" />
             </div>
           </Link>
-
-          <span className="hidden items-center gap-1.5 rounded-full border border-ink/15 bg-paper-deep/50 px-2.5 py-1 text-[0.68rem] tracking-wider uppercase text-ink-soft lg:inline-flex">
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-brand-red" />
-            Live Wire
-          </span>
         </div>
 
-        <div className="flex items-center gap-6 md:gap-8">
+        <div className="flex items-center gap-6 md:gap-8 px-4">
           <nav
             aria-label="Primary"
             className="hidden items-center gap-6 text-[0.88rem] tracking-[-0.01em] md:flex lg:gap-7"

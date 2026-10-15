@@ -143,7 +143,7 @@ export default async function EditorialDossier() {
         </div>
 
         {/* Right Culture Briefs Column - Distinct editorial rail layout (no repetitive rounded box) */}
-        <div className="flex flex-col border-t border-ink/15 pt-6 lg:col-span-3 lg:border-t-0 lg:border-l lg:border-ink/15 lg:pl-7 lg:pt-0">
+        <div className="flex flex-col mt-12 sm:mt-16 lg:mt-0 lg:col-span-3 lg:border-l lg:border-ink/15 lg:pl-8">
           <div className="flex items-center justify-between border-b border-ink/15 pb-3">
             <div className="flex items-center gap-2">
               <span className="relative flex h-2 w-2">

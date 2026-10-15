@@ -145,27 +145,80 @@ export default async function ArticlePage({ params }: { params: Params }) {
           {/* Medium-style structured content blocks */}
           <ArticleBody blocks={article.body} />
 
-          {/* Verified Source Citations */}
-          {article.sourceLinks && article.sourceLinks.length > 0 && (
-            <div className="mt-12 rounded-2xl border border-ink/10 bg-paper-deep/30 p-6">
-              <h3 className="label font-medium text-brand-red">SOURCES &amp; CITATIONS</h3>
-              <ul className="mt-3 divide-y divide-ink/10 text-xs text-ink-soft">
-                {article.sourceLinks.map((src, i) => (
-                  <li key={i} className="flex items-center justify-between gap-3 py-2.5">
-                    <span className="font-medium text-ink/80 truncate min-w-0">{src.publisher}</span>
-                    <a
-                      href={src.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="shrink-0 font-medium text-brand-red hover:underline"
-                    >
-                      Official Source ↗
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+          {/* Sources Section - simple link list at bottom of article */}
+          {(() => {
+            const rawSources: { title: string; url: string; publisher?: string }[] = [];
+
+            if (article.sources && Array.isArray(article.sources)) {
+              for (const s of article.sources) {
+                if (s.url) {
+                  rawSources.push({
+                    title: s.sourceName || s.claimSummary || s.url,
+                    url: s.url,
+                    publisher: s.sourceName,
+                  });
+                }
+              }
+            }
+
+            if (article.sourceLinks && Array.isArray(article.sourceLinks)) {
+              for (const s of article.sourceLinks) {
+                if (s.url) {
+                  rawSources.push({
+                    title: s.publisher || s.url,
+                    url: s.url,
+                    publisher: s.publisher,
+                  });
+                }
+              }
+            }
+
+            if (article.body && Array.isArray(article.body)) {
+              for (const b of article.body) {
+                if (b.type === "external_link" && b.url) {
+                  rawSources.push({
+                    title: b.title || b.publisher || b.url,
+                    url: b.url,
+                    publisher: b.publisher,
+                  });
+                }
+              }
+            }
+
+            const seenUrls = new Set<string>();
+            const allSources = rawSources.filter((s) => {
+              if (!s.url || seenUrls.has(s.url)) return false;
+              seenUrls.add(s.url);
+              return true;
+            });
+
+            if (allSources.length === 0) return null;
+
+            return (
+              <div className="mt-12 border-t border-ink/10 pt-6">
+                <h3 className="label text-[0.72rem] font-semibold tracking-wider text-ink/60 uppercase">
+                  Sources
+                </h3>
+                <ul className="mt-3.5 space-y-2.5 text-xs text-ink/80">
+                  {allSources.map((src, i) => (
+                    <li key={i}>
+                      <a
+                        href={src.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-ink/85 underline underline-offset-4 transition-colors hover:text-brand-red break-words"
+                      >
+                        {src.title}
+                      </a>
+                      {src.publisher && src.publisher !== src.title && (
+                        <span className="text-ink-soft"> &mdash; {src.publisher}</span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })()}
 
           {/* Social Syndication */}
           {article.channelVariants && (

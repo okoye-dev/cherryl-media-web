@@ -135,13 +135,13 @@ export default function ArticleBody({ blocks }: { blocks: ContentBlock[] }) {
               <aside key={idx} className="my-7">
                 <Link
                   href={`/article/${block.slug}`}
-                  className="group flex flex-col justify-between rounded-2xl border border-ink/15 bg-paper-deep/40 p-5 transition-all duration-300 hover:border-brand-red/50 hover:bg-cream sm:flex-row sm:items-center"
+                  className="group flex flex-col justify-between rounded-2xl border border-ink/15 bg-paper-deep/40 p-5 transition-all duration-300 hover:bg-white/20 hover:border-ink/25 sm:flex-row sm:items-center"
                 >
                   <div className="max-w-xl">
                     <span className="label text-[0.65rem] font-medium text-brand-red">
                       RELATED STORY · {block.category}
                     </span>
-                    <h4 className="mt-1 font-area text-base md:text-lg font-semibold leading-snug tracking-[-0.02em] text-ink transition-colors group-hover:text-brand-red">
+                    <h4 className="mt-1 font-area text-base md:text-lg font-semibold leading-snug tracking-[-0.02em] text-ink transition-colors group-hover:text-ink/80">
                       {block.title}
                     </h4>
                     {block.deck && (
@@ -150,7 +150,7 @@ export default function ArticleBody({ blocks }: { blocks: ContentBlock[] }) {
                       </p>
                     )}
                   </div>
-                  <div className="mt-3 flex items-center gap-1.5 text-xs font-medium text-brand-red sm:mt-0">
+                  <div className="mt-3 flex items-center gap-1.5 text-xs font-medium text-ink-soft transition-colors group-hover:text-ink sm:mt-0">
                     <span>Read story</span>
                   </div>
                 </Link>
@@ -158,28 +158,8 @@ export default function ArticleBody({ blocks }: { blocks: ContentBlock[] }) {
             );
 
           case "external_link":
-            return (
-              <div
-                key={idx}
-                className="my-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 rounded-xl border border-ink/10 bg-cream/70 px-4 py-3 text-xs"
-              >
-                <div className="flex items-start sm:items-center gap-2.5 min-w-0">
-                  <span className="mt-1 sm:mt-0 flex h-1.5 w-1.5 shrink-0 rounded-full bg-brand-red" />
-                  <span className="shrink-0 font-sans font-medium text-ink">Source:</span>
-                  <span className="text-ink-soft break-words line-clamp-2 sm:truncate sm:max-w-md">
-                    {block.title}
-                  </span>
-                </div>
-                <a
-                  href={block.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="self-end sm:self-auto shrink-0 font-medium text-brand-red underline underline-offset-4 hover:opacity-80"
-                >
-                  View ({block.publisher}) ↗
-                </a>
-              </div>
-            );
+            // Consolidated into the dedicated Sources list at the bottom of the article
+            return null;
 
           default:
             return null;
