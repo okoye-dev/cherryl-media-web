@@ -27,9 +27,21 @@ export default function AdminHeader() {
   return (
     <header className="sticky top-0 z-50 flex items-center justify-between border-b border-white/[0.08] bg-[#141519]/95 px-4 sm:px-8 py-3.5 backdrop-blur-md">
       <div className="flex items-center gap-4 sm:gap-6">
-        <Link href="/admin" className="flex items-baseline gap-2 text-base sm:text-lg font-medium tracking-tight text-white">
-          <span className="font-semibold text-white tracking-wider">CHERRYL</span>
-          <span className="text-xs font-mono uppercase tracking-widest text-brand-red font-semibold">NEWSROOM</span>
+        <Link href="/admin" className="flex items-center gap-2.5 text-base sm:text-lg font-medium tracking-tight text-white">
+          <div className="relative h-7 w-7 shrink-0 overflow-hidden rounded-full ring-1 ring-white/20">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/brand/logo-circle.webp"
+              alt="Cherryl Media"
+              width={28}
+              height={28}
+              className="h-full w-full object-cover"
+            />
+          </div>
+          <div className="flex items-baseline gap-1.5">
+            <span className="font-semibold text-white tracking-wider">CHERRYL</span>
+            <span className="text-xs font-mono uppercase tracking-widest text-brand-red font-semibold">NEWSROOM</span>
+          </div>
         </Link>
         <span className="hidden items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-0.5 font-mono text-[0.68rem] font-medium text-zinc-400 md:inline-flex">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />

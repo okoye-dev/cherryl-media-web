@@ -40,6 +40,16 @@ export const metadata: Metadata = {
     template: `%s | ${SITE.name}`,
   },
   description: SITE.description,
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/brand/logo-circle.webp", type: "image/webp" },
+      { url: "/brand/logo-circle.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
   openGraph: {
     title: `${SITE.name} — ${SITE.tagline}`,
     description: SITE.description,
@@ -47,12 +57,21 @@ export const metadata: Metadata = {
     siteName: SITE.name,
     locale: "en_NG",
     type: "website",
+    images: [
+      {
+        url: "/brand/logo-circle.png",
+        width: 600,
+        height: 600,
+        alt: "Cherryl Media Logo",
+      },
+    ],
   },
   twitter: {
-    card: "summary_large_image",
+    card: "summary",
     title: SITE.name,
     description: SITE.description,
     creator: "@cherrylmedia",
+    images: ["/brand/logo-circle.png"],
   },
   robots: {
     index: true,

@@ -37,14 +37,26 @@ export default function SiteHeader() {
         <div className="flex items-center gap-6">
           <Link
             href="/"
-            className="group flex items-baseline gap-1 text-[1.2rem] leading-none tracking-tight text-ink"
+            className="group flex items-center gap-2.5 text-[1.2rem] leading-none tracking-tight text-ink"
             aria-label={`${SITE.name}, home`}
           >
-            <span className="font-sans font-normal tracking-[-0.03em]">CHERRYL</span>
-            <span className="font-display text-[1.25em] font-light italic text-ink transition-colors duration-300 group-hover:text-brand-red">
-              Media
-            </span>
-            <span className="inline-block h-1.5 w-1.5 rounded-full bg-brand-red" />
+            <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full ring-1 ring-ink/10 transition-transform duration-300 group-hover:scale-105">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/brand/logo-circle.webp"
+                alt="Cherryl Media Logo"
+                width={32}
+                height={32}
+                className="h-full w-full object-cover"
+              />
+            </div>
+            <div className="hidden items-baseline gap-1 sm:inline-flex">
+              <span className="font-sans font-normal tracking-[-0.03em]">CHERRYL</span>
+              <span className="font-display text-[1.25em] font-light italic text-ink transition-colors duration-300 group-hover:text-brand-red">
+                Media
+              </span>
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-brand-red" />
+            </div>
           </Link>
 
           <span className="hidden items-center gap-1.5 rounded-full border border-ink/15 bg-paper-deep/50 px-2.5 py-1 text-[0.68rem] tracking-wider uppercase text-ink-soft lg:inline-flex">

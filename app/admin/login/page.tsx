@@ -32,12 +32,24 @@ export default function AdminLoginPage() {
     <div className="flex min-h-[80vh] items-center justify-center px-4">
       <div className="w-full max-w-md space-y-6">
         {/* Brand header */}
-        <div className="text-center space-y-2">
-          <Link href="/" className="inline-block">
-            <span className="font-semibold text-2xl tracking-wider text-white">CHERRYL</span>
-            <span className="ml-2 font-mono text-xs uppercase tracking-widest text-brand-red font-semibold">
-              NEWSROOM
-            </span>
+        <div className="text-center space-y-3">
+          <Link href="/" className="inline-flex flex-col items-center gap-2 group">
+            <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full ring-2 ring-brand-red/30 transition-transform duration-300 group-hover:scale-105">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/brand/logo-circle.webp"
+                alt="Cherryl Media"
+                width={48}
+                height={48}
+                className="h-full w-full object-cover"
+              />
+            </div>
+            <div className="flex items-baseline gap-2">
+              <span className="font-semibold text-2xl tracking-wider text-white">CHERRYL</span>
+              <span className="font-mono text-xs uppercase tracking-widest text-brand-red font-semibold">
+                NEWSROOM
+              </span>
+            </div>
           </Link>
           <h1 className="text-lg font-semibold text-zinc-100">Editorial Desk Login</h1>
           <p className="text-xs text-zinc-400">
