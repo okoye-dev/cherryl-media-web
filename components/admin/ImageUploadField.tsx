@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { uploadImageFile } from "@/lib/upload";
+import { uploadMediaWithProgress, type UploadProgressInfo } from "@/lib/upload";
 
 interface ImageUploadFieldProps {
   value?: string;
@@ -10,6 +10,7 @@ interface ImageUploadFieldProps {
   description?: string;
   required?: boolean;
   hasError?: boolean;
+  onUploadStateChange?: (uploading: boolean) => void;
 }
 
 export default function ImageUploadField({
@@ -19,40 +20,66 @@ export default function ImageUploadField({
   description,
   required = false,
   hasError = false,
+  onUploadStateChange,
 }: ImageUploadFieldProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [uploading, setUploading] = useState(false);
-  const [progress, setProgress] = useState(0);
+  const [localPreview, setLocalPreview] = useState<string | null>(null);
+  const [uploadInfo, setUploadInfo] = useState<UploadProgressInfo | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const isUploading =
+    uploadInfo !== null &&
+    uploadInfo.stage !== "idle" &&
+    uploadInfo.stage !== "done" &&
+    uploadInfo.stage !== "error";
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Instant local preview
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      if (event.target?.result) {
-        onChange(event.target.result as string);
-      }
-    };
-    reader.readAsDataURL(file);
+    setErrorMessage(null);
+
+    // Create temporary local thumbnail for instant visual feedback
+    const objectUrl = URL.createObjectURL(file);
+    setLocalPreview(objectUrl);
+
+    onUploadStateChange?.(true);
 
     try {
-      setUploading(true);
-      setProgress(0);
+      // Execute compression -> presign -> S3 PUT -> HeadObject landing confirmation
+      const confirmedUrl = await uploadMediaWithProgress(file, (info) => {
+        setUploadInfo(info);
+      });
 
-      // Upload via backend S3/R2 presigned URL with progress
-      const finalUrl = await uploadImageFile(file, (p) => setProgress(p));
-      if (finalUrl) {
-        onChange(finalUrl);
+      if (confirmedUrl) {
+        onChange(confirmedUrl);
       }
-    } catch (err) {
-      console.error("Upload error:", err);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Image upload failed";
+      setErrorMessage(msg);
+      setUploadInfo({ stage: "error", percent: 0, message: msg });
     } finally {
-      setUploading(false);
-      setProgress(0);
+      onUploadStateChange?.(false);
+      // Clean up object URL after a delay
+      setTimeout(() => {
+        try {
+          URL.revokeObjectURL(objectUrl);
+        } catch {}
+      }, 5000);
     }
   };
+
+  const handleRemove = () => {
+    setLocalPreview(null);
+    setUploadInfo(null);
+    setErrorMessage(null);
+    onChange("");
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const displayImage = localPreview || value;
 
   return (
     <div className="space-y-1.5">
@@ -74,44 +101,78 @@ export default function ImageUploadField({
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/*"
+        accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
         onChange={handleFileChange}
         className="hidden"
       />
 
-      {value ? (
-        <div className="flex flex-wrap items-center gap-4 rounded-xl border border-white/10 bg-[#1A1D24] p-3">
-          <div className="relative h-20 w-32 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-zinc-900">
+      {displayImage ? (
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 rounded-xl border border-white/10 bg-[#1A1D24] p-3.5">
+          <div className="relative h-24 w-36 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-zinc-900">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={value}
-              alt="Selected photo"
+              src={displayImage}
+              alt="Selected photograph"
               className="h-full w-full object-cover"
             />
-          </div>
-          <div className="flex flex-col gap-2">
-            <span className="text-xs font-medium text-zinc-200">
-              {uploading ? (
-                <span className="text-brand-red font-semibold">
-                  Uploading to storage... {progress > 0 ? `${progress}%` : ""}
+            {isUploading && (
+              <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] flex items-center justify-center">
+                <span className="text-[0.68rem] font-mono font-bold text-white">
+                  {uploadInfo?.percent}%
                 </span>
-              ) : (
-                "Photo uploaded & verified"
+              </div>
+            )}
+          </div>
+
+          <div className="flex-1 min-w-0 space-y-2 w-full">
+            <div className="space-y-1">
+              <div className="flex items-center justify-between text-xs">
+                {isUploading ? (
+                  <span className="font-medium text-amber-400 flex items-center gap-1.5">
+                    <span className="h-2 w-2 rounded-full bg-amber-400 animate-ping" />
+                    {uploadInfo?.message}
+                  </span>
+                ) : errorMessage ? (
+                  <span className="font-medium text-red-400 flex items-center gap-1">
+                    ⚠️ {errorMessage}
+                  </span>
+                ) : (
+                  <span className="font-medium text-emerald-400 flex items-center gap-1.5">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                    Landed &amp; confirmed in S3 storage
+                  </span>
+                )}
+                {isUploading && (
+                  <span className="font-mono text-[0.68rem] text-zinc-400">
+                    {uploadInfo?.percent}%
+                  </span>
+                )}
+              </div>
+
+              {/* Upload progress bar */}
+              {isUploading && (
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+                  <div
+                    className="h-full bg-brand-red transition-all duration-200 ease-out"
+                    style={{ width: `${uploadInfo?.percent || 0}%` }}
+                  />
+                </div>
               )}
-            </span>
-            <div className="flex items-center gap-2">
+            </div>
+
+            <div className="flex items-center gap-2 pt-1">
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                disabled={uploading}
+                disabled={isUploading}
                 className="rounded-lg border border-white/15 bg-zinc-800 px-3 py-1 text-xs font-medium text-white hover:bg-zinc-700 transition-colors disabled:opacity-50"
               >
-                Change photo
+                {errorMessage ? "Retry upload" : "Change photo"}
               </button>
               <button
                 type="button"
-                onClick={() => onChange("")}
-                disabled={uploading}
+                onClick={handleRemove}
+                disabled={isUploading}
                 className="rounded-lg px-2.5 py-1 text-xs text-zinc-400 hover:text-red-400 transition-colors disabled:opacity-50"
               >
                 Remove
@@ -123,7 +184,7 @@ export default function ImageUploadField({
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          disabled={uploading}
+          disabled={isUploading}
           className={`flex w-full items-center justify-center gap-3.5 rounded-xl border-2 border-dashed p-5 transition-colors disabled:opacity-50 ${
             hasError
               ? "border-red-500/80 bg-red-950/20 text-red-200"
@@ -148,7 +209,7 @@ export default function ImageUploadField({
               {hasError ? "⚠️ Image required — choose photo" : "Choose photo from device"}
             </span>
             <span className="block text-[0.68rem] text-zinc-400">
-              Select JPG, PNG, or WebP (Cloudflare R2 storage)
+              WebP compressed &amp; verified in Cloudflare R2 / S3
             </span>
           </div>
         </button>

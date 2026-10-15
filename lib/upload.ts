@@ -33,19 +33,41 @@ export interface ConfirmResponse {
   size_bytes: number;
 }
 
-export async function uploadMediaFile(
+export type UploadStage =
+  | "idle"
+  | "compressing"
+  | "requesting_url"
+  | "uploading"
+  | "confirming"
+  | "done"
+  | "error";
+
+export interface UploadProgressInfo {
+  stage: UploadStage;
+  percent: number;
+  message: string;
+}
+
+export async function uploadMediaWithProgress(
   rawFile: File,
-  onProgress?: (progress: number) => void
+  onProgress?: (info: UploadProgressInfo) => void
 ): Promise<string> {
+  const notify = (stage: UploadStage, percent: number, message: string) => {
+    onProgress?.({ stage, percent, message });
+  };
+
   // Step 0: Validate limits
   const validation = validateMediaFile(rawFile);
   if (!validation.valid) {
-    throw new Error(validation.error || "Invalid file");
+    const errorMsg = validation.error || "Invalid file";
+    notify("error", 0, errorMsg);
+    throw new Error(errorMsg);
   }
 
   // Step 1: Compress if it's an image
   let fileToUpload = rawFile;
   if (rawFile.type.startsWith("image/")) {
+    notify("compressing", 10, "Compressing image to WebP...");
     try {
       fileToUpload = await compressImage(rawFile);
     } catch (compressErr) {
@@ -56,7 +78,8 @@ export async function uploadMediaFile(
   const contentType = fileToUpload.type || "application/octet-stream";
 
   try {
-    // Step 2: Ask backend for presigned upload URL
+    // Step 2: Request presigned upload URL from Go Media Engine
+    notify("requesting_url", 20, "Requesting Cloudflare R2 / S3 presigned URL...");
     const presignRes = await fetch(`${BACKEND_URL}/api/uploads/presign`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -75,9 +98,15 @@ export async function uploadMediaFile(
       }
 
       // Step 3: PUT bytes directly to S3 / Cloudflare R2
-      await putToPresignedURL(uploadTarget, fileToUpload, contentType, onProgress);
+      notify("uploading", 25, "Uploading bytes directly to bucket...");
+      await putToPresignedURL(uploadTarget, fileToUpload, contentType, (p) => {
+        // scale 25% -> 85%
+        const overall = Math.round(25 + p * 0.6);
+        notify("uploading", overall, `Uploading to storage: ${p}%`);
+      });
 
-      // Step 4: Confirm landing via HeadObject check in backend
+      // Step 4: Confirm landing via S3 HeadObject check in backend
+      notify("confirming", 90, "Verifying S3 / Cloudflare R2 landing...");
       try {
         const confirmRes = await fetch(`${BACKEND_URL}/api/uploads/confirm`, {
           method: "POST",
@@ -94,6 +123,7 @@ export async function uploadMediaFile(
           if (finalUrl.startsWith("/")) {
             finalUrl = `${BACKEND_URL}${finalUrl}`;
           }
+          notify("done", 100, "Landed & verified in storage");
           return finalUrl;
         }
       } catch (confirmErr) {
@@ -105,6 +135,7 @@ export async function uploadMediaFile(
       if (finalUrl.startsWith("/")) {
         finalUrl = `${BACKEND_URL}${finalUrl}`;
       }
+      notify("done", 100, "Upload completed");
       return finalUrl;
     }
   } catch (err) {
@@ -112,6 +143,7 @@ export async function uploadMediaFile(
   }
 
   // Fallback: Local Next.js API upload route
+  notify("uploading", 50, "Uploading to local server...");
   const formData = new FormData();
   formData.append("file", fileToUpload);
 
@@ -121,11 +153,22 @@ export async function uploadMediaFile(
   });
 
   if (!fallbackRes.ok) {
+    notify("error", 0, "Upload failed");
     throw new Error("Media upload failed");
   }
 
   const fallbackData = await fallbackRes.json();
+  notify("done", 100, "Uploaded to local storage");
   return fallbackData.url || "";
+}
+
+export async function uploadMediaFile(
+  rawFile: File,
+  onProgress?: (progress: number) => void
+): Promise<string> {
+  return uploadMediaWithProgress(rawFile, (info) => {
+    onProgress?.(info.percent);
+  });
 }
 
 /** Backward compatible alias for image uploads */
