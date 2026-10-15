@@ -26,8 +26,8 @@ export default function MediaDistributionStrip() {
           <span className="label text-brand-red font-medium">
             DAILY NEWSLETTER
           </span>
-          <h2 className="mt-3 font-display text-[clamp(1.75rem,3.2vw,2.75rem)] font-normal leading-[1.05] tracking-[-0.015em] text-paper">
-            Get the Cherryl Media <em className="italic text-brand-red">Morning Edition</em> in your inbox.
+          <h2 className="mt-3 font-area text-[clamp(1.75rem,3.2vw,2.75rem)] font-semibold leading-[1.05] tracking-[-0.025em] text-paper">
+            Get the Cherryl Media <em className="font-display italic font-light text-brand-red">Morning Edition</em> in your inbox.
           </h2>
           <p className="mt-4 text-sm md:text-base font-normal leading-relaxed text-paper/75">
             Key policy developments, practical Nigerian consumer updates, and cultural essays delivered every morning at 6:00 AM.

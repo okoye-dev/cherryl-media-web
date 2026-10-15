@@ -12,8 +12,8 @@ export default function SiteFooter() {
         <div className="flex flex-col justify-between gap-6 md:flex-row md:items-start">
           <div className="max-w-xl">
             <p className="label text-brand-red font-medium">DISPATCHES &amp; SYNDICATION</p>
-            <h2 className="mt-3 font-display text-[clamp(1.8rem,4vw,3.4rem)] font-light leading-[0.98] tracking-[-0.03em] text-paper">
-              Reporting the stories <em className="italic text-brand-red">shaping contemporary Africa.</em>
+            <h2 className="mt-3 font-area text-[clamp(1.8rem,4vw,3.4rem)] font-semibold leading-[0.98] tracking-[-0.03em] text-paper">
+              Reporting the stories <em className="font-display italic font-light text-brand-red">shaping contemporary Africa.</em>
             </h2>
             <p className="mt-4 text-sm font-light leading-relaxed text-paper/70">
               Direct intelligence from sub-national corridors, enterprise hubs, and cultural frontiers.

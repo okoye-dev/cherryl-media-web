@@ -41,6 +41,7 @@ const config: Config = {
       },
       fontFamily: {
         sans: ["var(--font-sans)", "Helvetica Neue", "Arial", "sans-serif"],
+        area: ["var(--font-sans)", "Helvetica Neue", "Arial", "sans-serif"],
         display: ["Sentient", "Georgia", "serif"],
         num: ["var(--font-num)", "sans-serif"],
       },

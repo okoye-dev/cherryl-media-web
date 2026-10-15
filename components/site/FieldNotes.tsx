@@ -30,7 +30,7 @@ export default async function FieldNotes() {
                 <span className="label text-[0.65rem] font-medium text-ink-soft block">
                   {col.category} · By {typeof col.author === "string" ? col.author : col.author.name}
                 </span>
-                <span className="mt-1 block font-display text-[1.05rem] font-semibold leading-snug tracking-[-0.01em] text-ink transition-colors duration-200 group-hover:text-brand-red md:text-[1.18rem]">
+                <span className="mt-1 block font-area text-[1.02rem] font-semibold leading-snug tracking-[-0.02em] text-ink transition-all duration-200 group-hover:italic group-hover:text-brand-red md:text-[1.15rem]">
                   {col.title}
                 </span>
               </div>

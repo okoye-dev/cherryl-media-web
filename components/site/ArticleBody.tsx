@@ -25,7 +25,7 @@ export default function ArticleBody({ blocks }: { blocks: ContentBlock[] }) {
               return (
                 <h2
                   key={idx}
-                  className="mt-10 mb-3 font-display text-[1.45rem] md:text-[1.65rem] font-normal leading-snug tracking-[-0.012em] text-ink"
+                  className="mt-10 mb-3 font-area text-[1.4rem] md:text-[1.6rem] font-semibold leading-snug tracking-[-0.02em] text-ink"
                 >
                   {block.text}
                 </h2>
@@ -34,7 +34,7 @@ export default function ArticleBody({ blocks }: { blocks: ContentBlock[] }) {
             return (
               <h3
                 key={idx}
-                className="mt-7 mb-2.5 font-display text-[1.2rem] md:text-[1.32rem] font-normal tracking-[-0.01em] text-ink"
+                className="mt-7 mb-2.5 font-area text-[1.18rem] md:text-[1.3rem] font-semibold tracking-[-0.02em] text-ink"
               >
                 {block.text}
               </h3>
@@ -89,7 +89,7 @@ export default function ArticleBody({ blocks }: { blocks: ContentBlock[] }) {
                     <span className="label text-[0.65rem] font-medium text-brand-red">
                       RELATED STORY · {block.category}
                     </span>
-                    <h4 className="mt-1 font-display text-base md:text-lg font-normal leading-snug text-ink transition-colors group-hover:text-brand-red">
+                    <h4 className="mt-1 font-area text-base md:text-lg font-semibold leading-snug tracking-[-0.02em] text-ink transition-colors group-hover:text-brand-red">
                       {block.title}
                     </h4>
                     {block.deck && (

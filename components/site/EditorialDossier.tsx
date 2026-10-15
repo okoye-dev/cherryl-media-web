@@ -8,8 +8,8 @@ export default function EditorialDossier() {
       <div className="flex flex-col gap-4 border-b border-ink/15 pb-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <span className="label-red font-medium">WEEKEND DOSSIER · ISSUE Nº 18</span>
-          <h2 id="dossier-heading" className="mt-2 font-display text-[clamp(1.5rem,2.8vw,2.2rem)] font-normal leading-tight tracking-[-0.012em] text-ink">
-            Culture, Cinema &amp; <em className="italic text-brand-red">Critical Essays</em>.
+          <h2 id="dossier-heading" className="mt-2 font-area text-[clamp(1.45rem,2.5vw,2rem)] font-semibold leading-tight tracking-[-0.02em] text-ink">
+            Culture, Cinema &amp; <em className="font-display italic font-light text-brand-red">Critical Essays</em>.
           </h2>
         </div>
         <Pill href="/category/entertainment-internet-culture" variant="ghost">
@@ -33,7 +33,7 @@ export default function EditorialDossier() {
               <span className="text-[0.7rem] font-medium text-ink-soft">Lagos Soundstages &amp; Studio Lots</span>
             </div>
 
-            <h3 className="mt-5 font-display text-[1.25rem] md:text-[1.38rem] font-bold leading-snug tracking-[-0.01em] text-ink transition-colors duration-200 group-hover:text-brand-red">
+            <h3 className="mt-5 font-area text-[1.22rem] md:text-[1.35rem] font-semibold leading-snug tracking-[-0.02em] text-ink transition-all duration-200 group-hover:italic group-hover:text-brand-red">
               <Link href="/article/lagos-soundscapes-and-creators-revolution">
                 The Nollywood Studio Architecture: From Direct-to-Video Roots to Global Distribution Dominance
               </Link>
@@ -57,7 +57,7 @@ export default function EditorialDossier() {
                 <span className="label text-brand-red font-semibold">SOUNDSCAPES</span>
                 <span className="font-num font-medium">4 min read</span>
               </div>
-              <h3 className="mt-3 font-display text-lg font-bold leading-snug tracking-tight text-ink transition-colors duration-200 group-hover:text-brand-red">
+              <h3 className="mt-3 font-area text-base md:text-[1.08rem] font-semibold leading-snug tracking-[-0.02em] text-ink transition-all duration-200 group-hover:italic group-hover:text-brand-red">
                 <Link href="/category/entertainment-internet-culture">
                   Inside the Lagos Underground: The Sound Architects Engineering Polyphonic Afro-Fusion
                 </Link>
@@ -78,7 +78,7 @@ export default function EditorialDossier() {
                 <span className="label text-brand-red">GASTRONOMY</span>
                 <span className="font-num">5 min read</span>
               </div>
-              <h3 className="mt-4 font-display text-xl font-bold leading-snug tracking-tight text-ink transition-colors duration-200 group-hover:text-brand-red">
+              <h3 className="mt-4 font-area text-base md:text-[1.12rem] font-semibold leading-snug tracking-[-0.02em] text-ink transition-all duration-200 group-hover:italic group-hover:text-brand-red">
                 <Link href="/category/entertainment-internet-culture">
                   Fermentation, Coastal Smoke &amp; Heritage: The Contemporary Revival of Indigenous Grains
                 </Link>
@@ -133,7 +133,7 @@ export default function EditorialDossier() {
                     <span className="label text-[0.62rem] text-brand-red">{item.tag}</span>
                     <span className="font-num text-[0.68rem] text-ink-soft">{item.time}</span>
                   </div>
-                  <h4 className="mt-1.5 font-display text-[0.98rem] font-semibold leading-snug tracking-tight text-ink transition-colors duration-200 group-hover:text-brand-red">
+                  <h4 className="mt-1.5 font-area text-[0.95rem] font-medium leading-snug tracking-[-0.02em] text-ink transition-all duration-200 group-hover:italic group-hover:text-brand-red">
                     {item.title}
                   </h4>
                 </Link>

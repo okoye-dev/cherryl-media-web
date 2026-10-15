@@ -16,8 +16,8 @@ export default function PageHeader({
       <h1
         className={
           compact
-            ? "intro mt-6 max-w-[32ch] font-display text-[clamp(1.5rem,2.8vw,2.35rem)] font-normal leading-snug tracking-[-0.012em] text-ink"
-            : "intro mt-6 max-w-[22ch] font-display text-[clamp(1.9rem,3.5vw,2.85rem)] font-normal leading-tight tracking-[-0.015em] text-ink"
+            ? "intro mt-6 max-w-[32ch] font-area text-[clamp(1.5rem,2.8vw,2.35rem)] font-semibold leading-snug tracking-[-0.02em] text-ink"
+            : "intro mt-6 max-w-[22ch] font-area text-[clamp(1.9rem,3.5vw,2.85rem)] font-semibold leading-tight tracking-[-0.025em] text-ink"
         }
         style={{ animationDelay: "100ms" }}
       >

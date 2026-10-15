@@ -62,10 +62,9 @@ export default function SiteHeader() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="group relative py-1 text-ink transition-colors duration-300 hover:text-brand-red"
+                className="py-1 text-ink transition-all duration-200 hover:italic hover:text-brand-red"
               >
-                <span>{item.label}</span>
-                <span className="absolute inset-x-0 -bottom-1 h-px scale-x-0 bg-brand-red transition-transform duration-300 ease-out group-hover:scale-x-100" />
+                {item.label}
               </Link>
             ))}
           </nav>
@@ -144,7 +143,7 @@ export default function SiteHeader() {
                         </span>
                         <span
                           className={cn(
-                            "font-display text-[length:clamp(1.4rem,min(4vw,4vh),2.5rem)] font-normal leading-[1.1] tracking-[-0.012em] transition-colors duration-300 group-hover:italic group-hover:text-brand-red",
+                            "font-area text-[length:clamp(1.35rem,min(3.8vw,3.8vh),2.3rem)] font-light leading-[1.1] tracking-[-0.025em] transition-all duration-300 group-hover:italic group-hover:text-brand-red",
                             active ? "italic text-brand-red" : "text-ink",
                           )}
                         >

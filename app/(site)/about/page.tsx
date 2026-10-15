@@ -26,7 +26,7 @@ export default function AboutPage() {
           <div className="space-y-12">
             <section className="space-y-4">
               <span className="label text-brand-red">OUR MISSION</span>
-              <h2 className="font-display text-[clamp(1.75rem,3vw,2.5rem)] font-light leading-tight tracking-tight text-ink">
+              <h2 className="font-area text-[clamp(1.75rem,3vw,2.5rem)] font-semibold leading-tight tracking-[-0.025em] text-ink">
                 Closing the intelligence gap between grassroots realities and policy decision-makers.
               </h2>
               <p className="text-base font-light leading-relaxed text-ink/80 md:text-lg">
@@ -40,7 +40,7 @@ export default function AboutPage() {
                 {SITE.categories.map((cat) => (
                   <div key={cat.slug} className="rounded-2xl border border-ink/10 bg-paper-deep/30 p-6">
                     <span className="font-num text-xs text-brand-red">{cat.channels ? cat.channels.join(" · ") : "Editorial Desk"}</span>
-                    <h3 className="mt-2 font-display text-xl font-light text-ink">{cat.name}</h3>
+                    <h3 className="mt-2 font-area text-lg font-semibold tracking-[-0.015em] text-ink">{cat.name}</h3>
                     <p className="mt-2 text-xs font-light leading-relaxed text-ink-soft">{cat.summary}</p>
                     <div className="mt-4">
                       <Pill href={`/category/${cat.slug}`} variant="ghost">View Desk</Pill>

@@ -39,7 +39,7 @@ export default function AdminDashboardPage() {
       <div className="flex flex-col gap-4 border-b border-white/[0.08] pb-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <span className="label text-[0.68rem] font-semibold tracking-wider text-brand-red">NEWSROOM DESK</span>
-          <h1 className="mt-1 font-display text-2xl font-normal text-white sm:text-3xl tracking-tight">
+          <h1 className="mt-1 font-sans text-2xl font-semibold text-white sm:text-3xl tracking-tight">
             Stories &amp; Publishing Control
           </h1>
         </div>
@@ -57,7 +57,7 @@ export default function AdminDashboardPage() {
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         <div className="rounded-xl border border-white/[0.08] bg-[#16181D] p-4 sm:p-5 shadow-sm">
           <span className="label text-[0.62rem] font-semibold uppercase tracking-wider text-zinc-400">PUBLISHED STORIES</span>
-          <div className="mt-2 font-display text-2xl sm:text-3xl font-bold text-white">
+          <div className="mt-2 font-num text-2xl sm:text-3xl font-semibold text-white">
             {CANONICAL_ARTICLES.length}
           </div>
           <span className="mt-1 block text-[0.72rem] text-zinc-400">Live on publication website</span>
@@ -65,7 +65,7 @@ export default function AdminDashboardPage() {
 
         <div className="rounded-xl border border-white/[0.08] bg-[#16181D] p-4 sm:p-5 shadow-sm">
           <span className="label text-[0.62rem] font-semibold uppercase tracking-wider text-zinc-400">CATEGORIES</span>
-          <div className="mt-2 font-display text-2xl sm:text-3xl font-bold text-white">
+          <div className="mt-2 font-num text-2xl sm:text-3xl font-semibold text-white">
             {SITE.categories.length}
           </div>
           <span className="mt-1 block text-[0.72rem] text-zinc-400">Active publication pillars</span>
@@ -73,7 +73,7 @@ export default function AdminDashboardPage() {
 
         <div className="rounded-xl border border-white/[0.08] bg-[#16181D] p-4 sm:p-5 shadow-sm">
           <span className="label text-[0.62rem] font-semibold uppercase tracking-wider text-zinc-400">CHANNELS</span>
-          <div className="mt-2 font-display text-2xl sm:text-3xl font-bold text-white">4</div>
+          <div className="mt-2 font-num text-2xl sm:text-3xl font-semibold text-white">4</div>
           <span className="mt-1 block text-[0.72rem] font-medium text-emerald-400">
             Web · X · FB · LinkedIn
           </span>
@@ -81,7 +81,7 @@ export default function AdminDashboardPage() {
 
         <div className="rounded-xl border border-white/[0.08] bg-[#16181D] p-4 sm:p-5 shadow-sm">
           <span className="label text-[0.62rem] font-semibold uppercase tracking-wider text-zinc-400">STORY LEADS</span>
-          <div className="mt-2 font-display text-2xl sm:text-3xl font-bold text-brand-red">
+          <div className="mt-2 font-num text-2xl sm:text-3xl font-semibold text-brand-red">
             {INGESTED_CANDIDATES.length}
           </div>
           <span className="mt-1 block text-[0.72rem] text-zinc-400">In discovery inbox</span>
@@ -92,7 +92,7 @@ export default function AdminDashboardPage() {
       <section className="rounded-2xl border border-white/[0.08] bg-[#16181D] p-5 sm:p-6 shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-white/[0.08] pb-4 gap-2">
           <div>
-            <h2 className="font-display text-lg font-semibold text-white sm:text-xl">
+            <h2 className="font-sans text-lg font-semibold text-white sm:text-xl">
               Story Ideas &amp; Discovery Inbox
             </h2>
             <p className="mt-0.5 text-xs text-zinc-400">
@@ -146,7 +146,7 @@ export default function AdminDashboardPage() {
       <section className="rounded-2xl border border-white/[0.08] bg-[#16181D] p-5 sm:p-6 shadow-sm">
         <div className="flex items-center justify-between border-b border-white/[0.08] pb-4">
           <div>
-            <h2 className="font-display text-lg font-semibold text-white sm:text-xl">
+            <h2 className="font-sans text-lg font-semibold text-white sm:text-xl">
               Published &amp; Scheduled Stories
             </h2>
             <p className="mt-0.5 text-xs text-zinc-400">

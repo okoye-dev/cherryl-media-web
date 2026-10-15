@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { CANONICAL_ARTICLES } from "@/lib/articles";
-import { isInternalUrl } from "@/lib/url-utils";
 import AutoTextarea from "@/components/admin/AutoTextarea";
 import ImageUploadField from "@/components/admin/ImageUploadField";
 import type { ContentBlock, PillarCategory, PublishingStatus } from "@/lib/types";
@@ -119,7 +118,8 @@ ${blocks.map((b) => {
   if (b.type === "paragraph") return b.text;
   if (b.type === "heading") return `### ${b.text}`;
   if (b.type === "quote") return `> "${b.quote}"\n> — ${b.author} (${b.context})`;
-  if (b.type === "link" || b.type === "internal_link") return `[Link: ${b.title} - ${b.url || b.slug}]`;
+  if (b.type === "external_link") return `[Link: ${b.title} - ${b.url}]`;
+  if (b.type === "internal_link") return `[Internal Story: ${b.title} - ${b.slug}]`;
   if (b.type === "image") return `[Photo: ${b.caption || b.alt} (${b.src})]`;
   return "";
 }).filter(Boolean).join("\n\n")}
@@ -495,7 +495,7 @@ ${blocks.map((b) => {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Enter story headline..."
-                className="font-display text-xl md:text-2xl font-bold text-white placeholder-zinc-500 bg-[#1A1D24] rounded-xl border border-white/10 p-4 leading-snug focus:border-brand-red focus:outline-none"
+                className="font-sans text-xl md:text-2xl font-semibold text-white placeholder-zinc-500 bg-[#1A1D24] rounded-xl border border-white/10 p-4 leading-snug tracking-tight focus:border-brand-red focus:outline-none"
               />
             </div>
 
@@ -576,7 +576,7 @@ ${blocks.map((b) => {
                       {block.type === "quote" && "Pull Quote / Statement"}
                       {block.type === "image" && "Inline Story Photo"}
                       {block.type === "internal_link" && "Story Link Card"}
-                      {block.type === "link" && "Story Link Card"}
+                      {block.type === "external_link" && "External Source Card"}
                     </span>
                     <button
                       type="button"
@@ -614,7 +614,7 @@ ${blocks.map((b) => {
                       value={block.text || ""}
                       onChange={(e) => updateBlock(index, { ...block, text: e.target.value })}
                       placeholder="Enter section subheading..."
-                      className="font-display text-lg font-bold text-white placeholder-zinc-500 bg-transparent focus:outline-none"
+                      className="font-sans text-lg font-semibold text-white placeholder-zinc-500 bg-transparent tracking-tight focus:outline-none"
                     />
                   )}
 
@@ -625,7 +625,7 @@ ${blocks.map((b) => {
                         value={block.quote || ""}
                         onChange={(e) => updateBlock(index, { ...block, quote: e.target.value })}
                         placeholder="Enter direct quote or statement..."
-                        className="font-display text-lg italic text-zinc-100 placeholder-zinc-500 bg-transparent leading-snug focus:outline-none border-l-2 border-brand-red pl-4"
+                        className="font-sans text-lg italic text-zinc-100 placeholder-zinc-500 bg-transparent leading-snug focus:outline-none border-l-2 border-brand-red pl-4"
                       />
                       <div className="grid gap-3 sm:grid-cols-2 pt-2">
                         <input
@@ -674,26 +674,24 @@ ${blocks.map((b) => {
                     </div>
                   )}
 
-                  {/* Story Link Card */}
-                  {(block.type === "internal_link" || block.type === "link") && (
+                  {/* Internal Story Link Card */}
+                  {block.type === "internal_link" && (
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs text-zinc-400">
-                          {isInternalUrl(block.url || block.slug || "") ? "✓ Internal Story Card" : "↗ External Reference Card"}
-                        </span>
+                        <span className="text-xs text-zinc-400">✓ Internal Story Card</span>
                       </div>
                       <input
                         type="text"
                         value={block.title || ""}
                         onChange={(e) => updateBlock(index, { ...block, title: e.target.value })}
-                        placeholder="Card title..."
+                        placeholder="Internal story headline..."
                         className="h-10 w-full rounded-lg border border-white/10 bg-[#141519] px-3 text-xs font-semibold text-white focus:border-brand-red focus:outline-none"
                       />
                       <input
                         type="text"
-                        value={block.url || block.slug || ""}
-                        onChange={(e) => updateBlock(index, { ...block, url: e.target.value, slug: e.target.value })}
-                        placeholder="URL or /article/slug..."
+                        value={block.slug || ""}
+                        onChange={(e) => updateBlock(index, { ...block, slug: e.target.value })}
+                        placeholder="Article slug (e.g. nigeria-electricity-regulatory-commission-updates-feeder-bands)..."
                         className="h-10 w-full rounded-lg border border-white/10 bg-[#141519] px-3 text-xs font-mono text-zinc-300 focus:border-brand-red focus:outline-none"
                       />
                       <input
@@ -701,6 +699,36 @@ ${blocks.map((b) => {
                         value={block.deck || ""}
                         onChange={(e) => updateBlock(index, { ...block, deck: e.target.value })}
                         placeholder="Brief 1-sentence reason why the reader should view this..."
+                        className="h-10 w-full rounded-lg border border-white/10 bg-[#141519] px-3 text-xs text-zinc-300 focus:border-brand-red focus:outline-none"
+                      />
+                    </div>
+                  )}
+
+                  {/* External Source Link */}
+                  {block.type === "external_link" && (
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-zinc-400">↗ External Source Reference</span>
+                      </div>
+                      <input
+                        type="text"
+                        value={block.title || ""}
+                        onChange={(e) => updateBlock(index, { ...block, title: e.target.value })}
+                        placeholder="Source title..."
+                        className="h-10 w-full rounded-lg border border-white/10 bg-[#141519] px-3 text-xs font-semibold text-white focus:border-brand-red focus:outline-none"
+                      />
+                      <input
+                        type="text"
+                        value={block.url || ""}
+                        onChange={(e) => updateBlock(index, { ...block, url: e.target.value })}
+                        placeholder="https://official-source.gov.ng/..."
+                        className="h-10 w-full rounded-lg border border-white/10 bg-[#141519] px-3 text-xs font-mono text-zinc-300 focus:border-brand-red focus:outline-none"
+                      />
+                      <input
+                        type="text"
+                        value={block.publisher || ""}
+                        onChange={(e) => updateBlock(index, { ...block, publisher: e.target.value })}
+                        placeholder="Publisher or institution..."
                         className="h-10 w-full rounded-lg border border-white/10 bg-[#141519] px-3 text-xs text-zinc-300 focus:border-brand-red focus:outline-none"
                       />
                     </div>
@@ -748,7 +776,7 @@ ${blocks.map((b) => {
       {activeTab === "social" && (
         <div className="rounded-2xl border border-white/[0.08] bg-[#16181D] p-5 sm:p-6 space-y-6 shadow-sm">
           <div>
-            <h2 className="font-display text-xl font-bold text-white">
+            <h2 className="font-sans text-xl font-semibold text-white tracking-tight">
               Social Media Channels
             </h2>
             <p className="mt-0.5 text-xs text-zinc-400">
@@ -846,7 +874,7 @@ ${blocks.map((b) => {
                 <span className="label text-[0.62rem] font-semibold text-purple-400 uppercase tracking-wider">
                   AI EDITORIAL COLLABORATION
                 </span>
-                <h3 className="font-display text-lg font-bold text-white mt-1">
+                <h3 className="font-sans text-lg font-semibold text-white mt-1 tracking-tight">
                   Export Editorial Context for AI Review
                 </h3>
                 <p className="text-xs text-zinc-300 mt-1 max-w-2xl leading-relaxed">
@@ -870,7 +898,7 @@ ${blocks.map((b) => {
           <div className="rounded-2xl border border-white/[0.08] bg-[#16181D] p-5 sm:p-6 space-y-4 shadow-sm">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-white/[0.08] pb-4 gap-3">
               <div>
-                <h2 className="font-display text-xl font-bold text-white">
+                <h2 className="font-sans text-xl font-semibold text-white tracking-tight">
                   Primary Sources &amp; Citations
                 </h2>
                 <p className="mt-0.5 text-xs text-zinc-400">
