@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense, useCallback } from "react";
 import Link from "next/link";
+import { useSearchParams, useRouter } from "next/navigation";
 import { CANONICAL_ARTICLES } from "@/lib/articles";
 import AutoTextarea from "@/components/admin/AutoTextarea";
 import ImageUploadField from "@/components/admin/ImageUploadField";
-import type { ContentBlock, PillarCategory, PublishingStatus } from "@/lib/types";
+import type { ContentBlock, PillarCategory, PublishingStatus, CanonicalArticle } from "@/lib/types";
 import { getYouTubeEmbedUrl } from "@/lib/url-utils";
 import { uploadMediaFile } from "@/lib/upload";
 
@@ -15,7 +16,14 @@ interface SourceItem {
   claimSummary?: string;
 }
 
-export default function AdminEditorPage() {
+function AdminEditorContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const urlSlug = searchParams.get("slug");
+
+  const [articlesList, setArticlesList] = useState<CanonicalArticle[]>(CANONICAL_ARTICLES);
+  const [selectedSlug, setSelectedSlug] = useState<string>(urlSlug || CANONICAL_ARTICLES[0].slug);
+
   const [activeTab, setActiveTab] = useState<"story" | "social" | "sources">("story");
   const [socialTab, setSocialTab] = useState<"x" | "facebook" | "linkedin" | "newsletter">("x");
 
@@ -49,6 +57,108 @@ export default function AdminEditorPage() {
       claimSummary: "Decentralized sub-national mini-grid guidelines and tariff ring-fencing for Band A.",
     },
   ]);
+
+  const populateArticleData = useCallback((art: Partial<CanonicalArticle> & Record<string, unknown>) => {
+    setTitle(typeof art.title === "string" ? art.title : "");
+    setSlug(typeof art.slug === "string" ? art.slug : "");
+    setKicker(typeof art.kicker === "string" ? art.kicker : "POLICY · DISPATCH");
+    setDeck(typeof art.deck === "string" ? art.deck : "");
+    setCategory((art.category as PillarCategory) || "nigerian-current-affairs");
+    const authorObj = art.author as { name?: string; role?: string } | undefined;
+    setAuthorName(authorObj?.name || "Newsroom Desk");
+    setAuthorRole(authorObj?.role || "Staff Reporter");
+    setStatus((art.status as PublishingStatus) || "published");
+    const featImg = art.featuredImage as { url?: string; caption?: string } | undefined;
+    setCoverUrl(featImg?.url || "");
+    setCoverCaption(featImg?.caption || "");
+    setBlocks(Array.isArray(art.body) ? (art.body as ContentBlock[]) : []);
+
+    const social = (art.socialVariants || art.channelVariants) as Record<string, string> | undefined;
+    setXPost(social?.x || "");
+    setFbPost(social?.facebook || "");
+    setLiPost(social?.linkedin || "");
+    setNlPost(social?.newsletter || "");
+
+    const rawSources = ((art.sources || art.sourceLinks) as Array<{
+      url?: string;
+      publisher?: string;
+      sourceName?: string;
+      claimSummary?: string;
+    }>) || [];
+    setSources(
+      rawSources.map((s) => ({
+        url: s.url || "",
+        publisher: s.publisher || s.sourceName || "Source Gazette",
+        claimSummary: s.claimSummary || "",
+      }))
+    );
+  }, []);
+
+
+  const handleCreateNewStory = () => {
+    setSelectedSlug("__new__");
+    setTitle("");
+    setSlug("");
+    setKicker("BREAKING · DESK DISPATCH");
+    setDeck("");
+    setCategory("nigerian-current-affairs");
+    setAuthorName("Newsroom Desk");
+    setAuthorRole("Staff Reporter");
+    setStatus("draft");
+    setCoverUrl("");
+    setCoverCaption("");
+    setBlocks([
+      {
+        type: "paragraph",
+        isDropCap: true,
+        text: "Draft your opening paragraph here...",
+      },
+    ]);
+    setXPost("");
+    setFbPost("");
+    setLiPost("");
+    setNlPost("");
+    setSources([]);
+    setSaveMessage("Started new story draft");
+    setTimeout(() => setSaveMessage(null), 3000);
+  };
+
+  // Fetch live articles list from backend
+  useEffect(() => {
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080";
+    fetch(`${backendUrl}/api/articles`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setArticlesList(data);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  // When urlSlug or selectedSlug changes, load that article
+  useEffect(() => {
+    const targetSlug = urlSlug || selectedSlug;
+    if (!targetSlug || targetSlug === "__new__") return;
+
+    setSelectedSlug(targetSlug);
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080";
+    fetch(`${backendUrl}/api/articles/${encodeURIComponent(targetSlug)}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((art) => {
+        if (art && art.title) {
+          populateArticleData(art);
+        } else {
+          const fallback = CANONICAL_ARTICLES.find((a) => a.slug === targetSlug);
+          if (fallback) populateArticleData(fallback);
+        }
+      })
+      .catch(() => {
+        const fallback = CANONICAL_ARTICLES.find((a) => a.slug === targetSlug);
+        if (fallback) populateArticleData(fallback);
+      });
+  }, [urlSlug, selectedSlug, populateArticleData]);
+
 
   const [savedNotice, setSavedNotice] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -467,9 +577,37 @@ ${blocks.map((b) => {
             ← All Stories
           </Link>
           <span className="text-zinc-600">/</span>
+          <div className="flex items-center gap-1.5">
+            <span className="text-[0.65rem] font-mono uppercase text-zinc-500 hidden sm:inline">Story:</span>
+            <select
+              value={selectedSlug}
+              onChange={(e) => {
+                const val = e.target.value;
+                setSelectedSlug(val);
+                if (val === "__new__") {
+                  handleCreateNewStory();
+                  router.push("/admin/editor");
+                } else {
+                  router.push(`/admin/editor?slug=${val}`);
+                }
+              }}
+              className="rounded-lg border border-white/10 bg-zinc-900 px-2.5 py-1 text-xs font-medium text-white focus:border-brand-red focus:outline-none max-w-[200px] sm:max-w-[280px] truncate"
+            >
+              <option value="__new__">+ Write New Story</option>
+              <optgroup label="Published Articles">
+                {articlesList.map((art) => (
+                  <option key={art.slug} value={art.slug}>
+                    {art.title}
+                  </option>
+                ))}
+              </optgroup>
+            </select>
+          </div>
+          <span className="text-zinc-600">/</span>
           <span className="font-mono text-xs uppercase tracking-wider text-zinc-400">
             {category}
           </span>
+
           <span className={`rounded-full px-2.5 py-0.5 text-[0.68rem] font-semibold uppercase tracking-wider border ${
             status === "published"
               ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
@@ -1525,3 +1663,18 @@ ${blocks.map((b) => {
     </div>
   );
 }
+
+export default function AdminEditorPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-[400px] text-zinc-400 font-mono text-xs">
+          Loading Editorial Desk...
+        </div>
+      }
+    >
+      <AdminEditorContent />
+    </Suspense>
+  );
+}
+

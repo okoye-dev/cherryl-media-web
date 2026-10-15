@@ -40,10 +40,21 @@ export default function AdminHeader() {
       <nav className="flex items-center gap-3 sm:gap-4 text-xs font-medium">
         <Link
           href="/admin"
-          className="hidden sm:inline-block text-zinc-300 transition-colors hover:text-white px-2 py-1"
+          className={`hidden sm:inline-block transition-colors px-2 py-1 ${
+            pathname === "/admin" ? "text-white font-semibold" : "text-zinc-400 hover:text-white"
+          }`}
         >
           All Stories
         </Link>
+        <Link
+          href="/admin/settings"
+          className={`hidden sm:inline-block transition-colors px-2 py-1 ${
+            pathname === "/admin/settings" ? "text-white font-semibold" : "text-zinc-400 hover:text-white"
+          }`}
+        >
+          Site Copy &amp; Config
+        </Link>
+
         <Link
           href="/admin/editor"
           className="rounded-lg bg-brand-red px-3.5 py-1.5 font-medium text-white shadow-sm transition-all hover:bg-brand-red/90"

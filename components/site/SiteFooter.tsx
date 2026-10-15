@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { SITE } from "@/config/site";
 import Pill from "./Pill";
+import { getEditorialCopy } from "@/lib/settings";
 
-export default function SiteFooter() {
+export default async function SiteFooter() {
+  const copy = await getEditorialCopy();
+
   return (
     <footer
       id="contact"
@@ -16,14 +19,14 @@ export default function SiteFooter() {
               Reporting the stories <em className="font-display italic font-light text-brand-red">shaping contemporary Africa.</em>
             </h2>
             <p className="mt-4 text-sm font-light leading-relaxed text-paper/70">
-              Direct intelligence from sub-national corridors, enterprise hubs, and cultural frontiers.
+              {copy.footer.tagline || "Direct intelligence from sub-national corridors, enterprise hubs, and cultural frontiers."}
             </p>
           </div>
 
           <div className="flex flex-col gap-3">
             <span className="label text-paper/50">NEWSROOM CONTACT</span>
-            <Pill href={`mailto:${SITE.email}`} variant="paper">
-              {SITE.email}
+            <Pill href={`mailto:${copy.footer.contactEmail || SITE.email}`} variant="paper">
+              {copy.footer.contactEmail || SITE.email}
             </Pill>
             <div className="flex flex-wrap gap-2">
               {SITE.socials.map((s) => (
@@ -34,6 +37,7 @@ export default function SiteFooter() {
             </div>
           </div>
         </div>
+
 
         <div className="mt-12 grid grid-cols-2 gap-8 border-t border-paper/15 pt-8 sm:grid-cols-4 md:gap-10">
           <div>
@@ -73,10 +77,11 @@ export default function SiteFooter() {
 
       <div className="mt-6 flex flex-wrap items-center justify-between gap-4 text-[0.8rem] text-ink-soft md:mt-8">
         <div className="flex items-center gap-2">
-          <span>© {new Date().getFullYear()} {SITE.name}. All Rights Reserved.</span>
+          <span>{copy.footer.copyrightNotice || `© ${new Date().getFullYear()} ${SITE.name}. All Rights Reserved.`}</span>
           <span className="text-ink-soft/40">·</span>
-          <span>Abuja · Lagos · London</span>
+          <span>{copy.footer.locations || "Abuja · Lagos · London"}</span>
         </div>
+
         <div className="flex items-center gap-6">
           <Link href="/privacy" className="transition-colors hover:text-brand-red">
             Privacy

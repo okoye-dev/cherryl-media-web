@@ -2,11 +2,13 @@ import Link from "next/link";
 import Pill from "./Pill";
 import Arrow from "./Arrow";
 import { getLeadStory, getDispatches } from "@/lib/news";
+import { getEditorialCopy } from "@/lib/settings";
 
 export default async function Hero() {
-  const [leadStory, dispatches] = await Promise.all([
+  const [leadStory, dispatches, copy] = await Promise.all([
     getLeadStory(),
     getDispatches(),
+    getEditorialCopy(),
   ]);
 
   return (
@@ -14,18 +16,21 @@ export default async function Hero() {
       <div className="flex flex-col justify-between gap-4 border-b border-ink/10 pb-6 md:flex-row md:items-end">
         <div className="max-w-3xl">
           <p className="label-red intro font-semibold">
-            CHERRYL MEDIA · DAILY EDITION
+            {copy.hero.editionBadge}
           </p>
           <h1
             className="intro mt-3 text-[clamp(2.35rem,4.4vw,3.8rem)] font-bold leading-[1.03] tracking-[-0.025em] text-ink"
             style={{ animationDelay: "100ms" }}
           >
-            <span className="font-sans font-bold">Independent </span>
+            <span className="font-sans font-bold">{copy.hero.titleLead}</span>
             <span className="font-display font-medium italic text-brand-red">
-              journalism
+              {copy.hero.titleAccent}
             </span>
-            <span className="font-sans font-bold"> &amp; digital media network.</span>
+            <span className="font-sans font-bold">{copy.hero.titleTrail}</span>
           </h1>
+          <p className="intro mt-3 text-[0.98rem] font-normal leading-relaxed text-ink/75 max-w-2xl">
+            {copy.hero.description}
+          </p>
         </div>
 
         <div
@@ -66,10 +71,20 @@ export default async function Hero() {
                   Featured Story
                 </span>
               </div>
-              <div className="h-full w-full flex items-center justify-center text-ink/40 font-display italic text-xl">
-                Cherryl Media
-              </div>
+              {leadStory.featuredImage?.url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={leadStory.featuredImage.url}
+                  alt={leadStory.title}
+                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+              ) : (
+                <div className="h-full w-full flex items-center justify-center text-ink/40 font-display italic text-xl">
+                  Cherryl Media
+                </div>
+              )}
             </div>
+
 
             <Link href={`/article/${leadStory.slug}`} className="mt-5 block">
               <h2 className="font-area text-[clamp(1.35rem,2.2vw,1.85rem)] font-semibold leading-snug tracking-[-0.02em] text-ink transition-all duration-200 group-hover:italic group-hover:text-brand-red">

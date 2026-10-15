@@ -1,6 +1,10 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { CANONICAL_ARTICLES } from "@/lib/articles";
 import { SITE } from "@/config/site";
+import type { CanonicalArticle } from "@/lib/types";
 
 const INGESTED_CANDIDATES = [
   {
@@ -33,6 +37,20 @@ const INGESTED_CANDIDATES = [
 ];
 
 export default function AdminDashboardPage() {
+  const [articles, setArticles] = useState<CanonicalArticle[]>(CANONICAL_ARTICLES);
+
+  useEffect(() => {
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080";
+    fetch(`${backendUrl}/api/articles`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setArticles(data);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
       {/* Header bar */}
@@ -45,6 +63,12 @@ export default function AdminDashboardPage() {
         </div>
         <div className="flex items-center gap-3">
           <Link
+            href="/admin/settings"
+            className="w-full sm:w-auto inline-flex items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] px-4 py-2 text-xs font-semibold text-zinc-300 hover:text-white hover:bg-white/[0.08] transition-all"
+          >
+            Site Copy &amp; Config
+          </Link>
+          <Link
             href="/admin/editor"
             className="w-full sm:w-auto inline-flex items-center justify-center rounded-lg bg-brand-red px-4 py-2 text-xs font-semibold text-white shadow transition-all hover:bg-brand-red/90"
           >
@@ -53,12 +77,13 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
+
       {/* Metrics grid */}
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         <div className="rounded-xl border border-white/[0.08] bg-[#16181D] p-4 sm:p-5 shadow-sm">
           <span className="label text-[0.62rem] font-semibold uppercase tracking-wider text-zinc-400">PUBLISHED STORIES</span>
           <div className="mt-2 font-num text-2xl sm:text-3xl font-semibold text-white">
-            {CANONICAL_ARTICLES.length}
+            {articles.length}
           </div>
           <span className="mt-1 block text-[0.72rem] text-zinc-400">Live on publication website</span>
         </div>
@@ -175,7 +200,7 @@ export default function AdminDashboardPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/[0.06]">
-              {CANONICAL_ARTICLES.map((art) => (
+              {articles.map((art) => (
                 <tr key={art.id} className="hover:bg-white/[0.02] transition-colors">
                   <td className="py-3.5 pr-4 font-medium text-zinc-100 max-w-sm truncate">
                     <Link href={`/admin/editor?slug=${art.slug}`} className="hover:text-brand-red">
@@ -183,7 +208,7 @@ export default function AdminDashboardPage() {
                     </Link>
                   </td>
                   <td className="py-3.5 pr-4 text-zinc-400">{art.categoryName}</td>
-                  <td className="py-3.5 pr-4 text-zinc-400">{art.author.name}</td>
+                  <td className="py-3.5 pr-4 text-zinc-400">{typeof art.author === "string" ? art.author : art.author?.name}</td>
                   <td className="py-3.5 pr-4">
                     <span className="rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[0.65rem] font-medium uppercase tracking-wider text-emerald-400 border border-emerald-500/20">
                       {art.status}
@@ -220,7 +245,7 @@ export default function AdminDashboardPage() {
 
         {/* Mobile & Tablet Card View (Responsive) */}
         <div className="mt-4 md:hidden divide-y divide-white/[0.06]">
-          {CANONICAL_ARTICLES.map((art) => (
+          {articles.map((art) => (
             <div key={art.id} className="py-4 space-y-2">
               <div className="flex items-center justify-between text-xs">
                 <span className="label text-[0.6rem] font-semibold text-brand-red uppercase">
@@ -237,7 +262,7 @@ export default function AdminDashboardPage() {
                 {art.title}
               </Link>
               <div className="flex items-center justify-between text-xs text-zinc-400 pt-1">
-                <span>By {art.author.name}</span>
+                <span>By {typeof art.author === "string" ? art.author : art.author?.name}</span>
                 <div className="flex items-center gap-3">
                   <Link
                     href={`/admin/editor?slug=${art.slug}`}
@@ -257,6 +282,7 @@ export default function AdminDashboardPage() {
             </div>
           ))}
         </div>
+
       </section>
     </div>
   );

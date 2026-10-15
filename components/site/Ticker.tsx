@@ -1,12 +1,21 @@
 import Link from "next/link";
 import { getLeadStory, getDispatches } from "@/lib/news";
+import { getEditorialCopy } from "@/lib/settings";
 
 export default async function Ticker() {
-  const [lead, dispatches] = await Promise.all([getLeadStory(), getDispatches()]);
+  const [lead, dispatches, copy] = await Promise.all([
+    getLeadStory(),
+    getDispatches(),
+    getEditorialCopy(),
+  ]);
+
   const items = [
+    ...(copy.ticker.customNotice
+      ? [{ tag: "SPECIAL WIRE", title: copy.ticker.customNotice, slug: lead.slug }]
+      : []),
     { tag: "BREAKING", title: lead.title, slug: lead.slug },
     ...dispatches.map((d) => ({
-      tag: d.category,
+      tag: d.categoryName || d.category,
       title: d.title,
       slug: d.slug,
     })),
@@ -20,9 +29,10 @@ export default async function Ticker() {
           <span className="relative h-1.5 w-1.5 rounded-full bg-brand-red" />
         </span>
         <span className="font-num font-medium tracking-wider text-brand-red uppercase">
-          LIVE WIRE
+          {copy.ticker.label || "LIVE WIRE"}
         </span>
       </div>
+
 
       <div className="flex-1 overflow-hidden">
         <div className="animate-ticker flex items-center gap-8 pl-4">

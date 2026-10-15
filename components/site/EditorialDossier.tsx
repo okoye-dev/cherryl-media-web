@@ -1,16 +1,22 @@
 import Link from "next/link";
 import Arrow from "./Arrow";
 import Pill from "./Pill";
+import { getEditorialCopy } from "@/lib/settings";
 
-export default function EditorialDossier() {
+export default async function EditorialDossier() {
+  const copy = await getEditorialCopy();
+
   return (
     <section className="mx-auto mt-20 w-full max-w-[90rem] px-5 md:mt-32 md:px-10 xl:px-16" aria-labelledby="dossier-heading">
       <div className="flex flex-col gap-4 border-b border-ink/15 pb-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <span className="label-red font-medium">WEEKEND DOSSIER · ISSUE Nº 18</span>
+          <span className="label-red font-medium">{copy.dossier.issueBadge}</span>
           <h2 id="dossier-heading" className="mt-2 font-area text-[clamp(1.45rem,2.5vw,2rem)] font-semibold leading-tight tracking-[-0.02em] text-ink">
-            Culture, Cinema &amp; <em className="font-display italic font-light text-brand-red">Critical Essays</em>.
+            {copy.dossier.heading}
           </h2>
+          <p className="mt-1 text-xs text-ink/70 max-w-xl font-normal">
+            {copy.dossier.subheading}
+          </p>
         </div>
         <Pill href="/category/entertainment-internet-culture" variant="ghost">
           All Culture Stories
@@ -25,12 +31,12 @@ export default function EditorialDossier() {
               <span className="font-num font-medium">7 min read</span>
             </div>
 
-            <div className="mt-5 aspect-[16/10] w-full rounded-2xl border border-ink/10 bg-paper-deep/60 p-6 flex flex-col justify-between">
-              <span className="label text-[0.65rem] font-medium text-ink-soft">PHOTO ESSAY ARCHIVE</span>
-              <p className="font-display text-base md:text-lg font-normal italic text-ink/80">
+            <div className="mt-5 aspect-[16/10] w-full rounded-2xl border border-ink/10 bg-paper-deep/60 p-6 flex flex-col justify-between relative overflow-hidden">
+              <span className="label text-[0.65rem] font-medium text-ink-soft z-10">PHOTO ESSAY ARCHIVE</span>
+              <p className="font-display text-base md:text-lg font-normal italic text-ink/80 z-10">
                 “We stopped negotiating for shelf space. We engineered the audience first.”
               </p>
-              <span className="text-[0.7rem] font-medium text-ink-soft">Lagos Soundstages &amp; Studio Lots</span>
+              <span className="text-[0.7rem] font-medium text-ink-soft z-10">Lagos Soundstages &amp; Studio Lots</span>
             </div>
 
             <h3 className="mt-5 font-area text-[1.22rem] md:text-[1.35rem] font-semibold leading-snug tracking-[-0.02em] text-ink transition-all duration-200 group-hover:italic group-hover:text-brand-red">
@@ -58,7 +64,7 @@ export default function EditorialDossier() {
                 <span className="font-num font-medium">4 min read</span>
               </div>
               <h3 className="mt-3 font-area text-base md:text-[1.08rem] font-semibold leading-snug tracking-[-0.02em] text-ink transition-all duration-200 group-hover:italic group-hover:text-brand-red">
-                <Link href="/category/entertainment-internet-culture">
+                <Link href="/article/inside-the-lagos-underground-polyphonic-afro-fusion">
                   Inside the Lagos Underground: The Sound Architects Engineering Polyphonic Afro-Fusion
                 </Link>
               </h3>
@@ -79,7 +85,7 @@ export default function EditorialDossier() {
                 <span className="font-num">5 min read</span>
               </div>
               <h3 className="mt-4 font-area text-base md:text-[1.12rem] font-semibold leading-snug tracking-[-0.02em] text-ink transition-all duration-200 group-hover:italic group-hover:text-brand-red">
-                <Link href="/category/entertainment-internet-culture">
+                <Link href="/article/fermentation-coastal-smoke-heritage-indigenous-grains">
                   Fermentation, Coastal Smoke &amp; Heritage: The Contemporary Revival of Indigenous Grains
                 </Link>
               </h3>
@@ -106,29 +112,33 @@ export default function EditorialDossier() {
                 num: "01",
                 tag: "EXHIBITIONS",
                 title: "Art X Lagos Finalizes 2026 Pavilions with 42 International Galleries",
+                slug: "art-x-lagos-finalizes-2026-pavilions",
                 time: "2 min",
               },
               {
                 num: "02",
                 tag: "ARCHIVES",
                 title: "Preserving Highlife Wax: The Vinyl Restorers Digitizing Vintage Accra Sessions",
+                slug: "preserving-highlife-wax-vintage-accra-sessions",
                 time: "4 min",
               },
               {
                 num: "03",
                 tag: "ARCHITECTURE",
                 title: "Sahelian Earth Hubs: Passive Cooling Innovations in Urban Architecture",
+                slug: "sahelian-earth-hubs-passive-cooling",
                 time: "3 min",
               },
               {
                 num: "04",
                 tag: "GRAPHIC NOVELS",
                 title: "Independent Comics Guild Rewriting Regional Folklore for Young Audiences",
+                slug: "independent-comics-guild-rewriting-folklore",
                 time: "3 min",
               },
             ].map((item) => (
               <li key={item.num} className="group py-4 first:pt-2 last:pb-0">
-                <Link href="/category/entertainment-internet-culture" className="block">
+                <Link href={`/article/${item.slug}`} className="block">
                   <div className="flex items-center justify-between">
                     <span className="label text-[0.62rem] text-brand-red">{item.tag}</span>
                     <span className="font-num text-[0.68rem] text-ink-soft">{item.time}</span>
