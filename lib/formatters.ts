@@ -47,3 +47,14 @@ export function formatDate(dateStr?: string): string {
     return dateStr;
   }
 }
+
+/** Formats read time to compact format without 'read' (e.g. "4 min read" -> "4min") */
+export function formatReadTime(timeStr?: string): string {
+  if (!timeStr) return "4min";
+  const cleaned = timeStr.replace(/\s*read\.?$/i, "").trim();
+  const match = cleaned.match(/^(\d+)\s*min$/i);
+  if (match) {
+    return `${match[1]}min`;
+  }
+  return cleaned.replace(/\s+/g, "");
+}

@@ -4,7 +4,7 @@ import Arrow from "./Arrow";
 import { getLeadStory, getDispatches } from "@/lib/news";
 import { getEditorialCopy } from "@/lib/settings";
 import { getCuratedSections } from "@/lib/sections";
-import { formatDate, formatCategoryName } from "@/lib/formatters";
+import { formatDate, formatCategoryName, formatReadTime } from "@/lib/formatters";
 
 export default async function Hero() {
   const [curated, defaultLead, defaultDispatches, copy] = await Promise.all([
@@ -61,20 +61,20 @@ export default async function Hero() {
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[1.55fr_1fr] lg:gap-10">
         <article
-          className="group relative flex flex-col justify-between rounded-card border border-ink/10 bg-cream/70 p-6 transition-all duration-500 hover:border-brand-red/40 hover:bg-cream md:p-8"
+          className="group relative flex flex-col justify-between rounded-card border border-ink/10 bg-cream/70 p-4 transition-all duration-500 hover:border-brand-red/40 hover:bg-cream sm:p-5 md:p-8"
           style={{ animationDelay: "300ms" }}
         >
           <div>
-            <div className="flex items-center justify-between gap-4">
-              <span className="label-red font-medium">
+            <div className="flex items-center justify-between gap-3">
+              <span className="label-red font-medium min-w-0 truncate">
                 {leadStory.kicker}
               </span>
-              <span className="font-num text-[0.72rem] font-medium text-ink-soft">
+              <span className="font-num text-[0.72rem] font-medium text-ink-soft shrink-0 whitespace-nowrap">
                 {formatDate(leadStory.publishedAt)}
               </span>
             </div>
 
-            <div className="mt-5 aspect-[16/9] w-full overflow-hidden rounded-2xl bg-paper-deep/80 relative">
+            <div className="mt-4 aspect-[16/9] w-full overflow-hidden rounded-2xl bg-paper-deep/80 relative">
               <div className="absolute inset-0 bg-gradient-to-t from-ink/30 via-transparent to-transparent z-10" />
               <div className="absolute top-4 left-4 z-20">
                 <span className="rounded-full bg-brand-red px-3 py-1 font-num text-[0.68rem] font-medium uppercase tracking-wider text-white">
@@ -95,21 +95,20 @@ export default async function Hero() {
               )}
             </div>
 
-
-            <Link href={`/article/${leadStory.slug}`} className="mt-5 block">
+            <Link href={`/article/${leadStory.slug}`} className="mt-4 block">
               <h2 className="font-area text-[clamp(1.35rem,2.2vw,1.85rem)] font-semibold leading-snug tracking-[-0.02em] text-ink transition-all duration-200 group-hover:italic group-hover:text-brand-red">
                 {leadStory.title}
               </h2>
             </Link>
 
-            <p className="mt-3 text-[0.98rem] font-normal leading-relaxed text-ink/80">
+            <p className="mt-2.5 text-[0.98rem] font-normal leading-relaxed text-ink/80 line-clamp-2 md:line-clamp-3">
               {leadStory.deck}
             </p>
           </div>
 
-          <div className="mt-8 flex items-center justify-between border-t border-ink/10 pt-4 text-xs">
+          <div className="mt-6 flex items-center justify-between border-t border-ink/10 pt-3.5 text-xs">
             <span className="text-ink-soft font-sans">
-              By <strong className="font-medium text-ink">{typeof leadStory.author === "string" ? leadStory.author : leadStory.author.name}</strong> · {leadStory.readTime}
+              By <strong className="font-medium text-ink">{typeof leadStory.author === "string" ? leadStory.author : leadStory.author.name}</strong> · {formatReadTime(leadStory.readTime)}
             </span>
             <Link
               href={`/article/${leadStory.slug}`}
@@ -158,7 +157,7 @@ export default async function Hero() {
 
                   <div className="mt-3 flex items-center justify-between text-[0.72rem] text-ink-soft">
                     <span className="font-medium text-ink-soft/90">
-                      {typeof story.author === "string" ? story.author : story.author.name} · {story.readTime}
+                      {typeof story.author === "string" ? story.author : story.author.name} · {formatReadTime(story.readTime)}
                     </span>
                     <span className="text-brand-red transition-transform duration-200 group-hover:translate-x-1">
                       <Arrow className="h-3 w-3" />

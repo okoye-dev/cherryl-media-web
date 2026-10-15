@@ -3,7 +3,7 @@ import Arrow from "./Arrow";
 import Pill from "./Pill";
 import { getEditorialCopy } from "@/lib/settings";
 import { getCuratedSections } from "@/lib/sections";
-import { formatDate } from "@/lib/formatters";
+import { formatDate, formatReadTime } from "@/lib/formatters";
 
 export default async function EditorialDossier() {
   const [curated, copy] = await Promise.all([
@@ -36,11 +36,11 @@ export default async function EditorialDossier() {
       <div className="mt-8 grid gap-8 lg:grid-cols-12 lg:gap-8">
         {/* The Feature Lead Column */}
         {leadStory && (
-          <article className="group flex flex-col justify-between rounded-[1.75rem] border border-ink/10 bg-cream p-7 transition-all duration-300 hover:border-brand-red/40 lg:col-span-5 lg:p-8">
+          <article className="group flex flex-col justify-between rounded-[1.75rem] border border-ink/10 bg-cream p-4 sm:p-5 transition-all duration-300 hover:border-brand-red/40 lg:col-span-5 lg:p-8">
             <div>
               <div className="flex items-center justify-between text-xs text-ink-soft">
                 <span className="label text-brand-red font-semibold">FEATURE STORY</span>
-                <span className="font-num font-medium">{leadStory.readTime || "6 min read"}</span>
+                <span className="font-num font-medium">{formatReadTime(leadStory.readTime)}</span>
               </div>
 
               <div className="mt-5 aspect-[16/10] w-full rounded-2xl border border-ink/10 bg-paper-deep/60 p-6 flex flex-col justify-between relative overflow-hidden">
@@ -78,7 +78,7 @@ export default async function EditorialDossier() {
                 </Link>
               </h3>
 
-              <p className="mt-3 text-sm font-normal leading-relaxed text-ink/80">
+              <p className="mt-3 text-sm font-normal leading-relaxed text-ink/80 line-clamp-2 md:line-clamp-3">
                 {leadStory.deck || leadStory.excerpt}
               </p>
             </div>
@@ -93,58 +93,58 @@ export default async function EditorialDossier() {
         {/* Center Features Column: Soundscapes & Gastronomy */}
         <div className="flex flex-col justify-between gap-6 lg:col-span-4">
           {soundscapesStory && (
-            <article className="group flex flex-1 flex-col justify-between rounded-[1.75rem] border border-ink/10 bg-cream p-6 transition-all duration-300 hover:border-brand-red/40">
+            <article className="group flex flex-1 flex-col justify-between rounded-[1.75rem] border border-ink/10 bg-cream p-4 sm:p-5 md:p-6 transition-all duration-300 hover:border-brand-red/40">
               <div>
                 <div className="flex items-center justify-between text-xs text-ink-soft">
                   <span className="label text-brand-red font-semibold">
                     {soundscapesStory.kicker || "SOUNDSCAPES"}
                   </span>
-                  <span className="font-num font-medium">{soundscapesStory.readTime || "4 min read"}</span>
+                  <span className="font-num font-medium">{formatReadTime(soundscapesStory.readTime)}</span>
                 </div>
                 <h3 className="mt-3 font-area text-base md:text-[1.08rem] font-semibold leading-snug tracking-[-0.02em] text-ink transition-all duration-200 group-hover:italic group-hover:text-brand-red">
                   <Link href={`/article/${soundscapesStory.slug}`}>
                     {soundscapesStory.title}
                   </Link>
                 </h3>
-                <p className="mt-2 text-xs font-normal leading-relaxed text-ink/70">
+                <p className="mt-2 text-xs font-normal leading-relaxed text-ink/70 line-clamp-2">
                   {soundscapesStory.deck || soundscapesStory.excerpt}
                 </p>
               </div>
               <div className="mt-6 flex items-center justify-between border-t border-ink/10 pt-3 text-[0.75rem] text-ink-soft">
                 <span>By {typeof soundscapesStory.author === "string" ? soundscapesStory.author : soundscapesStory.author?.name}</span>
-                <span className="font-num text-[0.7rem]">{formatDate(soundscapesStory.publishedAt)}</span>
+                <span className="font-num text-[0.7rem] shrink-0 whitespace-nowrap">{formatDate(soundscapesStory.publishedAt)}</span>
               </div>
             </article>
           )}
 
           {gastronomyStory && (
-            <article className="group flex flex-1 flex-col justify-between rounded-[1.75rem] border border-ink/10 bg-cream p-6 transition-all duration-300 hover:border-brand-red/40">
+            <article className="group flex flex-1 flex-col justify-between rounded-[1.75rem] border border-ink/10 bg-cream p-4 sm:p-5 md:p-6 transition-all duration-300 hover:border-brand-red/40">
               <div>
                 <div className="flex items-center justify-between text-xs text-ink-soft">
                   <span className="label text-brand-red">
                     {gastronomyStory.kicker || "FOOD & HERITAGE"}
                   </span>
-                  <span className="font-num font-medium">{gastronomyStory.readTime || "5 min read"}</span>
+                  <span className="font-num font-medium">{formatReadTime(gastronomyStory.readTime)}</span>
                 </div>
                 <h3 className="mt-4 font-area text-base md:text-[1.12rem] font-semibold leading-snug tracking-[-0.02em] text-ink transition-all duration-200 group-hover:italic group-hover:text-brand-red">
                   <Link href={`/article/${gastronomyStory.slug}`}>
                     {gastronomyStory.title}
                   </Link>
                 </h3>
-                <p className="mt-2 text-xs font-normal leading-relaxed text-ink/70">
+                <p className="mt-2 text-xs font-normal leading-relaxed text-ink/70 line-clamp-2">
                   {gastronomyStory.deck || gastronomyStory.excerpt}
                 </p>
               </div>
               <div className="mt-6 flex items-center justify-between border-t border-ink/10 pt-3 text-[0.75rem] text-ink-soft">
                 <span>By {typeof gastronomyStory.author === "string" ? gastronomyStory.author : gastronomyStory.author?.name}</span>
-                <span className="font-num text-[0.7rem]">{formatDate(gastronomyStory.publishedAt)}</span>
+                <span className="font-num text-[0.7rem] shrink-0 whitespace-nowrap">{formatDate(gastronomyStory.publishedAt)}</span>
               </div>
             </article>
           )}
         </div>
 
         {/* Right Culture Briefs Column */}
-        <div className="flex flex-col rounded-[1.75rem] border border-ink/10 bg-paper-deep/30 p-6 lg:col-span-3">
+        <div className="flex flex-col rounded-[1.75rem] border border-ink/10 bg-paper-deep/30 p-4 sm:p-5 md:p-6 lg:col-span-3">
           <div className="flex items-center justify-between border-b border-ink/10 pb-3">
             <span className="label text-brand-red">CULTURE BRIEFS</span>
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-brand-red" />
@@ -159,7 +159,7 @@ export default async function EditorialDossier() {
                       {item.kicker || "RADAR"}
                     </span>
                     <span className="font-num text-[0.68rem] text-ink-soft">
-                      {item.readTime || `0${idx + 1}`}
+                      {item.readTime ? formatReadTime(item.readTime) : `0${idx + 1}`}
                     </span>
                   </div>
                   <h4 className="mt-1.5 font-area text-[0.95rem] font-medium leading-snug tracking-[-0.02em] text-ink transition-all duration-200 group-hover:italic group-hover:text-brand-red">

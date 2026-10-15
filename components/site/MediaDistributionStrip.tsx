@@ -21,7 +21,7 @@ export default function MediaDistributionStrip() {
       id="newsletter"
       className="mx-auto mt-16 w-full max-w-[90rem] px-5 md:mt-24 md:px-10 xl:px-16"
     >
-      <div className="rounded-[2rem] bg-ink p-8 text-paper md:p-14">
+      <div className="rounded-[2rem] bg-ink p-5 sm:p-7 text-paper md:p-14">
         <div className="mx-auto max-w-3xl text-center">
           <span className="label text-brand-red font-medium">
             DAILY NEWSLETTER

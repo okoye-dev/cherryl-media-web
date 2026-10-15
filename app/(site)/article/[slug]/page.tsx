@@ -6,7 +6,7 @@ import ArticleBody from "@/components/site/ArticleBody";
 import { SITE } from "@/config/site";
 import { getAllArticleSlugs, getArticleBySlug } from "@/lib/news";
 import { resolveMediaUrl } from "@/lib/url-utils";
-import { formatDate, formatCategoryName } from "@/lib/formatters";
+import { formatDate, formatCategoryName, formatReadTime } from "@/lib/formatters";
 
 export async function generateStaticParams() {
   const slugs = await getAllArticleSlugs();
@@ -110,10 +110,10 @@ export default async function ArticlePage({ params }: { params: Params }) {
                   By <strong className="font-semibold text-ink">{article.author.name}</strong>
                 </span>
                 <span>·</span>
-                <span className="font-num">{formatDate(article.publishedAt)}</span>
+                <span className="font-num whitespace-nowrap">{formatDate(article.publishedAt)}</span>
               </div>
-              <span className="font-num text-[0.72rem] text-ink-soft">
-                {article.readTime || "4 min read"}
+              <span className="font-num text-[0.72rem] text-ink-soft shrink-0 whitespace-nowrap">
+                {formatReadTime(article.readTime)}
               </span>
             </>
           }

@@ -20,7 +20,7 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [
       "caption": "Ministerial council convenes during the extraordinary session in Abuja.",
       "credit": "Federal Information Bureau"
     },
-    "readTime": "4 min read",
+    "readTime": "4min",
     "status": "published",
     "tags": [
       "FEC",
@@ -72,7 +72,7 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [
         "slug": "nigeria-electricity-regulatory-commission-updates-feeder-bands",
         "category": "Practical Updates",
         "deck": "Official public-service advisory detailing guaranteed supply hours, revised band thresholds, and direct customer dispute mechanisms.",
-        "readTime": "3 min read"
+        "readTime": "3min"
       },
       {
         "type": "paragraph",
@@ -126,7 +126,7 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [
       "caption": "Technicians deploy smart meters in residential zones.",
       "credit": "NERC Communications"
     },
-    "readTime": "3 min read",
+    "readTime": "3min",
     "status": "published",
     "tags": [
       "NERC",
@@ -188,7 +188,7 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [
       "caption": "High-definition soundstage in a multi-stage production complex in Epe.",
       "credit": "Lagos Soundstages Photo Archive"
     },
-    "readTime": "7 min read",
+    "readTime": "7min",
     "status": "published",
     "tags": [
       "Nollywood",
@@ -255,7 +255,7 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [
       "caption": "Regional central bank governors sign multilateral settlement pact in Abuja.",
       "credit": "CBN Corporate Communications"
     },
-    "readTime": "5 min read",
+    "readTime": "5min",
     "status": "published",
     "tags": [
       "CBN",
@@ -309,7 +309,7 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [
       "caption": "Amber dusk settling over the Lagos lagoon and Third Mainland Bridge.",
       "credit": "Lagos Lens Photographic Archive"
     },
-    "readTime": "6 min read",
+    "readTime": "6min",
     "status": "published",
     "tags": [
       "Memoir",
@@ -362,7 +362,7 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [
       "caption": "Locomotive engineers inspect passenger coaches at the Ebute Metta terminal.",
       "credit": "Federal Ministry of Transport"
     },
-    "readTime": "3 min read",
+    "readTime": "3min",
     "status": "published",
     "tags": [
       "Rail",
@@ -415,7 +415,7 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [
       "caption": "Utility engineers configure prepaid smart meter communication modules.",
       "credit": "DisCo Operations Consortium"
     },
-    "readTime": "4 min read",
+    "readTime": "4min",
     "status": "published",
     "tags": [
       "Meters",
@@ -467,7 +467,7 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [
       "caption": "Commercial banking trading desk in Victoria Island, Lagos.",
       "credit": "Financial Markets Archive"
     },
-    "readTime": "5 min read",
+    "readTime": "5min",
     "status": "published",
     "tags": [
       "Banking",
@@ -520,7 +520,7 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [
       "caption": "Rain glistening on the asphalt outside a cafe on Awolowo Road, Ikoyi.",
       "credit": "Urban Lens Archive"
     },
-    "readTime": "4 min read",
+    "readTime": "4min",
     "status": "published",
     "tags": [
       "Romance",
@@ -573,7 +573,7 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [
       "caption": "Analog synthesizer patchbay in a recording sanctuary in Surulere.",
       "credit": "Lagos Soundstages Photo"
     },
-    "readTime": "4 min read",
+    "readTime": "4min",
     "status": "published",
     "tags": [
       "AfroFusion",
@@ -625,7 +625,7 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [
       "caption": "Heirloom sorghum and fonio grains curated in an artisanal culinary research kitchen.",
       "credit": "West African Botanical Archive"
     },
-    "readTime": "5 min read",
+    "readTime": "5min",
     "status": "published",
     "tags": [
       "Gastronomy",
@@ -678,7 +678,7 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [
       "caption": "Curators install large-format sculptural works at the Federal Palace pavilion.",
       "credit": "Art X Lagos Communications"
     },
-    "readTime": "2 min read",
+    "readTime": "2min",
     "status": "published",
     "tags": [
       "Art",
@@ -730,7 +730,7 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [
       "caption": "Turntable optical scanner reading microgrooves on a rare highlife 45rpm record.",
       "credit": "Sound Preservation Trust"
     },
-    "readTime": "4 min read",
+    "readTime": "4min",
     "status": "published",
     "tags": [
       "Highlife",
@@ -782,7 +782,7 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [
       "caption": "Bioclimatic earth-block community hub in northern Nigeria featuring natural airflow chimneys.",
       "credit": "Sustainable Sahel Architecture Bureau"
     },
-    "readTime": "3 min read",
+    "readTime": "3min",
     "status": "published",
     "tags": [
       "Architecture",
@@ -834,7 +834,7 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [
       "caption": "Original ink sketches and character designs from the West African Comic Anthology.",
       "credit": "Independent Comics Guild"
     },
-    "readTime": "3 min read",
+    "readTime": "3min",
     "status": "published",
     "tags": [
       "Comics",
@@ -886,7 +886,7 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [
       "caption": "Ecological remediation and flood barrier construction works across frontline subnational zones.",
       "credit": "National Climate Secretariat"
     },
-    "readTime": "4 min read",
+    "readTime": "4min",
     "status": "published",
     "tags": [
       "Climate",
@@ -948,7 +948,7 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [
       "caption": "Digital ticketing scanners and manifest verification stations at intercity transit terminals.",
       "credit": "FRSC Transport Safety Division"
     },
-    "readTime": "3 min read",
+    "readTime": "3min",
     "status": "published",
     "tags": [
       "Transport",
@@ -1010,7 +1010,7 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [
       "caption": "Certified rooftop photovoltaic and battery inverter installation on a residential estate in Abuja.",
       "credit": "SON Energy Standards Bureau"
     },
-    "readTime": "4 min read",
+    "readTime": "4min",
     "status": "published",
     "tags": [
       "Solar",
@@ -1072,7 +1072,7 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [
       "caption": "Prime commercial property skyline along Victoria Island's financial boulevard.",
       "credit": "Nigerian Exchange Group Media"
     },
-    "readTime": "5 min read",
+    "readTime": "5min",
     "status": "published",
     "tags": [
       "REITs",
@@ -1134,7 +1134,7 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [
       "caption": "Newly completed master-planned residential housing development financed via pension-backed mortgages.",
       "credit": "Federal Mortgage Bank Archive"
     },
-    "readTime": "4 min read",
+    "readTime": "4min",
     "status": "published",
     "tags": [
       "PenCom",
@@ -1196,7 +1196,7 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [
       "caption": "Reflective evening shadows and shared phone conversations across transatlantic horizons.",
       "credit": "Cherryl Media Essay Collection"
     },
-    "readTime": "5 min read",
+    "readTime": "5min",
     "status": "published",
     "tags": [
       "Modern Love",
@@ -1258,7 +1258,7 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [
       "caption": "Tail lights and evening glow reflecting off the wet asphalt along the Lekki-Epe expressway corridor.",
       "credit": "Photo: Cherryl Media Field Archive"
     },
-    "readTime": "4 min read",
+    "readTime": "4min",
     "status": "published",
     "tags": [
       "Lagos",
