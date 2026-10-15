@@ -3,6 +3,7 @@ import Arrow from "./Arrow";
 import Pill from "./Pill";
 import { getEditorialCopy } from "@/lib/settings";
 import { getCuratedSections } from "@/lib/sections";
+import { formatDate } from "@/lib/formatters";
 
 export default async function EditorialDossier() {
   const [curated, copy] = await Promise.all([
@@ -17,7 +18,7 @@ export default async function EditorialDossier() {
 
   return (
     <section className="mx-auto mt-20 w-full max-w-[90rem] px-5 md:mt-32 md:px-10 xl:px-16" aria-labelledby="dossier-heading">
-      <div className="flex flex-col gap-4 border-b border-ink/15 pb-6 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex flex-col items-start gap-4 border-b border-ink/15 pb-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <span className="label-red font-medium">{copy.dossier.issueBadge}</span>
           <h2 id="dossier-heading" className="mt-2 font-area text-[clamp(1.45rem,2.5vw,2rem)] font-semibold leading-tight tracking-[-0.02em] text-ink">
@@ -27,18 +28,18 @@ export default async function EditorialDossier() {
             {copy.dossier.subheading}
           </p>
         </div>
-        <Pill href="/category/entertainment-internet-culture" variant="ghost">
+        <Pill href="/category/entertainment-internet-culture" variant="ghost" className="self-start sm:self-auto w-fit">
           All Culture Stories
         </Pill>
       </div>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-12 lg:gap-8">
-        {/* The Big Read Lead Column */}
+        {/* The Feature Lead Column */}
         {leadStory && (
           <article className="group flex flex-col justify-between rounded-[1.75rem] border border-ink/10 bg-cream p-7 transition-all duration-300 hover:border-brand-red/40 lg:col-span-5 lg:p-8">
             <div>
               <div className="flex items-center justify-between text-xs text-ink-soft">
-                <span className="label text-brand-red font-semibold">THE BIG READ</span>
+                <span className="label text-brand-red font-semibold">FEATURE STORY</span>
                 <span className="font-num font-medium">{leadStory.readTime || "6 min read"}</span>
               </div>
 
@@ -111,7 +112,7 @@ export default async function EditorialDossier() {
               </div>
               <div className="mt-6 flex items-center justify-between border-t border-ink/10 pt-3 text-[0.75rem] text-ink-soft">
                 <span>By {typeof soundscapesStory.author === "string" ? soundscapesStory.author : soundscapesStory.author?.name}</span>
-                <span className="font-num">{soundscapesStory.publishedAt?.slice(0, 10) || "Recent"}</span>
+                <span className="font-num text-[0.7rem]">{formatDate(soundscapesStory.publishedAt)}</span>
               </div>
             </article>
           )}
@@ -121,7 +122,7 @@ export default async function EditorialDossier() {
               <div>
                 <div className="flex items-center justify-between text-xs text-ink-soft">
                   <span className="label text-brand-red">
-                    {gastronomyStory.kicker || "GASTRONOMY"}
+                    {gastronomyStory.kicker || "FOOD & HERITAGE"}
                   </span>
                   <span className="font-num font-medium">{gastronomyStory.readTime || "5 min read"}</span>
                 </div>
@@ -136,16 +137,16 @@ export default async function EditorialDossier() {
               </div>
               <div className="mt-6 flex items-center justify-between border-t border-ink/10 pt-3 text-[0.75rem] text-ink-soft">
                 <span>By {typeof gastronomyStory.author === "string" ? gastronomyStory.author : gastronomyStory.author?.name}</span>
-                <span className="font-num">{gastronomyStory.publishedAt?.slice(0, 10) || "Recent"}</span>
+                <span className="font-num text-[0.7rem]">{formatDate(gastronomyStory.publishedAt)}</span>
               </div>
             </article>
           )}
         </div>
 
-        {/* Right Radar Dispatches Column */}
+        {/* Right Culture Briefs Column */}
         <div className="flex flex-col rounded-[1.75rem] border border-ink/10 bg-paper-deep/30 p-6 lg:col-span-3">
           <div className="flex items-center justify-between border-b border-ink/10 pb-3">
-            <span className="label text-brand-red">RADAR · DISPATCHES</span>
+            <span className="label text-brand-red">CULTURE BRIEFS</span>
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-brand-red" />
           </div>
 

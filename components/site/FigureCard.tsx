@@ -1,11 +1,12 @@
 import Link from "next/link";
 import Arrow from "./Arrow";
+import { formatCategoryName } from "@/lib/formatters";
 
 export default function FigureCard({
   index,
   name,
   category = "DISPATCH",
-  href = "/category/state-affairs-environs",
+  href = "/category/nigerian-current-affairs",
   readTime = "4 min",
   imageUrl,
 }: {
@@ -31,17 +32,17 @@ export default function FigureCard({
             Cherryl Media
           </div>
         )}
-        <span className="absolute bottom-3 left-3 rounded-full bg-ink/80 backdrop-blur px-2.5 py-0.5 font-num text-[0.65rem] text-paper uppercase z-10">
-          {category}
+        <span className="absolute bottom-3 left-3 rounded-full bg-ink/80 backdrop-blur px-2.5 py-0.5 font-num text-[0.6rem] font-medium text-paper uppercase tracking-wider z-10 leading-none">
+          {formatCategoryName(category)}
         </span>
       </div>
-      <div className="mt-3.5 flex items-baseline justify-between gap-3">
+      <div className="mt-3 flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <span className="font-num text-[0.7rem] font-medium text-brand-red">
+            <span className="font-num text-[0.68rem] font-semibold text-brand-red leading-none">
               No. {String(index).padStart(2, "0")}
             </span>
-            <span className="text-[0.68rem] font-medium text-ink-soft">· {readTime}</span>
+            <span className="text-[0.65rem] font-medium text-ink-soft leading-none">· {readTime}</span>
           </div>
           <span className="mt-1 block font-area text-[1.05rem] md:text-[1.15rem] font-semibold leading-snug tracking-[-0.02em] text-ink transition-all duration-200 group-hover:italic group-hover:text-brand-red">
             {name}

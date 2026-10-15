@@ -22,17 +22,17 @@ export default function IndexList() {
           <li key={cat.slug}>
             <Link
               href={`/category/${cat.slug}`}
-              className="group grid grid-cols-[2.5rem_1fr_auto] items-baseline gap-4 py-4 md:grid-cols-[3.5rem_1.2fr_1.5fr_auto] md:gap-8 md:py-5"
+              className="group grid grid-cols-[2.5rem_1fr_auto] items-center gap-4 py-4 md:grid-cols-[3.5rem_1.2fr_1.5fr_auto] md:gap-8 md:py-5"
             >
-              <span className="font-num text-xs font-medium text-brand-red md:text-sm">
+              <span className="font-num text-xs font-semibold text-brand-red md:text-sm leading-none">
                 0{i + 1}
               </span>
 
               <div>
-                <span className="block font-area text-[clamp(1.1rem,1.8vw,1.45rem)] font-semibold leading-snug tracking-[-0.02em] text-ink transition-all duration-200 group-hover:italic group-hover:text-brand-red">
+                <span className="block font-area text-[clamp(1.05rem,1.7vw,1.4rem)] font-semibold leading-snug tracking-[-0.02em] text-ink transition-all duration-200 group-hover:italic group-hover:text-brand-red">
                   {cat.name}
                 </span>
-                <span className="font-num text-[0.72rem] font-medium text-ink-soft md:hidden">
+                <span className="font-num text-[0.68rem] font-medium text-ink-soft md:hidden">
                   {cat.channels ? cat.channels.join(" · ") : "Section"}
                 </span>
               </div>

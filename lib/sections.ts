@@ -39,23 +39,23 @@ export const SECTION_METADATA: Record<
     maxSlots: 3,
   },
   dossier_lead: {
-    title: "Editorial Dossier: The Big Read",
-    subtitle: "Featured investigative culture & industry essay",
+    title: "Culture: Main Feature",
+    subtitle: "Featured culture and longform investigative story",
     maxSlots: 1,
   },
   dossier_soundscapes: {
-    title: "Dossier: Soundscapes Feature",
-    subtitle: "Dedicated acoustics, music industry, and sonic essay slot",
+    title: "Culture: Music & Soundscapes",
+    subtitle: "Music industry, sonic profile, and arts slot",
     maxSlots: 1,
   },
   dossier_gastronomy: {
-    title: "Dossier: Gastronomy Feature",
-    subtitle: "Culinary heritage and regional food culture feature slot",
+    title: "Culture: Food & Heritage",
+    subtitle: "Food culture and regional culinary heritage slot",
     maxSlots: 1,
   },
   dossier_radar: {
-    title: "Dossier: Radar Dispatches",
-    subtitle: "4 rapid-read cultural alerts, exhibitions, and archives",
+    title: "Culture Briefs",
+    subtitle: "4 quick cultural reads, arts announcements, and profiles",
     maxSlots: 4,
   },
 };

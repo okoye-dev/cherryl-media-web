@@ -6,7 +6,7 @@ export const SITE = {
     "Leading digital newsroom and new-age media distribution network covering Nigerian state affairs, business, culture, politics, and dispatches across Africa.",
   tagline: "New-Age Media Distribution & Independent Journalism",
   location: "Abuja · Lagos · London",
-  email: "newsroom@local.dev",
+  email: "cherrylmedia1@gmail.com",
   edition: "Pan-African & Global",
   url: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
   
@@ -27,7 +27,7 @@ export const SITE = {
       shortName: "Current Affairs",
       summary: "Confirmed announcements, policy changes, executive governance, and major national developments.",
       subcategories: ["Confirmed Announcements", "Policy Changes", "Federal Affairs", "Security"],
-      channels: ["Website", "Facebook", "X"],
+      channels: ["Article", "Facebook", "X"],
       automation: "Medium",
     },
     {
@@ -36,7 +36,7 @@ export const SITE = {
       shortName: "Entertainment",
       summary: "Releases, public announcements, Nollywood & music, trending stories, and internet culture explainers.",
       subcategories: ["Releases & Premieres", "Music & Nollywood", "Trending Explainers", "Creator Economy"],
-      channels: ["Facebook", "X", "TikTok", "Website"],
+      channels: ["Article", "Facebook", "X", "TikTok"],
       automation: "Medium–High",
     },
     {
@@ -45,7 +45,7 @@ export const SITE = {
       shortName: "Practical Updates",
       summary: "Education, transport routes, electricity tariffs, consumer advisories, and public-service changes.",
       subcategories: ["Education & Exams", "Transport & Transit", "Power & Utilities", "Public Service"],
-      channels: ["Website", "Facebook", "Newsletter"],
+      channels: ["Article", "Facebook", "Newsletter"],
       automation: "High",
     },
     {
@@ -54,7 +54,7 @@ export const SITE = {
       shortName: "Business",
       summary: "Company announcements, industry developments, banking & fintech, public earnings, and economic reports.",
       subcategories: ["Company Announcements", "Banking & Fintech", "Industry Trends", "Public Reports"],
-      channels: ["Website", "LinkedIn", "X", "Newsletter"],
+      channels: ["Article", "LinkedIn", "X", "Newsletter"],
       automation: "Medium–High",
     },
     {
@@ -63,7 +63,7 @@ export const SITE = {
       shortName: "Stories",
       summary: "Human-interest narratives, modern love, relationship chronicles, literary dispatches, and personal memoirs.",
       subcategories: ["Modern Love", "Relationship Chronicles", "Personal Essays", "Fiction & Memoirs"],
-      channels: ["Website", "Socials", "Weekend Edition"],
+      channels: ["Article", "Socials", "Weekend Edition"],
       automation: "Curated",
     },
   ],

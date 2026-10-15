@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getOpinionColumns } from "@/lib/news";
 import { getCuratedSections } from "@/lib/sections";
+import { formatCategoryName } from "@/lib/formatters";
 import Arrow from "./Arrow";
 import Pill from "./Pill";
 
@@ -31,14 +32,14 @@ export default async function FieldNotes() {
           <li key={col.slug}>
             <Link
               href={`/article/${col.slug}`}
-              className="group grid grid-cols-[1.75rem_1fr_auto] items-baseline gap-x-3 py-3 md:py-4 transition-colors"
+              className="group grid grid-cols-[1.75rem_1fr_auto] items-center gap-x-3 py-3 md:py-4 transition-colors"
             >
-              <span className="font-num text-[0.7rem] font-medium text-brand-red">
+              <span className="font-num text-[0.7rem] font-semibold text-brand-red leading-none">
                 0{i + 1}
               </span>
               <div>
-                <span className="label text-[0.65rem] font-medium text-ink-soft block">
-                  {col.category} · By {typeof col.author === "string" ? col.author : col.author.name}
+                <span className="label text-[0.6rem] font-medium text-ink-soft block leading-none">
+                  {formatCategoryName(col.categoryName || col.category)} · By {typeof col.author === "string" ? col.author : col.author.name}
                 </span>
                 <span className="mt-1 block font-area text-[1.02rem] font-semibold leading-snug tracking-[-0.02em] text-ink transition-all duration-200 group-hover:italic group-hover:text-brand-red md:text-[1.15rem]">
                   {col.title}

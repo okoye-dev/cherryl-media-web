@@ -4,7 +4,7 @@ import Arrow from "./Arrow";
 
 /** One pill size for the whole site. Only the colours change. */
 const BASE =
-  "group inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[0.78rem] leading-none transition-colors duration-500";
+  "group inline-flex shrink-0 whitespace-nowrap items-center gap-1.5 rounded-full px-4 py-2 text-[0.76rem] font-medium leading-none transition-colors duration-500";
 
 const VARIANTS = {
   solid: "bg-ink text-paper hover:bg-brand-red hover:text-paper",

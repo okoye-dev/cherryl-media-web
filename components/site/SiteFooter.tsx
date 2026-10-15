@@ -14,8 +14,7 @@ export default async function SiteFooter() {
       <div className="rounded-[1.75rem] bg-ink px-6 py-8 text-paper md:rounded-[2rem] md:p-12">
         <div className="flex flex-col justify-between gap-6 md:flex-row md:items-start">
           <div className="max-w-xl">
-            <p className="label text-brand-red font-medium">DISPATCHES &amp; SYNDICATION</p>
-            <h2 className="mt-3 font-area text-[clamp(1.8rem,4vw,3.4rem)] font-semibold leading-[0.98] tracking-[-0.03em] text-paper">
+            <h2 className="font-area text-[clamp(1.8rem,4vw,3.4rem)] font-semibold leading-[0.98] tracking-[-0.03em] text-paper">
               Reporting the stories <em className="font-display italic font-light text-brand-red">shaping contemporary Africa.</em>
             </h2>
             <p className="mt-4 text-sm font-light leading-relaxed text-paper/70">
@@ -53,22 +52,21 @@ export default async function SiteFooter() {
             <ul className="mt-3 flex flex-col gap-2 text-xs font-light text-paper/75">
               <li><Link href="/category/entertainment-internet-culture" className="hover:text-brand-red">Entertainment &amp; Internet Culture</Link></li>
               <li><Link href="/category/stories-romance" className="hover:text-brand-red">Stories &amp; Romance</Link></li>
-              <li><Link href="/#dossier-heading" className="hover:text-brand-red">Weekend Editorial Dossier</Link></li>
+              <li><Link href="/#dossier-heading" className="hover:text-brand-red">Culture &amp; Features</Link></li>
             </ul>
           </div>
           <div>
             <h3 className="label text-brand-red">Primary Channels</h3>
             <ul className="mt-3 flex flex-col gap-2 text-xs font-light text-paper/75">
-              <li><Link href="/#distribution" className="hover:text-brand-red">Website, Facebook &amp; X Wire</Link></li>
-              <li><Link href="/#distribution" className="hover:text-brand-red">TikTok &amp; Internet Culture</Link></li>
-              <li><Link href="/#distribution" className="hover:text-brand-red">Executive Briefing Newsletter</Link></li>
+              <li><Link href="/#distribution" className="hover:text-brand-red">Articles, Facebook &amp; X</Link></li>
+              <li><Link href="/#distribution" className="hover:text-brand-red">TikTok &amp; Video Shorts</Link></li>
+              <li><Link href="/#distribution" className="hover:text-brand-red">Morning Edition Newsletter</Link></li>
             </ul>
           </div>
           <div>
             <h3 className="label text-brand-red">Network</h3>
             <ul className="mt-3 flex flex-col gap-2 text-xs font-light text-paper/75">
-              <li><Link href="/about" className="hover:text-brand-red">About &amp; Editorial Charter</Link></li>
-              <li><Link href="/#distribution" className="hover:text-brand-red">Wire Syndication API</Link></li>
+              <li><Link href="/about" className="hover:text-brand-red">About Cherryl Media</Link></li>
               <li><Link href={`mailto:${SITE.email}`} className="hover:text-brand-red">Newsroom &amp; Bureau Contact</Link></li>
             </ul>
           </div>

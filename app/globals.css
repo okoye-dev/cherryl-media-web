@@ -54,17 +54,39 @@ html[data-menu="open"] {
 }
 
 .label {
-  font-size: 0.72rem;
-  letter-spacing: 0.14em;
+  font-size: 0.625rem;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+}
+
+@media (min-width: 768px) {
+  .label {
+    font-size: 0.675rem;
+    letter-spacing: 0.09em;
+  }
 }
 
 .label-red {
-  font-size: 0.72rem;
-  letter-spacing: 0.14em;
+  font-size: 0.625rem;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #e01e1e;
-  font-weight: 500;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+}
+
+@media (min-width: 768px) {
+  .label-red {
+    font-size: 0.675rem;
+    letter-spacing: 0.09em;
+  }
 }
 
 @keyframes ticker {

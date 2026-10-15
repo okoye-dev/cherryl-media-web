@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getLeadStory, getDispatches } from "@/lib/news";
 import { getEditorialCopy } from "@/lib/settings";
+import { formatDate, formatCategoryName } from "@/lib/formatters";
 
 export default async function Ticker() {
   const [lead, dispatches, copy] = await Promise.all([
@@ -15,7 +16,7 @@ export default async function Ticker() {
       : []),
     { tag: "BREAKING", title: lead.title, slug: lead.slug },
     ...dispatches.map((d) => ({
-      tag: d.categoryName || d.category,
+      tag: formatCategoryName(d.categoryName || d.category),
       title: d.title,
       slug: d.slug,
     })),
@@ -55,7 +56,7 @@ export default async function Ticker() {
       </div>
 
       <div className="hidden shrink-0 border-l border-ink/15 px-4 font-num text-[0.72rem] text-ink-soft md:block">
-        {lead.publishedAt}
+        {formatDate(lead.publishedAt)}
       </div>
     </div>
   );

@@ -6,6 +6,7 @@ import ArticleBody from "@/components/site/ArticleBody";
 import { SITE } from "@/config/site";
 import { getAllArticleSlugs, getArticleBySlug } from "@/lib/news";
 import { resolveMediaUrl } from "@/lib/url-utils";
+import { formatDate, formatCategoryName } from "@/lib/formatters";
 
 export async function generateStaticParams() {
   const slugs = await getAllArticleSlugs();
@@ -98,7 +99,7 @@ export default async function ArticlePage({ params }: { params: Params }) {
       />
       <article className="pb-24">
         <PageHeader
-          label={`${article.categoryName} · By ${article.author.name} (${article.author.role}) · ${article.readTime}`}
+          label={`${formatCategoryName(article.categoryName || article.category)} · By ${article.author.name} · ${formatDate(article.publishedAt)} · ${article.readTime}`}
           title={article.title}
           intro={article.deck}
           compact

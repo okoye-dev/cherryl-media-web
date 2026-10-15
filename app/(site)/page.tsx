@@ -21,7 +21,7 @@ export default async function Home() {
       {/* Flagship Coverage: Current Affairs & Practical Updates Grid */}
       <div className="mx-auto mt-16 grid w-full max-w-[90rem] gap-12 px-5 md:mt-24 md:grid-cols-[1.35fr_1fr] md:gap-14 md:px-10 xl:px-16">
         <section aria-labelledby="featured-dispatches">
-          <div className="flex items-center justify-between pb-4 text-ink-soft">
+          <div className="flex items-center justify-between gap-3 pb-4 text-ink-soft">
             <h2 id="featured-dispatches" className="label text-ink-soft">
               Policy Announcements &amp; Practical Updates
             </h2>

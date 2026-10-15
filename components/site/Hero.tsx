@@ -4,6 +4,7 @@ import Arrow from "./Arrow";
 import { getLeadStory, getDispatches } from "@/lib/news";
 import { getEditorialCopy } from "@/lib/settings";
 import { getCuratedSections } from "@/lib/sections";
+import { formatDate, formatCategoryName } from "@/lib/formatters";
 
 export default async function Hero() {
   const [curated, defaultLead, defaultDispatches, copy] = await Promise.all([
@@ -68,8 +69,8 @@ export default async function Hero() {
               <span className="label-red font-medium">
                 {leadStory.kicker}
               </span>
-              <span className="font-num text-xs font-medium text-ink-soft">
-                {leadStory.publishedAt}
+              <span className="font-num text-[0.72rem] font-medium text-ink-soft">
+                {formatDate(leadStory.publishedAt)}
               </span>
             </div>
 
@@ -135,15 +136,15 @@ export default async function Hero() {
                     i === 0 ? "pt-3.5 pb-4 sm:pt-4 sm:pb-4.5" : "py-4 sm:py-4.5"
                   }`}
                 >
-                  <div className="flex items-center gap-2.5 text-xs">
-                    <span className="font-num text-xs font-bold text-brand-red">
+                  <div className="flex items-center gap-2 text-xs">
+                    <span className="font-num text-[0.7rem] font-bold text-brand-red leading-none">
                       0{i + 1}
                     </span>
-                    <span className="label text-[0.6rem] font-bold uppercase tracking-wider text-ink-soft">
-                      {story.categoryName || story.category}
+                    <span className="label text-[0.62rem] font-bold uppercase tracking-wider text-ink-soft leading-none">
+                      {formatCategoryName(story.categoryName || story.category)}
                     </span>
                     {story.urgent && (
-                      <span className="rounded bg-brand-red/10 px-1.5 py-0.5 text-[0.58rem] font-bold text-brand-red tracking-wider">
+                      <span className="rounded bg-brand-red/10 px-1.5 py-0.5 text-[0.58rem] font-bold text-brand-red tracking-wider leading-none">
                         URGENT
                       </span>
                     )}
