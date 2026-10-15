@@ -37,10 +37,10 @@ export default function SiteHeader() {
         <div className="flex items-center gap-6">
           <Link
             href="/"
-            className="group flex items-center gap-2.5 text-[1.2rem] leading-none tracking-tight text-ink"
+            className="flex items-center gap-2.5 text-[1.2rem] leading-none tracking-tight text-ink cursor-pointer"
             aria-label={`${SITE.name}, home`}
           >
-            <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full ring-1 ring-ink/10 transition-transform duration-300 group-hover:scale-105">
+            <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/brand/logo-circle.webp"

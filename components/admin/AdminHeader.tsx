@@ -27,8 +27,8 @@ export default function AdminHeader() {
   return (
     <header className="sticky top-0 z-50 flex items-center justify-between border-b border-white/[0.08] bg-[#141519]/95 px-4 sm:px-8 py-3.5 backdrop-blur-md">
       <div className="flex items-center gap-4 sm:gap-6">
-        <Link href="/admin" className="flex items-center gap-2.5 text-base sm:text-lg font-medium tracking-tight text-white">
-          <div className="relative h-7 w-7 shrink-0 overflow-hidden rounded-full ring-1 ring-white/20">
+        <Link href="/admin" className="flex items-center gap-2.5 text-base sm:text-lg font-medium tracking-tight text-white cursor-pointer">
+          <div className="relative h-7 w-7 shrink-0 overflow-hidden rounded-full">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/brand/logo-circle.webp"

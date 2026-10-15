@@ -33,8 +33,8 @@ export default function AdminLoginPage() {
       <div className="w-full max-w-md space-y-6">
         {/* Brand header */}
         <div className="text-center space-y-3">
-          <Link href="/" className="inline-flex flex-col items-center gap-2 group">
-            <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full ring-2 ring-brand-red/30 transition-transform duration-300 group-hover:scale-105">
+          <Link href="/" className="inline-flex flex-col items-center gap-2 cursor-pointer">
+            <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/brand/logo-circle.webp"

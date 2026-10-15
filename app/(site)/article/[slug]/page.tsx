@@ -151,13 +151,13 @@ export default async function ArticlePage({ params }: { params: Params }) {
               <h3 className="label font-medium text-brand-red">SOURCES &amp; CITATIONS</h3>
               <ul className="mt-3 divide-y divide-ink/10 text-xs text-ink-soft">
                 {article.sourceLinks.map((src, i) => (
-                  <li key={i} className="flex items-center justify-between py-2.5">
-                    <span className="font-medium text-ink/80">{src.publisher}</span>
+                  <li key={i} className="flex items-center justify-between gap-3 py-2.5">
+                    <span className="font-medium text-ink/80 truncate min-w-0">{src.publisher}</span>
                     <a
                       href={src.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-medium text-brand-red hover:underline"
+                      className="shrink-0 font-medium text-brand-red hover:underline"
                     >
                       Official Source ↗
                     </a>

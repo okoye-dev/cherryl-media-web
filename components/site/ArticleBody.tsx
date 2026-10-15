@@ -163,12 +163,12 @@ export default function ArticleBody({ blocks }: { blocks: ContentBlock[] }) {
             return (
               <div
                 key={idx}
-                className="my-5 flex items-center justify-between rounded-xl border border-ink/10 bg-cream/70 px-4 py-3 text-xs"
+                className="my-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 rounded-xl border border-ink/10 bg-cream/70 px-4 py-3 text-xs"
               >
-                <div className="flex items-center gap-2.5">
-                  <span className="flex h-1.5 w-1.5 rounded-full bg-brand-red" />
-                  <span className="font-sans font-medium text-ink">Source:</span>
-                  <span className="text-ink-soft truncate max-w-sm sm:max-w-md">
+                <div className="flex items-start sm:items-center gap-2.5 min-w-0">
+                  <span className="mt-1 sm:mt-0 flex h-1.5 w-1.5 shrink-0 rounded-full bg-brand-red" />
+                  <span className="shrink-0 font-sans font-medium text-ink">Source:</span>
+                  <span className="text-ink-soft break-words line-clamp-2 sm:truncate sm:max-w-md">
                     {block.title}
                   </span>
                 </div>
@@ -176,7 +176,7 @@ export default function ArticleBody({ blocks }: { blocks: ContentBlock[] }) {
                   href={block.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="shrink-0 font-medium text-brand-red underline underline-offset-4 hover:opacity-80"
+                  className="self-end sm:self-auto shrink-0 font-medium text-brand-red underline underline-offset-4 hover:opacity-80"
                 >
                   View ({block.publisher}) ↗
                 </a>
