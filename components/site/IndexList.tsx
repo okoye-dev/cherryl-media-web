@@ -29,7 +29,7 @@ export default function IndexList() {
               </span>
 
               <div>
-                <span className="block font-display text-[clamp(1.15rem,2vw,1.55rem)] font-normal leading-snug tracking-[-0.01em] text-ink transition-colors duration-300 group-hover:italic group-hover:text-brand-red">
+                <span className="block font-display text-[clamp(1.15rem,2vw,1.55rem)] font-semibold leading-snug tracking-[-0.01em] text-ink transition-colors duration-200 group-hover:text-brand-red">
                   {cat.name}
                 </span>
                 <span className="font-num text-[0.72rem] font-medium text-ink-soft md:hidden">

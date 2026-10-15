@@ -7,12 +7,18 @@ interface ImageUploadFieldProps {
   value?: string;
   onChange: (url: string) => void;
   label?: string;
+  description?: string;
+  required?: boolean;
+  hasError?: boolean;
 }
 
 export default function ImageUploadField({
   value,
   onChange,
   label = "Upload Photo",
+  description,
+  required = false,
+  hasError = false,
 }: ImageUploadFieldProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -35,7 +41,7 @@ export default function ImageUploadField({
       setUploading(true);
       setProgress(0);
 
-      // Upload via backend S3 presigned URL with progress
+      // Upload via backend S3/R2 presigned URL with progress
       const finalUrl = await uploadImageFile(file, (p) => setProgress(p));
       if (finalUrl) {
         onChange(finalUrl);
@@ -49,11 +55,20 @@ export default function ImageUploadField({
   };
 
   return (
-    <div className="space-y-2">
-      {label && (
-        <label className="block text-[0.72rem] font-medium uppercase tracking-wider text-slate-400">
-          {label}
-        </label>
+    <div className="space-y-1.5">
+      <div className="flex items-baseline justify-between">
+        {label && (
+          <label className="block text-[0.72rem] font-semibold uppercase tracking-wider text-zinc-300">
+            {label}
+            {required && <span className="text-brand-red ml-1">*</span>}
+          </label>
+        )}
+      </div>
+
+      {description && (
+        <p className="text-[0.72rem] text-zinc-400 leading-relaxed">
+          {description}
+        </p>
       )}
 
       <input
@@ -65,8 +80,8 @@ export default function ImageUploadField({
       />
 
       {value ? (
-        <div className="flex flex-wrap items-center gap-4 rounded-xl border border-slate-800 bg-slate-900/60 p-3">
-          <div className="relative h-20 w-32 shrink-0 overflow-hidden rounded-lg border border-slate-700 bg-slate-800">
+        <div className="flex flex-wrap items-center gap-4 rounded-xl border border-white/10 bg-[#1A1D24] p-3">
+          <div className="relative h-20 w-32 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-zinc-900">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={value}
@@ -75,13 +90,13 @@ export default function ImageUploadField({
             />
           </div>
           <div className="flex flex-col gap-2">
-            <span className="text-xs font-medium text-slate-300">
+            <span className="text-xs font-medium text-zinc-200">
               {uploading ? (
-                <span className="text-brand-red">
+                <span className="text-brand-red font-semibold">
                   Uploading to storage... {progress > 0 ? `${progress}%` : ""}
                 </span>
               ) : (
-                "Photo selected"
+                "Photo uploaded & verified"
               )}
             </span>
             <div className="flex items-center gap-2">
@@ -89,7 +104,7 @@ export default function ImageUploadField({
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploading}
-                className="rounded-lg border border-slate-700 bg-slate-800 px-3 py-1 text-xs font-medium text-white hover:bg-slate-700 transition-colors disabled:opacity-50"
+                className="rounded-lg border border-white/15 bg-zinc-800 px-3 py-1 text-xs font-medium text-white hover:bg-zinc-700 transition-colors disabled:opacity-50"
               >
                 Change photo
               </button>
@@ -97,7 +112,7 @@ export default function ImageUploadField({
                 type="button"
                 onClick={() => onChange("")}
                 disabled={uploading}
-                className="rounded-lg px-2.5 py-1 text-xs text-slate-400 hover:text-red-400 transition-colors disabled:opacity-50"
+                className="rounded-lg px-2.5 py-1 text-xs text-zinc-400 hover:text-red-400 transition-colors disabled:opacity-50"
               >
                 Remove
               </button>
@@ -109,10 +124,14 @@ export default function ImageUploadField({
           type="button"
           onClick={() => fileInputRef.current?.click()}
           disabled={uploading}
-          className="flex w-full items-center justify-center gap-3 rounded-xl border-2 border-dashed border-slate-700/80 bg-slate-900/40 p-5 text-slate-300 transition-colors hover:border-brand-red hover:bg-slate-900/80 hover:text-white disabled:opacity-50"
+          className={`flex w-full items-center justify-center gap-3.5 rounded-xl border-2 border-dashed p-5 transition-colors disabled:opacity-50 ${
+            hasError
+              ? "border-red-500/80 bg-red-950/20 text-red-200"
+              : "border-white/15 bg-[#1A1D24]/60 text-zinc-300 hover:border-brand-red hover:bg-[#1A1D24] hover:text-white"
+          }`}
         >
           <svg
-            className="h-5 w-5 text-brand-red"
+            className={`h-5 w-5 ${hasError ? "text-red-400" : "text-brand-red"}`}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -125,11 +144,11 @@ export default function ImageUploadField({
             />
           </svg>
           <div className="text-left">
-            <span className="block text-xs font-medium">
-              Choose photo from device
+            <span className="block text-xs font-semibold">
+              {hasError ? "⚠️ Image required — choose photo" : "Choose photo from device"}
             </span>
-            <span className="block text-[0.68rem] text-slate-500">
-              Select any photo or image file (JPG, PNG, WebP)
+            <span className="block text-[0.68rem] text-zinc-400">
+              Select JPG, PNG, or WebP (Cloudflare R2 storage)
             </span>
           </div>
         </button>

@@ -72,7 +72,7 @@ export default async function Hero() {
             </div>
 
             <Link href={`/article/${leadStory.slug}`} className="mt-5 block">
-              <h2 className="font-display text-[clamp(1.3rem,2.1vw,1.75rem)] font-normal leading-snug tracking-[-0.012em] text-ink transition-colors duration-300 group-hover:text-brand-red">
+              <h2 className="font-display text-[clamp(1.35rem,2.2vw,1.85rem)] font-bold leading-snug tracking-[-0.015em] text-ink transition-colors duration-200 group-hover:text-brand-red">
                 {leadStory.title}
               </h2>
             </Link>
@@ -96,50 +96,53 @@ export default async function Hero() {
           </div>
         </article>
 
-        <div className="flex flex-col divide-y divide-ink/10">
-          <div className="pb-3">
-            <h3 className="label font-medium text-ink-soft">Trending Stories</h3>
+        <div className="flex flex-col space-y-2">
+          <div className="flex items-center justify-between border-b border-ink/10 pb-3">
+            <h3 className="label font-semibold text-brand-red tracking-wider">TRENDING STORIES</h3>
+            <span className="text-[0.68rem] font-medium text-ink-soft">Latest Dispatches</span>
           </div>
 
-          {dispatches.map((story, i) => (
-            <article
-              key={story.slug}
-              className="group relative flex flex-col justify-between py-4 transition-colors duration-300"
-            >
-              <div>
-                <div className="flex items-center gap-3 text-xs">
-                  <span className="font-num text-sm font-medium text-brand-red">
-                    0{i + 1}
-                  </span>
-                  <span className="label text-[0.68rem] font-medium text-ink-soft">
-                    {story.categoryName || story.category}
-                  </span>
-                  {story.urgent && (
-                    <span className="rounded bg-brand-red/10 px-1.5 py-0.5 text-[0.62rem] font-medium text-brand-red">
-                      URGENT
+          <div className="flex flex-col divide-y divide-ink/10 pt-1">
+            {dispatches.map((story, i) => (
+              <article
+                key={story.slug}
+                className="group relative flex flex-col justify-between -mx-3.5 px-3.5 py-4.5 rounded-xl transition-colors duration-200 hover:bg-ink/[0.05]"
+              >
+                <div>
+                  <div className="flex items-center gap-2.5 text-xs">
+                    <span className="font-num text-xs font-semibold text-brand-red">
+                      0{i + 1}
                     </span>
-                  )}
+                    <span className="label text-[0.6rem] font-semibold uppercase tracking-wider text-ink-soft">
+                      {story.categoryName || story.category}
+                    </span>
+                    {story.urgent && (
+                      <span className="rounded bg-brand-red/10 px-1.5 py-0.5 text-[0.58rem] font-semibold text-brand-red tracking-wider">
+                        URGENT
+                      </span>
+                    )}
+                  </div>
+
+                  <Link href={`/article/${story.slug}`} className="mt-2 block">
+                    <h4 className="font-display text-[1.08rem] md:text-[1.18rem] font-semibold leading-snug tracking-[-0.015em] text-ink transition-colors duration-200 group-hover:text-brand-red">
+                      {story.title}
+                    </h4>
+                  </Link>
+
+                  <p className="mt-1.5 line-clamp-2 text-xs font-normal leading-relaxed text-ink/75">
+                    {story.deck}
+                  </p>
                 </div>
 
-                <Link href={`/article/${story.slug}`} className="mt-1.5 block">
-                  <h4 className="font-display text-[1.12rem] md:text-[1.2rem] font-normal leading-snug tracking-[-0.01em] text-ink transition-colors duration-300 group-hover:italic group-hover:text-brand-red">
-                    {story.title}
-                  </h4>
-                </Link>
-
-                <p className="mt-1.5 line-clamp-2 text-xs font-normal leading-relaxed text-ink/75">
-                  {story.deck}
-                </p>
-              </div>
-
-              <div className="mt-4 flex items-center justify-between text-[0.72rem] text-ink-soft">
-                <span>{typeof story.author === "string" ? story.author : story.author.name} · {story.readTime}</span>
-                <span className="transition-transform duration-200 group-hover:translate-x-1 group-hover:text-brand-red">
-                  <Arrow className="h-3 w-3" />
-                </span>
-              </div>
-            </article>
-          ))}
+                <div className="mt-3.5 flex items-center justify-between text-[0.72rem] text-ink-soft">
+                  <span className="font-medium">{typeof story.author === "string" ? story.author : story.author.name} · {story.readTime}</span>
+                  <span className="transition-transform duration-200 group-hover:translate-x-1 group-hover:text-brand-red">
+                    <Arrow className="h-3 w-3" />
+                  </span>
+                </div>
+              </article>
+            ))}
+          </div>
         </div>
       </div>
     </section>

@@ -1,67 +1,73 @@
-import Pill from "./Pill";
-import { SITE } from "@/config/site";
+"use client";
+
+import { useState } from "react";
 
 export default function MediaDistributionStrip() {
+  const [email, setEmail] = useState("");
+  const [subscribed, setSubscribed] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (email.trim()) {
+      setSubscribed(true);
+      setTimeout(() => {
+        setEmail("");
+      }, 3000);
+    }
+  };
+
   return (
     <section
-      id="distribution"
+      id="newsletter"
       className="mx-auto mt-16 w-full max-w-[90rem] px-5 md:mt-24 md:px-10 xl:px-16"
     >
-      <div className="rounded-[2rem] bg-ink p-8 text-paper md:p-12">
-        <div className="flex flex-col justify-between gap-6 border-b border-paper/15 pb-8 md:flex-row md:items-end">
-          <div>
-            <span className="label text-brand-red font-medium">
-              NEW MEDIA NETWORK
-            </span>
-            <h2 className="mt-2 font-display text-[clamp(1.45rem,2.6vw,2.15rem)] font-normal leading-tight tracking-[-0.012em] text-paper">
-              Multi-channel <em className="italic text-brand-red">distribution</em> for modern readers.
-            </h2>
-          </div>
-          <p className="max-w-[36ch] text-sm font-normal leading-relaxed text-paper/80">
-            Publishing stories, audio digests, and newsletters across website, social platforms, and subscriber channels.
-          </p>
-        </div>
-
-        <div className="mt-8 grid gap-6 md:grid-cols-3">
-          {SITE.mediaDistribution.map((channel, i) => (
-            <div
-              key={channel.title}
-              className="group flex flex-col justify-between rounded-2xl border border-paper/10 bg-white/[0.03] p-6 transition-all duration-300 hover:border-brand-red/50 hover:bg-white/[0.06]"
-            >
-              <div>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-num text-brand-red font-medium">
-                    0{i + 1}
-                  </span>
-                  <span className="rounded bg-paper/10 px-2 py-0.5 text-[0.65rem] uppercase tracking-wider text-paper/70 font-medium">
-                    {channel.format}
-                  </span>
-                </div>
-                <h3 className="mt-3 font-display text-lg font-normal text-paper transition-colors group-hover:text-brand-red">
-                  {channel.title}
-                </h3>
-                <p className="mt-2 text-xs font-normal leading-relaxed text-paper/75">
-                  {channel.description}
-                </p>
-              </div>
-
-              <div className="mt-6 flex items-center justify-between border-t border-paper/10 pt-4 text-[0.7rem] text-paper/50">
-                <span>{channel.status}</span>
-                <span className="text-paper transition-transform duration-200 group-hover:translate-x-1 group-hover:text-brand-red">
-                  →
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-paper/10 pt-6">
-          <span className="text-xs text-paper/60 font-light">
-            Need syndication rights or automated API feeds for your newsroom?
+      <div className="rounded-[2rem] bg-ink p-8 text-paper md:p-14">
+        <div className="mx-auto max-w-3xl text-center">
+          <span className="label text-brand-red font-medium">
+            DAILY NEWSLETTER
           </span>
-          <Pill href={`mailto:${SITE.email}`} variant="paper">
-            Inquire for syndication
-          </Pill>
+          <h2 className="mt-3 font-display text-[clamp(1.75rem,3.2vw,2.75rem)] font-normal leading-[1.05] tracking-[-0.015em] text-paper">
+            Get the Cherryl Media <em className="italic text-brand-red">Morning Edition</em> in your inbox.
+          </h2>
+          <p className="mt-4 text-sm md:text-base font-normal leading-relaxed text-paper/75">
+            Key policy developments, practical Nigerian consumer updates, and cultural essays delivered every morning at 6:00 AM.
+          </p>
+
+          <form onSubmit={handleSubmit} className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3 max-w-md mx-auto">
+            {subscribed ? (
+              <div className="w-full rounded-full bg-emerald-500/20 border border-emerald-500/40 py-3 px-6 text-sm font-medium text-emerald-300">
+                ✓ You&apos;re subscribed to the Morning Edition!
+              </div>
+            ) : (
+              <>
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email address"
+                  className="w-full rounded-full border border-paper/20 bg-white/[0.08] px-5 py-3 text-sm text-paper placeholder-paper/40 focus:border-brand-red focus:outline-none focus:bg-white/[0.12]"
+                />
+                <button
+                  type="submit"
+                  className="w-full sm:w-auto rounded-full bg-brand-red px-7 py-3 text-sm font-semibold text-white shadow transition-all hover:bg-brand-red/90 shrink-0"
+                >
+                  Subscribe
+                </button>
+              </>
+            )}
+          </form>
+
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-[0.72rem] text-paper/50">
+            <span>Also publishing on:</span>
+            <span className="font-medium text-paper/80">Website</span>
+            <span>·</span>
+            <span className="font-medium text-paper/80">X</span>
+            <span>·</span>
+            <span className="font-medium text-paper/80">Facebook</span>
+            <span>·</span>
+            <span className="font-medium text-paper/80">LinkedIn</span>
+          </div>
         </div>
       </div>
     </section>

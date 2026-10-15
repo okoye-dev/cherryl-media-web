@@ -33,7 +33,7 @@ export default function EditorialDossier() {
               <span className="text-[0.7rem] font-medium text-ink-soft">Lagos Soundstages &amp; Studio Lots</span>
             </div>
 
-            <h3 className="mt-5 font-display text-[1.25rem] md:text-[1.38rem] font-normal leading-snug tracking-[-0.01em] text-ink transition-colors duration-300 group-hover:text-brand-red">
+            <h3 className="mt-5 font-display text-[1.25rem] md:text-[1.38rem] font-bold leading-snug tracking-[-0.01em] text-ink transition-colors duration-200 group-hover:text-brand-red">
               <Link href="/article/lagos-soundscapes-and-creators-revolution">
                 The Nollywood Studio Architecture: From Direct-to-Video Roots to Global Distribution Dominance
               </Link>
@@ -57,12 +57,12 @@ export default function EditorialDossier() {
                 <span className="label text-brand-red font-semibold">SOUNDSCAPES</span>
                 <span className="font-num font-medium">4 min read</span>
               </div>
-              <h3 className="mt-3 font-display text-lg font-normal leading-snug tracking-tight text-ink transition-colors duration-300 group-hover:text-brand-red">
+              <h3 className="mt-3 font-display text-lg font-bold leading-snug tracking-tight text-ink transition-colors duration-200 group-hover:text-brand-red">
                 <Link href="/category/entertainment-internet-culture">
                   Inside the Lagos Underground: The Sound Architects Engineering Polyphonic Afro-Fusion
                 </Link>
               </h3>
-              <p className="mt-2 text-xs font-light leading-relaxed text-ink/70">
+              <p className="mt-2 text-xs font-normal leading-relaxed text-ink/70">
                 A technical exploration into the rhythmic syncopations and modular synthesizers defining new West African acoustics.
               </p>
             </div>
@@ -78,12 +78,12 @@ export default function EditorialDossier() {
                 <span className="label text-brand-red">GASTRONOMY</span>
                 <span className="font-num">5 min read</span>
               </div>
-              <h3 className="mt-4 font-display text-xl font-light leading-snug tracking-tight text-ink transition-colors duration-300 group-hover:text-brand-red">
+              <h3 className="mt-4 font-display text-xl font-bold leading-snug tracking-tight text-ink transition-colors duration-200 group-hover:text-brand-red">
                 <Link href="/category/entertainment-internet-culture">
                   Fermentation, Coastal Smoke &amp; Heritage: The Contemporary Revival of Indigenous Grains
                 </Link>
               </h3>
-              <p className="mt-2 text-xs font-light leading-relaxed text-ink/70">
+              <p className="mt-2 text-xs font-normal leading-relaxed text-ink/70">
                 Culinary anthropologists and contemporary chefs recharting regional biodiversity across coastal markets.
               </p>
             </div>
@@ -133,7 +133,7 @@ export default function EditorialDossier() {
                     <span className="label text-[0.62rem] text-brand-red">{item.tag}</span>
                     <span className="font-num text-[0.68rem] text-ink-soft">{item.time}</span>
                   </div>
-                  <h4 className="mt-1.5 font-display text-[0.98rem] font-light leading-snug tracking-tight text-ink transition-colors duration-200 group-hover:text-brand-red">
+                  <h4 className="mt-1.5 font-display text-[0.98rem] font-semibold leading-snug tracking-tight text-ink transition-colors duration-200 group-hover:text-brand-red">
                     {item.title}
                   </h4>
                 </Link>

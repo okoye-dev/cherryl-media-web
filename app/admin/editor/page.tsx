@@ -1,12 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { CANONICAL_ARTICLES } from "@/lib/articles";
 import { isInternalUrl } from "@/lib/url-utils";
 import AutoTextarea from "@/components/admin/AutoTextarea";
 import ImageUploadField from "@/components/admin/ImageUploadField";
 import type { ContentBlock, PillarCategory, PublishingStatus } from "@/lib/types";
+
+interface SourceItem {
+  url: string;
+  publisher: string;
+  claimSummary?: string;
+}
 
 export default function AdminEditorPage() {
   const [activeTab, setActiveTab] = useState<"story" | "social" | "sources">("story");
@@ -30,7 +36,7 @@ export default function AdminEditorPage() {
   const [liPost, setLiPost] = useState(CANONICAL_ARTICLES[0].channelVariants?.linkedin || "");
   const [nlPost, setNlPost] = useState(CANONICAL_ARTICLES[0].channelVariants?.newsletter || "");
 
-  const [sources, setSources] = useState<Array<{ url: string; publisher: string; claimSummary?: string }>>([
+  const [sources, setSources] = useState<SourceItem[]>([
     {
       url: "https://statehouse.gov.ng",
       publisher: "State House Communications",
@@ -48,6 +54,55 @@ export default function AdminEditorPage() {
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [copiedAI, setCopiedAI] = useState(false);
 
+  // Validation & Autosave state
+  const [coverImageError, setCoverImageError] = useState(false);
+  const [publishWarning, setPublishWarning] = useState<string | null>(null);
+  const [autosaveStatus, setAutosaveStatus] = useState<"idle" | "saving" | "saved">("idle");
+  const [lastAutosavedTime, setLastAutosavedTime] = useState<string | null>(null);
+
+  // Debounced background autosave
+  useEffect(() => {
+    if (!title.trim()) return;
+
+    const timer = setTimeout(async () => {
+      setAutosaveStatus("saving");
+      try {
+        const payload = {
+          title,
+          slug: slug || title.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+          kicker,
+          deck,
+          category,
+          categoryName: category.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+          author: { name: authorName, role: authorRole },
+          featuredImage: { url: coverUrl, caption: coverCaption, credit: "Cherryl Media" },
+          readTime: "4 min read",
+          status: "draft",
+          body: blocks,
+          socialVariants: { x: xPost, facebook: fbPost, linkedin: liPost, newsletter: nlPost },
+          sources: sources.map((s) => ({ sourceName: s.publisher, url: s.url, claimSummary: s.claimSummary || "" })),
+          sourceLinks: sources.map((s) => ({ url: s.url, publisher: s.publisher, accessedAt: new Date().toISOString() })),
+          publishedAt: new Date().toISOString(),
+        };
+
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080";
+        await fetch(`${backendUrl}/api/articles`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        const timeStr = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+        setLastAutosavedTime(timeStr);
+        setAutosaveStatus("saved");
+      } catch {
+        setAutosaveStatus("idle");
+      }
+    }, 2500);
+
+    return () => clearTimeout(timer);
+  }, [title, slug, kicker, deck, category, authorName, authorRole, coverUrl, coverCaption, blocks, sources, xPost, fbPost, liPost, nlPost]);
+
   const handleCopyAIContext = () => {
     const prompt = `# EDITORIAL CONTEXT & SOURCE BRIEF FOR FACT-CHECKING / REFINEMENT
 
@@ -57,7 +112,7 @@ export default function AdminEditorPage() {
 ## AUTHOR: ${authorName} (${authorRole})
 
 ### PRIMARY SOURCES & CITATIONS:
-${sources.map((s, i) => `${i + 1}. **${s.publisher}**\n   - URL: ${s.url}\n   - Verified Claim: ${s.claimSummary || "Primary source document"}`).join("\n\n") || "No external sources attached yet."}
+${sources.map((s, i) => `${i + 1}. **${s.publisher}**\n   - URL: ${s.url}\n   - Verified Claim: ${s.claimSummary || "Primary report"}`).join("\n\n") || "No external sources attached yet."}
 
 ### FULL ARTICLE BODY:
 ${blocks.map((b) => {
@@ -90,6 +145,19 @@ ${blocks.map((b) => {
 
   const handleSave = async (newStatus?: PublishingStatus) => {
     const targetStatus = newStatus || status;
+
+    // Image validation: Not publishable if no cover photo is added
+    if (targetStatus === "published" && !coverUrl.trim()) {
+      setCoverImageError(true);
+      setPublishWarning("⚠️ A cover photo is required before publishing this story. Please upload an image below.");
+      setActiveTab("story");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      setTimeout(() => setPublishWarning(null), 6000);
+      return;
+    }
+
+    setCoverImageError(false);
+    setPublishWarning(null);
     if (newStatus) setStatus(newStatus);
     setIsSubmitting(true);
     setSaveMessage(null);
@@ -141,7 +209,7 @@ ${blocks.map((b) => {
       });
 
       if (res.ok) {
-        setSaveMessage("✓ Synced to backend & saved");
+        setSaveMessage(targetStatus === "published" ? "✓ Published & Synced" : "✓ Saved draft to backend");
       } else {
         setSaveMessage("✓ Saved locally");
       }
@@ -209,24 +277,60 @@ ${blocks.map((b) => {
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
+      {/* Validation warning banner */}
+      {publishWarning && (
+        <div className="rounded-xl border border-red-500/50 bg-red-950/40 p-4 text-xs font-medium text-red-200 flex items-center justify-between shadow-lg animate-fade">
+          <span className="flex items-center gap-2">
+            <span>{publishWarning}</span>
+          </span>
+          <button
+            type="button"
+            onClick={() => setPublishWarning(null)}
+            className="text-red-400 hover:text-white font-bold ml-4"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {/* Top action bar */}
-      <div className="flex flex-col gap-4 rounded-2xl border border-slate-800 bg-[#131B2B] p-4 sm:flex-row sm:items-center sm:justify-between shadow-sm">
-        <div className="flex items-center gap-3">
-          <Link href="/admin" className="text-xs font-medium text-slate-400 hover:text-white">
+      <div className="flex flex-col gap-3 rounded-2xl border border-white/[0.08] bg-[#16181D] p-4 sm:flex-row sm:items-center sm:justify-between shadow-sm">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          <Link href="/admin" className="text-xs font-semibold text-zinc-400 hover:text-white transition-colors">
             ← All Stories
           </Link>
-          <span className="text-slate-600">/</span>
-          <span className="font-num text-xs uppercase tracking-wider text-slate-400">
+          <span className="text-zinc-600">/</span>
+          <span className="font-mono text-xs uppercase tracking-wider text-zinc-400">
             {category}
           </span>
-          <span className="rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 text-[0.68rem] font-medium uppercase tracking-wider text-emerald-400">
+          <span className={`rounded-full px-2.5 py-0.5 text-[0.68rem] font-semibold uppercase tracking-wider border ${
+            status === "published"
+              ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+              : "bg-amber-500/10 border-amber-500/20 text-amber-400"
+          }`}>
             {status}
           </span>
+
+          {/* Autosave status indicator */}
+          <div className="hidden sm:flex items-center gap-1.5 pl-2 text-[0.7rem] font-mono text-zinc-400">
+            {autosaveStatus === "saving" && (
+              <span className="flex items-center gap-1 text-amber-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-ping" />
+                Autosaving...
+              </span>
+            )}
+            {autosaveStatus === "saved" && lastAutosavedTime && (
+              <span className="flex items-center gap-1 text-zinc-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                Autosaved {lastAutosavedTime}
+              </span>
+            )}
+          </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2.5">
           {savedNotice && saveMessage && (
-            <span className="text-xs font-medium text-emerald-400 animate-fade">
+            <span className="text-xs font-semibold text-emerald-400 animate-fade">
               {saveMessage}
             </span>
           )}
@@ -235,20 +339,20 @@ ${blocks.map((b) => {
           <button
             type="button"
             onClick={handleCopyAIContext}
-            className="flex items-center gap-1.5 rounded-lg border border-purple-500/40 bg-purple-500/15 px-3.5 py-1.5 text-xs font-medium text-purple-200 hover:bg-purple-500/25 hover:text-white transition-all shadow-sm"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-purple-500/40 bg-purple-500/15 px-3 py-1.5 text-xs font-medium text-purple-200 hover:bg-purple-500/25 hover:text-white transition-all shadow-sm"
             title="Copy complete editorial brief, verified sources, and text to paste into ChatGPT, Claude or Gemini for vetting and refinement"
           >
             <svg className="w-3.5 h-3.5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
             </svg>
-            {copiedAI ? "✓ Context Copied for AI!" : "Copy Context for AI"}
+            {copiedAI ? "✓ Copied for AI!" : "Copy Context for AI"}
           </button>
 
           <button
             type="button"
             disabled={isSubmitting}
             onClick={() => handleSave("draft")}
-            className="rounded-lg border border-slate-700 bg-slate-800/80 px-4 py-1.5 text-xs font-medium text-slate-200 hover:bg-slate-700 hover:text-white transition-colors disabled:opacity-50"
+            className="rounded-lg border border-white/15 bg-zinc-800 px-3.5 py-1.5 text-xs font-medium text-zinc-200 hover:bg-zinc-700 hover:text-white transition-colors disabled:opacity-50"
           >
             {isSubmitting ? "Saving..." : "Save Draft"}
           </button>
@@ -256,7 +360,7 @@ ${blocks.map((b) => {
             type="button"
             disabled={isSubmitting}
             onClick={() => handleSave("published")}
-            className="rounded-lg bg-brand-red px-4 py-1.5 text-xs font-medium text-white shadow hover:bg-brand-red/90 transition-colors disabled:opacity-50"
+            className="rounded-lg bg-brand-red px-4 py-1.5 text-xs font-semibold text-white shadow hover:bg-brand-red/90 transition-colors disabled:opacity-50"
           >
             {isSubmitting ? "Publishing..." : "Publish Now"}
           </button>
@@ -264,14 +368,14 @@ ${blocks.map((b) => {
       </div>
 
       {/* Primary tab switcher */}
-      <div className="flex items-center gap-2 border-b border-slate-800 pb-2">
+      <div className="flex flex-wrap items-center gap-2 border-b border-white/[0.08] pb-2">
         <button
           type="button"
           onClick={() => setActiveTab("story")}
-          className={`rounded-lg px-4 py-2 text-xs font-medium transition-colors ${
+          className={`rounded-lg px-4 py-2 text-xs font-semibold transition-colors ${
             activeTab === "story"
               ? "bg-brand-red text-white"
-              : "text-slate-400 hover:text-white hover:bg-slate-800/50"
+              : "text-zinc-400 hover:text-white hover:bg-white/[0.04]"
           }`}
         >
           1. Write Story
@@ -279,10 +383,10 @@ ${blocks.map((b) => {
         <button
           type="button"
           onClick={() => setActiveTab("social")}
-          className={`rounded-lg px-4 py-2 text-xs font-medium transition-colors ${
+          className={`rounded-lg px-4 py-2 text-xs font-semibold transition-colors ${
             activeTab === "social"
               ? "bg-brand-red text-white"
-              : "text-slate-400 hover:text-white hover:bg-slate-800/50"
+              : "text-zinc-400 hover:text-white hover:bg-white/[0.04]"
           }`}
         >
           2. Social Media Channels
@@ -290,13 +394,16 @@ ${blocks.map((b) => {
         <button
           type="button"
           onClick={() => setActiveTab("sources")}
-          className={`rounded-lg px-4 py-2 text-xs font-medium transition-colors ${
+          className={`rounded-lg px-4 py-2 text-xs font-semibold transition-colors flex items-center gap-1.5 ${
             activeTab === "sources"
               ? "bg-brand-red text-white"
-              : "text-slate-400 hover:text-white hover:bg-slate-800/50"
+              : "text-zinc-400 hover:text-white hover:bg-white/[0.04]"
           }`}
         >
-          3. Sources &amp; Citations
+          <span>3. Sources &amp; Citations</span>
+          <span className="rounded-full bg-white/15 px-1.5 py-0.2 text-[0.65rem]">
+            {sources.length}
+          </span>
         </button>
       </div>
 
@@ -304,16 +411,17 @@ ${blocks.map((b) => {
       {activeTab === "story" && (
         <div className="space-y-6">
           {/* Metadata Card */}
-          <div className="rounded-2xl border border-slate-800 bg-[#131B2B] p-6 space-y-4 shadow-sm">
+          <div className="rounded-2xl border border-white/[0.08] bg-[#16181D] p-5 sm:p-6 space-y-4 shadow-sm">
             <div className="grid gap-4 sm:grid-cols-3">
+              {/* Category dropdown matching input height and padding */}
               <div>
-                <label className="block text-[0.72rem] font-medium uppercase tracking-wider text-slate-400 mb-1.5">
+                <label className="block text-[0.72rem] font-semibold uppercase tracking-wider text-zinc-300 mb-1.5">
                   Category Pillar
                 </label>
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value as PillarCategory)}
-                  className="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs font-medium text-white focus:border-brand-red focus:outline-none"
+                  className="h-11 w-full rounded-xl border border-white/10 bg-[#1A1D24] px-3.5 py-2.5 text-sm font-medium text-white focus:border-brand-red focus:outline-none transition-colors"
                 >
                   <option value="nigerian-current-affairs">Nigerian Current Affairs</option>
                   <option value="entertainment-internet-culture">Entertainment &amp; Internet Culture</option>
@@ -324,33 +432,33 @@ ${blocks.map((b) => {
               </div>
 
               <div>
-                <label className="block text-[0.72rem] font-medium uppercase tracking-wider text-slate-400 mb-1.5">
+                <label className="block text-[0.72rem] font-semibold uppercase tracking-wider text-zinc-300 mb-1.5">
                   Author Name
                 </label>
                 <input
                   type="text"
                   value={authorName}
                   onChange={(e) => setAuthorName(e.target.value)}
-                  className="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs font-medium text-white focus:border-brand-red focus:outline-none"
+                  className="h-11 w-full rounded-xl border border-white/10 bg-[#1A1D24] px-3.5 py-2.5 text-sm font-medium text-white focus:border-brand-red focus:outline-none transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-[0.72rem] font-medium uppercase tracking-wider text-slate-400 mb-1.5">
+                <label className="block text-[0.72rem] font-semibold uppercase tracking-wider text-zinc-300 mb-1.5">
                   Author Title / Role
                 </label>
                 <input
                   type="text"
                   value={authorRole}
                   onChange={(e) => setAuthorRole(e.target.value)}
-                  className="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs font-medium text-white focus:border-brand-red focus:outline-none"
+                  className="h-11 w-full rounded-xl border border-white/10 bg-[#1A1D24] px-3.5 py-2.5 text-sm font-medium text-white focus:border-brand-red focus:outline-none transition-colors"
                 />
               </div>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label className="block text-[0.72rem] font-medium uppercase tracking-wider text-slate-400 mb-1.5">
+                <label className="block text-[0.72rem] font-semibold uppercase tracking-wider text-zinc-300 mb-1.5">
                   Top Label / Kicker
                 </label>
                 <input
@@ -358,357 +466,279 @@ ${blocks.map((b) => {
                   value={kicker}
                   onChange={(e) => setKicker(e.target.value)}
                   placeholder="e.g. NATIONAL POLICY ADVISORY"
-                  className="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs font-medium text-white focus:border-brand-red focus:outline-none"
+                  className="h-11 w-full rounded-xl border border-white/10 bg-[#1A1D24] px-3.5 py-2.5 text-sm font-medium text-white focus:border-brand-red focus:outline-none transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-[0.72rem] font-medium uppercase tracking-wider text-slate-400 mb-1.5">
+                <label className="block text-[0.72rem] font-semibold uppercase tracking-wider text-zinc-300 mb-1.5">
                   URL Slug
                 </label>
                 <input
                   type="text"
                   value={slug}
                   onChange={(e) => setSlug(e.target.value)}
-                  className="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs font-mono text-slate-300 focus:border-brand-red focus:outline-none"
+                  className="h-11 w-full rounded-xl border border-white/10 bg-[#1A1D24] px-3.5 py-2.5 text-sm font-mono text-zinc-300 focus:border-brand-red focus:outline-none transition-colors"
                 />
               </div>
             </div>
           </div>
 
           {/* Core Writing Canvas: Title, Deck, Cover Image */}
-          <div className="rounded-2xl border border-slate-800 bg-[#131B2B] p-6 md:p-8 space-y-6 shadow-sm">
+          <div className="rounded-2xl border border-white/[0.08] bg-[#16181D] p-5 sm:p-8 space-y-6 shadow-sm">
             {/* Title Block */}
             <div>
-              <label className="block text-[0.72rem] font-medium uppercase tracking-wider text-slate-400 mb-2">
-                Story Title
+              <label className="block text-[0.72rem] font-semibold uppercase tracking-wider text-zinc-300 mb-2">
+                Story Title <span className="text-brand-red">*</span>
               </label>
               <AutoTextarea
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Enter story headline..."
-                className="font-display text-xl md:text-2xl font-normal text-white placeholder-slate-600 bg-slate-900/60 rounded-xl border border-slate-800 p-4 leading-snug focus:border-brand-red focus:outline-none"
+                className="font-display text-xl md:text-2xl font-bold text-white placeholder-zinc-500 bg-[#1A1D24] rounded-xl border border-white/10 p-4 leading-snug focus:border-brand-red focus:outline-none"
               />
             </div>
 
             {/* Deck / Summary Block */}
             <div>
-              <label className="block text-[0.72rem] font-medium uppercase tracking-wider text-slate-400 mb-2">
+              <label className="block text-[0.72rem] font-semibold uppercase tracking-wider text-zinc-300 mb-2">
                 Story Summary / Deck
               </label>
               <AutoTextarea
                 value={deck}
                 onChange={(e) => setDeck(e.target.value)}
                 placeholder="Write a clear 1-2 sentence summary of this story..."
-                className="text-sm font-normal text-slate-200 placeholder-slate-600 bg-slate-900/60 rounded-xl border border-slate-800 p-4 leading-relaxed focus:border-brand-red focus:outline-none"
+                className="text-sm font-normal text-zinc-200 placeholder-zinc-500 bg-[#1A1D24] rounded-xl border border-white/10 p-4 leading-relaxed focus:border-brand-red focus:outline-none"
               />
             </div>
 
-            {/* Cover Image Block */}
-            <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-4 space-y-3">
+            {/* Cover Image Block with validation and description */}
+            <div className={`rounded-xl border p-4 space-y-3 transition-colors ${
+              coverImageError
+                ? "border-red-500/80 bg-red-950/20"
+                : "border-white/10 bg-[#1A1D24]/60"
+            }`}>
               <ImageUploadField
                 label="Cover Photo"
                 value={coverUrl}
-                onChange={(url) => setCoverUrl(url)}
+                onChange={(url) => {
+                  setCoverUrl(url);
+                  if (url) setCoverImageError(false);
+                }}
+                description="Required to publish. Landscape format (16:9 recommended). This primary image is displayed on the homepage cards, category feeds, and article header."
+                required={true}
+                hasError={coverImageError}
               />
               <div>
-                <label className="block text-[0.68rem] font-medium uppercase tracking-wider text-slate-400 mb-1">
+                <label className="block text-[0.68rem] font-semibold uppercase tracking-wider text-zinc-400 mb-1">
                   Cover Photo Caption &amp; Credit
                 </label>
                 <input
                   type="text"
                   value={coverCaption}
                   onChange={(e) => setCoverCaption(e.target.value)}
-                  placeholder="e.g. Photo credit or scene description..."
-                  className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-white focus:border-brand-red focus:outline-none"
+                  placeholder="e.g. Presidential council in session, Abuja. State House Photo."
+                  className="h-10 w-full rounded-lg border border-white/10 bg-[#141519] px-3 py-1.5 text-xs text-white focus:border-brand-red focus:outline-none"
                 />
               </div>
             </div>
 
-            {/* Flowing Content Blocks */}
-            <div className="border-t border-slate-800/80 pt-6 space-y-6">
-              <span className="block text-[0.72rem] font-medium uppercase tracking-wider text-slate-400">
-                Article Body Content ({blocks.length} blocks)
+            {/* Quick Sources Indicator */}
+            <div className="flex items-center justify-between rounded-xl border border-white/[0.08] bg-[#1A1D24]/40 p-3.5 text-xs text-zinc-400">
+              <span className="flex items-center gap-2">
+                <span>📎</span>
+                <span><strong>{sources.length} Verified Sources</strong> attached to this story.</span>
               </span>
+              <button
+                type="button"
+                onClick={() => setActiveTab("sources")}
+                className="font-medium text-brand-red hover:underline"
+              >
+                Manage Sources →
+              </button>
+            </div>
 
-              {blocks.map((block, idx) => {
-                if (block.type === "paragraph") {
-                  return (
-                    <div
-                      key={idx}
-                      className="group relative rounded-xl border border-slate-800 bg-slate-900/60 p-4 space-y-2 hover:border-slate-700 transition-colors"
+            {/* Flowing Story Blocks */}
+            <div className="space-y-4 pt-2">
+              <label className="block text-[0.72rem] font-semibold uppercase tracking-wider text-zinc-300">
+                Story Content Blocks
+              </label>
+
+              {blocks.map((block, index) => (
+                <div
+                  key={index}
+                  className="relative group rounded-xl border border-white/10 bg-[#1A1D24] p-4 transition-all hover:border-white/20"
+                >
+                  <div className="flex items-center justify-between pb-3 border-b border-white/[0.06] mb-3">
+                    <span className="text-[0.68rem] font-mono font-semibold uppercase tracking-wider text-brand-red">
+                      {block.type === "paragraph" && `Paragraph ${index + 1}`}
+                      {block.type === "heading" && "Section Heading"}
+                      {block.type === "quote" && "Pull Quote / Statement"}
+                      {block.type === "image" && "Inline Story Photo"}
+                      {block.type === "internal_link" && "Story Link Card"}
+                      {block.type === "link" && "Story Link Card"}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => removeBlock(index)}
+                      className="text-xs text-zinc-500 hover:text-red-400 transition-colors"
                     >
-                      <div className="flex items-center justify-between">
-                        <span className="text-[0.68rem] font-medium uppercase tracking-wider text-slate-400">
-                          Paragraph #{idx + 1}
-                        </span>
-                        <div className="flex items-center gap-3">
-                          <label className="flex items-center gap-1.5 text-xs text-slate-400 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={block.isDropCap || false}
-                              onChange={(e) =>
-                                updateBlock(idx, { ...block, isDropCap: e.target.checked })
-                              }
-                              className="rounded border-slate-700 bg-slate-800 text-brand-red"
-                            />
-                            Drop-cap letter
-                          </label>
-                          <button
-                            type="button"
-                            onClick={() => removeBlock(idx)}
-                            className="text-xs text-slate-500 hover:text-red-400 transition-colors"
-                          >
-                            ✕ Remove
-                          </button>
-                        </div>
-                      </div>
+                      Delete Block
+                    </button>
+                  </div>
+
+                  {/* Paragraph Block */}
+                  {block.type === "paragraph" && (
+                    <div className="space-y-2">
                       <AutoTextarea
-                        value={block.text}
-                        onChange={(e) => updateBlock(idx, { ...block, text: e.target.value })}
-                        placeholder="Write paragraph content..."
-                        className="text-sm font-normal text-slate-100 placeholder-slate-600 bg-transparent leading-relaxed focus:outline-none"
+                        value={block.text || ""}
+                        onChange={(e) => updateBlock(index, { ...block, text: e.target.value })}
+                        placeholder="Write paragraph text..."
+                        className="text-base text-zinc-100 placeholder-zinc-500 bg-transparent leading-relaxed focus:outline-none"
                       />
-                    </div>
-                  );
-                }
-
-                if (block.type === "image") {
-                  return (
-                    <div
-                      key={idx}
-                      className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 space-y-3"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-[0.68rem] font-medium uppercase tracking-wider text-slate-400">
-                          Story Photo #{idx + 1}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => removeBlock(idx)}
-                          className="text-xs text-slate-500 hover:text-red-400 transition-colors"
-                        >
-                          ✕ Remove
-                        </button>
-                      </div>
-
-                      <ImageUploadField
-                        value={block.src}
-                        onChange={(url) => updateBlock(idx, { ...block, src: url })}
-                        label=""
-                      />
-
-                      <div className="grid gap-3 sm:grid-cols-2">
+                      <label className="flex items-center gap-2 pt-2 text-xs text-zinc-400 cursor-pointer">
                         <input
-                          type="text"
-                          value={block.caption || ""}
-                          onChange={(e) =>
-                            updateBlock(idx, { ...block, caption: e.target.value })
-                          }
-                          placeholder="Photo caption..."
-                          className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-white focus:border-brand-red focus:outline-none"
+                          type="checkbox"
+                          checked={Boolean(block.isDropCap)}
+                          onChange={(e) => updateBlock(index, { ...block, isDropCap: e.target.checked })}
+                          className="rounded border-zinc-700 bg-zinc-900 text-brand-red focus:ring-0"
                         />
-                        <input
-                          type="text"
-                          value={block.credit || ""}
-                          onChange={(e) =>
-                            updateBlock(idx, { ...block, credit: e.target.value })
-                          }
-                          placeholder="Photo credit / source..."
-                          className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-white focus:border-brand-red focus:outline-none"
-                        />
-                      </div>
+                        Use large lead drop cap
+                      </label>
                     </div>
-                  );
-                }
+                  )}
 
-                if (block.type === "quote") {
-                  return (
-                    <div
-                      key={idx}
-                      className="rounded-xl border-l-4 border-l-brand-red border border-slate-800 bg-slate-900/60 p-4 space-y-3"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-[0.68rem] font-medium uppercase tracking-wider text-slate-400">
-                          Quote Block #{idx + 1}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => removeBlock(idx)}
-                          className="text-xs text-slate-500 hover:text-red-400 transition-colors"
-                        >
-                          ✕ Remove
-                        </button>
-                      </div>
+                  {/* Section Heading Block */}
+                  {block.type === "heading" && (
+                    <AutoTextarea
+                      value={block.text || ""}
+                      onChange={(e) => updateBlock(index, { ...block, text: e.target.value })}
+                      placeholder="Enter section subheading..."
+                      className="font-display text-lg font-bold text-white placeholder-zinc-500 bg-transparent focus:outline-none"
+                    />
+                  )}
+
+                  {/* Quote Block */}
+                  {block.type === "quote" && (
+                    <div className="space-y-3">
                       <AutoTextarea
-                        value={block.quote}
-                        onChange={(e) => updateBlock(idx, { ...block, quote: e.target.value })}
-                        placeholder="Quotation text..."
-                        className="font-display italic text-base text-white placeholder-slate-600 bg-transparent leading-relaxed focus:outline-none"
+                        value={block.quote || ""}
+                        onChange={(e) => updateBlock(index, { ...block, quote: e.target.value })}
+                        placeholder="Enter direct quote or statement..."
+                        className="font-display text-lg italic text-zinc-100 placeholder-zinc-500 bg-transparent leading-snug focus:outline-none border-l-2 border-brand-red pl-4"
                       />
-                      <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="grid gap-3 sm:grid-cols-2 pt-2">
                         <input
                           type="text"
                           value={block.author || ""}
-                          onChange={(e) =>
-                            updateBlock(idx, { ...block, author: e.target.value })
-                          }
-                          placeholder="Speaker or Author name"
-                          className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-white focus:border-brand-red focus:outline-none"
+                          onChange={(e) => updateBlock(index, { ...block, author: e.target.value })}
+                          placeholder="Speaker name"
+                          className="h-10 rounded-lg border border-white/10 bg-[#141519] px-3 text-xs text-white focus:border-brand-red focus:outline-none"
                         />
                         <input
                           type="text"
                           value={block.context || ""}
-                          onChange={(e) =>
-                            updateBlock(idx, { ...block, context: e.target.value })
-                          }
-                          placeholder="Institution or context"
-                          className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-white focus:border-brand-red focus:outline-none"
+                          onChange={(e) => updateBlock(index, { ...block, context: e.target.value })}
+                          placeholder="Official title or institution"
+                          className="h-10 rounded-lg border border-white/10 bg-[#141519] px-3 text-xs text-white focus:border-brand-red focus:outline-none"
                         />
                       </div>
                     </div>
-                  );
-                }
+                  )}
 
-                if (block.type === "internal_link" || block.type === "external_link") {
-                  const urlValue =
-                    block.type === "internal_link" ? block.slug : block.url;
-                  const isInternal = isInternalUrl(urlValue);
-
-                  return (
-                    <div
-                      key={idx}
-                      className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 space-y-3"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="text-[0.68rem] font-medium uppercase tracking-wider text-slate-400">
-                            Link #{idx + 1}
-                          </span>
-                          {isInternal ? (
-                            <span className="rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 text-[0.65rem] font-medium text-emerald-400">
-                              Internal Story Link
-                            </span>
-                          ) : (
-                            <span className="rounded-full bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 text-[0.65rem] font-medium text-blue-400">
-                              External Web Source
-                            </span>
-                          )}
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => removeBlock(idx)}
-                          className="text-xs text-slate-500 hover:text-red-400 transition-colors"
-                        >
-                          ✕ Remove
-                        </button>
-                      </div>
-
-                      <div className="space-y-3">
-                        <div>
-                          <label className="block text-[0.68rem] text-slate-400 mb-1">
-                            Link URL (e.g. /article/slug or https://source.com)
-                          </label>
-                          <input
-                            type="text"
-                            value={urlValue}
-                            onChange={(e) => {
-                              const newUrl = e.target.value;
-                              if (isInternalUrl(newUrl)) {
-                                updateBlock(idx, {
-                                  type: "internal_link",
-                                  title: block.title || "Related Story Headline",
-                                  slug: newUrl.replace(/^\/article\//, "").replace(/^\//, ""),
-                                  category: "Related",
-                                  deck: "deck" in block ? block.deck : "",
-                                });
-                              } else {
-                                updateBlock(idx, {
-                                  type: "external_link",
-                                  title: block.title || "External Source Article",
-                                  url: newUrl,
-                                  publisher: "Official Source",
-                                  verified: true,
-                                });
-                              }
-                            }}
-                            placeholder="Enter URL..."
-                            className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs font-mono text-white focus:border-brand-red focus:outline-none"
-                          />
-                        </div>
-
-                        <div className="grid gap-3 sm:grid-cols-2">
-                          <input
-                            type="text"
-                            value={block.title}
-                            onChange={(e) =>
-                              updateBlock(idx, { ...block, title: e.target.value })
-                            }
-                            placeholder="Display Headline / Title"
-                            className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-white focus:border-brand-red focus:outline-none"
-                          />
-                          {block.type === "internal_link" ? (
-                            <input
-                              type="text"
-                              value={block.category}
-                              onChange={(e) =>
-                                updateBlock(idx, { ...block, category: e.target.value })
-                              }
-                              placeholder="Category Tag"
-                              className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-white focus:border-brand-red focus:outline-none"
-                            />
-                          ) : (
-                            <input
-                              type="text"
-                              value={block.publisher}
-                              onChange={(e) =>
-                                updateBlock(idx, { ...block, publisher: e.target.value })
-                              }
-                              placeholder="Publisher Name"
-                              className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-white focus:border-brand-red focus:outline-none"
-                            />
-                          )}
-                        </div>
+                  {/* Inline Image Block */}
+                  {block.type === "image" && (
+                    <div className="space-y-3">
+                      <ImageUploadField
+                        label="Inline Photo"
+                        value={block.src || ""}
+                        onChange={(url) => updateBlock(index, { ...block, src: url })}
+                        description="Supporting photograph placed between paragraphs. Clear photo of subject, facility, or document."
+                      />
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <input
+                          type="text"
+                          value={block.caption || ""}
+                          onChange={(e) => updateBlock(index, { ...block, caption: e.target.value })}
+                          placeholder="Photo caption..."
+                          className="h-10 rounded-lg border border-white/10 bg-[#141519] px-3 text-xs text-white focus:border-brand-red focus:outline-none"
+                        />
+                        <input
+                          type="text"
+                          value={block.credit || ""}
+                          onChange={(e) => updateBlock(index, { ...block, credit: e.target.value })}
+                          placeholder="Photo credit..."
+                          className="h-10 rounded-lg border border-white/10 bg-[#141519] px-3 text-xs text-white focus:border-brand-red focus:outline-none"
+                        />
                       </div>
                     </div>
-                  );
-                }
+                  )}
 
-                return null;
-              })}
-            </div>
+                  {/* Story Link Card */}
+                  {(block.type === "internal_link" || block.type === "link") && (
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-zinc-400">
+                          {isInternalUrl(block.url || block.slug || "") ? "✓ Internal Story Card" : "↗ External Reference Card"}
+                        </span>
+                      </div>
+                      <input
+                        type="text"
+                        value={block.title || ""}
+                        onChange={(e) => updateBlock(index, { ...block, title: e.target.value })}
+                        placeholder="Card title..."
+                        className="h-10 w-full rounded-lg border border-white/10 bg-[#141519] px-3 text-xs font-semibold text-white focus:border-brand-red focus:outline-none"
+                      />
+                      <input
+                        type="text"
+                        value={block.url || block.slug || ""}
+                        onChange={(e) => updateBlock(index, { ...block, url: e.target.value, slug: e.target.value })}
+                        placeholder="URL or /article/slug..."
+                        className="h-10 w-full rounded-lg border border-white/10 bg-[#141519] px-3 text-xs font-mono text-zinc-300 focus:border-brand-red focus:outline-none"
+                      />
+                      <input
+                        type="text"
+                        value={block.deck || ""}
+                        onChange={(e) => updateBlock(index, { ...block, deck: e.target.value })}
+                        placeholder="Brief 1-sentence reason why the reader should view this..."
+                        className="h-10 w-full rounded-lg border border-white/10 bg-[#141519] px-3 text-xs text-zinc-300 focus:border-brand-red focus:outline-none"
+                      />
+                    </div>
+                  )}
+                </div>
+              ))}
 
-            {/* Progressive block insertion toolbar */}
-            <div className="pt-4 border-t border-slate-800 flex flex-wrap items-center gap-3">
-              <span className="text-xs font-medium text-slate-400">Add content:</span>
-              <button
-                type="button"
-                onClick={addParagraph}
-                className="rounded-lg border border-slate-700 bg-slate-800 px-3.5 py-1.5 text-xs font-medium text-white hover:bg-slate-700 hover:border-slate-600 transition-colors"
-              >
-                + New paragraph
-              </button>
-              <button
-                type="button"
-                onClick={addImage}
-                className="rounded-lg border border-slate-700 bg-slate-800 px-3.5 py-1.5 text-xs font-medium text-white hover:bg-slate-700 hover:border-slate-600 transition-colors"
-              >
-                + Add image
-              </button>
-              <button
-                type="button"
-                onClick={addQuote}
-                className="rounded-lg border border-slate-700 bg-slate-800 px-3.5 py-1.5 text-xs font-medium text-white hover:bg-slate-700 hover:border-slate-600 transition-colors"
-              >
-                + Add quote
-              </button>
-              <button
-                type="button"
-                onClick={addLink}
-                className="rounded-lg border border-slate-700 bg-slate-800 px-3.5 py-1.5 text-xs font-medium text-white hover:bg-slate-700 hover:border-slate-600 transition-colors"
-              >
-                + Add link
-              </button>
+              {/* Action Buttons to Add Blocks */}
+              <div className="flex flex-wrap items-center gap-2.5 pt-4 border-t border-white/[0.08]">
+                <button
+                  type="button"
+                  onClick={addParagraph}
+                  className="rounded-lg border border-white/15 bg-[#1A1D24] px-3.5 py-2 text-xs font-medium text-white hover:bg-zinc-800 transition-colors"
+                >
+                  + New paragraph
+                </button>
+                <button
+                  type="button"
+                  onClick={addImage}
+                  className="rounded-lg border border-white/15 bg-[#1A1D24] px-3.5 py-2 text-xs font-medium text-white hover:bg-zinc-800 transition-colors"
+                >
+                  + Add image
+                </button>
+                <button
+                  type="button"
+                  onClick={addQuote}
+                  className="rounded-lg border border-white/15 bg-[#1A1D24] px-3.5 py-2 text-xs font-medium text-white hover:bg-zinc-800 transition-colors"
+                >
+                  + Add quote
+                </button>
+                <button
+                  type="button"
+                  onClick={addLink}
+                  className="rounded-lg border border-white/15 bg-[#1A1D24] px-3.5 py-2 text-xs font-medium text-white hover:bg-zinc-800 transition-colors"
+                >
+                  + Add link
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -716,126 +746,117 @@ ${blocks.map((b) => {
 
       {/* TAB 2: Social Media Channels */}
       {activeTab === "social" && (
-        <div className="rounded-2xl border border-slate-800 bg-[#131B2B] p-6 space-y-6 shadow-sm">
+        <div className="rounded-2xl border border-white/[0.08] bg-[#16181D] p-5 sm:p-6 space-y-6 shadow-sm">
           <div>
-            <h2 className="font-display text-xl font-normal text-white">
+            <h2 className="font-display text-xl font-bold text-white">
               Social Media Channels
             </h2>
-            <p className="mt-0.5 text-xs text-slate-400">
-              Customize text for social platforms and email newsletter before broadcasting.
+            <p className="mt-0.5 text-xs text-zinc-400">
+              Draft channel-specific versions of this story for your social platforms and subscriber newsletter.
             </p>
           </div>
 
-          <div className="flex gap-2 border-b border-slate-800 pb-3">
-            {(
-              [
-                { id: "x", label: "X (Twitter)" },
-                { id: "facebook", label: "Facebook" },
-                { id: "linkedin", label: "LinkedIn" },
-                { id: "newsletter", label: "Email Newsletter" },
-              ] as const
-            ).map((ch) => (
+          <div className="flex flex-wrap items-center gap-2 border-b border-white/[0.08] pb-3">
+            {[
+              { id: "x", label: "X / Twitter" },
+              { id: "facebook", label: "Facebook" },
+              { id: "linkedin", label: "LinkedIn" },
+              { id: "newsletter", label: "Newsletter" },
+            ].map((tab) => (
               <button
-                key={ch.id}
+                key={tab.id}
                 type="button"
-                onClick={() => setSocialTab(ch.id)}
-                className={`rounded-lg px-3.5 py-1.5 text-xs font-medium transition-colors ${
-                  socialTab === ch.id
-                    ? "bg-brand-red text-white"
-                    : "bg-slate-800 text-slate-300 hover:bg-slate-700"
+                onClick={() => setSocialTab(tab.id as typeof socialTab)}
+                className={`rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-colors ${
+                  socialTab === tab.id
+                    ? "bg-zinc-800 text-white border border-white/20"
+                    : "text-zinc-400 hover:text-white"
                 }`}
               >
-                {ch.label}
+                {tab.label}
               </button>
             ))}
           </div>
 
           {socialTab === "x" && (
             <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-medium uppercase tracking-wider text-slate-400">
-                  X (Twitter) Post Copy
-                </label>
-                <span
-                  className={`font-mono text-xs ${
-                    xPost.length > 280 ? "text-red-400 font-bold" : "text-slate-400"
-                  }`}
-                >
-                  {xPost.length} / 280 characters
-                </span>
-              </div>
+              <label className="text-xs font-semibold uppercase tracking-wider text-zinc-300">
+                X / Twitter Post Copy
+              </label>
               <AutoTextarea
                 value={xPost}
                 onChange={(e) => setXPost(e.target.value)}
-                placeholder="Write concise 280-character post for X..."
-                className="text-sm font-normal text-white bg-slate-900 border border-slate-700 rounded-xl p-4 focus:border-brand-red focus:outline-none"
+                placeholder="Write concise post for X with key facts and source link..."
+                className="text-sm font-normal text-white bg-[#1A1D24] border border-white/10 rounded-xl p-4 focus:border-brand-red focus:outline-none"
               />
             </div>
           )}
 
           {socialTab === "facebook" && (
             <div className="space-y-3">
-              <label className="text-xs font-medium uppercase tracking-wider text-slate-400">
+              <label className="text-xs font-semibold uppercase tracking-wider text-zinc-300">
                 Facebook Post Copy
               </label>
               <AutoTextarea
                 value={fbPost}
                 onChange={(e) => setFbPost(e.target.value)}
-                placeholder="Write engaging story post with hook for Facebook readers..."
-                className="text-sm font-normal text-white bg-slate-900 border border-slate-700 rounded-xl p-4 focus:border-brand-red focus:outline-none"
+                placeholder="Write engaging Facebook post with context and headline..."
+                className="text-sm font-normal text-white bg-[#1A1D24] border border-white/10 rounded-xl p-4 focus:border-brand-red focus:outline-none"
               />
             </div>
           )}
 
           {socialTab === "linkedin" && (
             <div className="space-y-3">
-              <label className="text-xs font-medium uppercase tracking-wider text-slate-400">
+              <label className="text-xs font-semibold uppercase tracking-wider text-zinc-300">
                 LinkedIn Post Copy
               </label>
               <AutoTextarea
                 value={liPost}
                 onChange={(e) => setLiPost(e.target.value)}
                 placeholder="Write institutional, business or policy angle for LinkedIn..."
-                className="text-sm font-normal text-white bg-slate-900 border border-slate-700 rounded-xl p-4 focus:border-brand-red focus:outline-none"
+                className="text-sm font-normal text-white bg-[#1A1D24] border border-white/10 rounded-xl p-4 focus:border-brand-red focus:outline-none"
               />
             </div>
           )}
 
           {socialTab === "newsletter" && (
             <div className="space-y-3">
-              <label className="text-xs font-medium uppercase tracking-wider text-slate-400">
+              <label className="text-xs font-semibold uppercase tracking-wider text-zinc-300">
                 Email Newsletter Summary
               </label>
               <AutoTextarea
                 value={nlPost}
                 onChange={(e) => setNlPost(e.target.value)}
                 placeholder="Write curated editorial summary for the subscriber newsletter..."
-                className="text-sm font-normal text-white bg-slate-900 border border-slate-700 rounded-xl p-4 focus:border-brand-red focus:outline-none"
+                className="text-sm font-normal text-white bg-[#1A1D24] border border-white/10 rounded-xl p-4 focus:border-brand-red focus:outline-none"
               />
             </div>
           )}
         </div>
       )}
 
-      {/* TAB 3: Sources & Citations */}
+      {/* TAB 3: Dynamic Sources & Citations with AI Context Export */}
       {activeTab === "sources" && (
         <div className="space-y-6">
           {/* AI Workflow Card */}
-          <div className="rounded-2xl border border-purple-500/30 bg-purple-950/20 p-6 space-y-4 shadow-sm">
+          <div className="rounded-2xl border border-purple-500/30 bg-purple-950/20 p-5 sm:p-6 space-y-4 shadow-sm">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <span className="label font-medium text-purple-400">AI EDITORIAL COLLABORATION</span>
-                <h3 className="font-display text-lg font-normal text-white mt-1">
-                  Export Editorial Brief &amp; Context for External AI
+                <span className="label text-[0.62rem] font-semibold text-purple-400 uppercase tracking-wider">
+                  AI EDITORIAL COLLABORATION
+                </span>
+                <h3 className="font-display text-lg font-bold text-white mt-1">
+                  Export Editorial Context for AI Review
                 </h3>
-                <p className="text-xs text-slate-300 mt-1 max-w-2xl">
-                  Copy this story&apos;s full brief (headline, deck, attached sources, verified claims, body text, and social drafts) to paste directly into ChatGPT, Claude, or Gemini to fact-check, refine phrasing, and ensure local accuracy.
+                <p className="text-xs text-zinc-300 mt-1 max-w-2xl leading-relaxed">
+                  Copy this story&apos;s full brief (headline, deck, verified sources, body text, and social drafts) into your clipboard to paste into ChatGPT, Claude, or Gemini to fact-check, refine phrasing, and spot errors.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={handleCopyAIContext}
-                className="inline-flex items-center gap-2 rounded-xl bg-purple-600 px-5 py-2.5 text-xs font-medium text-white shadow hover:bg-purple-500 transition-colors shrink-0"
+                className="inline-flex items-center gap-2 rounded-xl bg-purple-600 px-5 py-2.5 text-xs font-semibold text-white shadow hover:bg-purple-500 transition-colors shrink-0"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
@@ -846,14 +867,14 @@ ${blocks.map((b) => {
           </div>
 
           {/* Primary Sources & Fact Citations */}
-          <div className="rounded-2xl border border-slate-800 bg-[#131B2B] p-6 space-y-4 shadow-sm">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+          <div className="rounded-2xl border border-white/[0.08] bg-[#16181D] p-5 sm:p-6 space-y-4 shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-white/[0.08] pb-4 gap-3">
               <div>
-                <h2 className="font-display text-xl font-normal text-white">
+                <h2 className="font-display text-xl font-bold text-white">
                   Primary Sources &amp; Citations
                 </h2>
-                <p className="mt-0.5 text-xs text-slate-400">
-                  Every claim must be traceable to official gazettes, ministerial releases, or verified data.
+                <p className="mt-0.5 text-xs text-zinc-400">
+                  Every claim must be traceable to official gazettes, ministerial releases, or verified public records.
                 </p>
               </div>
               <button
@@ -868,7 +889,7 @@ ${blocks.map((b) => {
                     },
                   ])
                 }
-                className="rounded-lg border border-slate-700 bg-slate-800 px-3.5 py-1.5 text-xs font-medium text-slate-200 hover:bg-slate-700 hover:text-white transition-colors"
+                className="rounded-lg bg-zinc-800 hover:bg-zinc-700 px-3.5 py-1.5 text-xs font-semibold text-white transition-colors self-start sm:self-auto"
               >
                 + Add Source Link
               </button>
@@ -878,23 +899,23 @@ ${blocks.map((b) => {
               {sources.map((s, idx) => (
                 <div
                   key={idx}
-                  className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 space-y-3"
+                  className="rounded-xl border border-white/10 bg-[#1A1D24] p-4 space-y-3"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-brand-red">
+                    <span className="text-xs font-semibold text-brand-red">
                       Source #{idx + 1}
                     </span>
                     <button
                       type="button"
                       onClick={() => setSources((prev) => prev.filter((_, i) => i !== idx))}
-                      className="text-xs text-slate-500 hover:text-red-400 transition-colors"
+                      className="text-xs text-zinc-500 hover:text-red-400 transition-colors"
                     >
                       Remove
                     </button>
                   </div>
                   <div className="grid gap-3 sm:grid-cols-2">
                     <div>
-                      <label className="block text-[0.68rem] uppercase tracking-wider text-slate-400 mb-1">
+                      <label className="block text-[0.68rem] font-semibold uppercase tracking-wider text-zinc-400 mb-1">
                         Publisher / Institution
                       </label>
                       <input
@@ -906,12 +927,12 @@ ${blocks.map((b) => {
                             prev.map((item, i) => (i === idx ? { ...item, publisher: val } : item))
                           );
                         }}
-                        className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-xs text-white focus:border-brand-red focus:outline-none"
+                        className="h-10 w-full rounded-lg border border-white/10 bg-[#141519] px-3 text-xs text-white focus:border-brand-red focus:outline-none"
                         placeholder="e.g. State House Official Gazette"
                       />
                     </div>
                     <div>
-                      <label className="block text-[0.68rem] uppercase tracking-wider text-slate-400 mb-1">
+                      <label className="block text-[0.68rem] font-semibold uppercase tracking-wider text-zinc-400 mb-1">
                         Source URL
                       </label>
                       <input
@@ -923,13 +944,13 @@ ${blocks.map((b) => {
                             prev.map((item, i) => (i === idx ? { ...item, url: val } : item))
                           );
                         }}
-                        className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-xs text-white focus:border-brand-red focus:outline-none"
+                        className="h-10 w-full rounded-lg border border-white/10 bg-[#141519] px-3 text-xs text-white focus:border-brand-red focus:outline-none"
                         placeholder="https://..."
                       />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-[0.68rem] uppercase tracking-wider text-slate-400 mb-1">
+                    <label className="block text-[0.68rem] font-semibold uppercase tracking-wider text-zinc-400 mb-1">
                       Verified Fact / Claim Summary
                     </label>
                     <input
@@ -941,7 +962,7 @@ ${blocks.map((b) => {
                           prev.map((item, i) => (i === idx ? { ...item, claimSummary: val } : item))
                         );
                       }}
-                      className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-xs text-white focus:border-brand-red focus:outline-none"
+                      className="h-10 w-full rounded-lg border border-white/10 bg-[#141519] px-3 text-xs text-white focus:border-brand-red focus:outline-none"
                       placeholder="e.g. Official confirmation of tariff stabilization starting November 1"
                     />
                   </div>

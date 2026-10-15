@@ -31,7 +31,7 @@ export default function FigureCard({
             </span>
             <span className="text-[0.68rem] font-medium text-ink-soft">· {readTime}</span>
           </div>
-          <span className="mt-1 block font-display text-[1.08rem] md:text-[1.18rem] font-normal leading-snug tracking-[-0.01em] text-ink transition-colors duration-300 group-hover:italic group-hover:text-brand-red">
+          <span className="mt-1 block font-display text-[1.08rem] md:text-[1.18rem] font-semibold leading-snug tracking-[-0.01em] text-ink transition-colors duration-200 group-hover:text-brand-red">
             {name}
           </span>
         </div>
