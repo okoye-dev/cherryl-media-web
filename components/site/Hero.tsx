@@ -12,12 +12,12 @@ export default async function Hero() {
   return (
     <section className="mx-auto w-full max-w-[90rem] px-5 pt-8 md:px-10 md:pt-12 xl:px-16">
       <div className="flex flex-col justify-between gap-4 border-b border-ink/10 pb-6 md:flex-row md:items-end">
-        <div className="max-w-5xl">
+        <div className="max-w-3xl">
           <p className="label-red intro font-semibold">
             CHERRYL MEDIA · DAILY EDITION
           </p>
           <h1
-            className="intro mt-4 max-w-[22ch] text-[clamp(3.2rem,6.8vw,6.2rem)] font-bold leading-[0.94] tracking-[-0.035em] text-ink"
+            className="intro mt-3 text-[clamp(2.35rem,4.4vw,3.8rem)] font-bold leading-[1.03] tracking-[-0.025em] text-ink"
             style={{ animationDelay: "100ms" }}
           >
             <span className="font-sans font-bold">Independent </span>
