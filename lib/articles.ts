@@ -8,8 +8,8 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [
     "title": "Federal Executive Council Confirms Unified National Clean Energy Transition Accord",
     "kicker": "POLICY DEVELOPMENT · GOVERNANCE",
     "deck": "Confirmed policy shifts introduce immediate tariff restructuring, regional mini-grid guarantees, and multi-state transmission oversight protocols.",
-    "category": "nigerian-current-affairs",
-    "categoryName": "Current Affairs",
+    "category": "state-affairs-environs",
+    "categoryName": "State Affairs & Environs",
     "author": {
       "name": "Tunde Oladipo",
       "role": "Senior Policy Correspondent"
@@ -70,7 +70,7 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [
         "type": "internal_link",
         "title": "NERC Releases Reclassified State Feeder Bands and Consumer Metering Schedule",
         "slug": "nigeria-electricity-regulatory-commission-updates-feeder-bands",
-        "category": "Practical Updates",
+        "category": "newsbeat",
         "deck": "Official public-service advisory detailing guaranteed supply hours, revised band thresholds, and direct customer dispute mechanisms.",
         "readTime": "3min"
       },
@@ -114,8 +114,8 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [
     "title": "NERC Releases Reclassified State Feeder Bands and Consumer Metering Schedule",
     "kicker": "CONSUMER ADVISORY · PUBLIC SERVICE",
     "deck": "Official public-service advisory detailing guaranteed supply hours, revised band thresholds, and direct customer dispute mechanisms.",
-    "category": "practical-nigerian-updates",
-    "categoryName": "Practical Updates",
+    "category": "newsbeat",
+    "categoryName": "Newsbeat",
     "author": {
       "name": "Bisi Alabi",
       "role": "Public Service \u0026 Utility Reporter"
@@ -176,8 +176,8 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [
     "title": "The Nollywood Studio Architecture: From Direct-to-Video Roots to Global Distribution Dominance",
     "kicker": "WEEKEND DOSSIER · CULTURE",
     "deck": "How independent Nigerian showrunners, cinematographers, and production executives bypassed legacy syndication bottlenecks to build sovereign intellectual property empires.",
-    "category": "entertainment-internet-culture",
-    "categoryName": "Entertainment \u0026 Internet Culture",
+    "category": "entertainment-lifestyle",
+    "categoryName": "Entertainment & Lifestyle",
     "author": {
       "name": "Funke Balogun",
       "role": "Culture Bureau Chief"
@@ -243,8 +243,8 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [
     "title": "CBN Finalizes Real-Time Cross-Border Settlement Framework with Regional Central Banks",
     "kicker": "FINANCIAL SYSTEM · MARKETS",
     "deck": "Central Bank of Nigeria collaborates with West African Monetary Agency to enable direct local-currency wholesale clearing across eight national jurisdictions.",
-    "category": "business-institutions",
-    "categoryName": "Business \u0026 Institutions",
+    "category": "brands-smes",
+    "categoryName": "Brands & SMEs",
     "author": {
       "name": "Chukwudi Nwosu",
       "role": "Capital Markets Analyst"
@@ -297,8 +297,8 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [
     "title": "Conversations on Third Mainland Bridge at Dusk: Reflections on Modern Longing in Lagos",
     "kicker": "STORIES \u0026 ROMANCE · ESSAYS",
     "deck": "Between the humid salt air of the lagoon and taillights stretching toward Oworonshoki, two travelers dissect what it means to stay tethered to someone across twenty million people.",
-    "category": "stories-romance",
-    "categoryName": "Stories \u0026 Romance",
+    "category": "opinions",
+    "categoryName": "Opinions",
     "author": {
       "name": "Amara Okonkwo",
       "role": "Special Features Columnist"
@@ -350,8 +350,8 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [
     "title": "Federal Ministry of Transport Directs Regional Rail Link Feasibility Review",
     "kicker": "PUBLIC SERVICE · INFRASTRUCTURE",
     "deck": "Technical directives mandate passenger coach telemetry and unified regional corridor signaling systems across southern and middle-belt transit networks.",
-    "category": "nigerian-current-affairs",
-    "categoryName": "Current Affairs",
+    "category": "state-affairs-environs",
+    "categoryName": "State Affairs & Environs",
     "author": {
       "name": "Tunde Oladipo",
       "role": "Senior Policy Correspondent"
@@ -403,8 +403,8 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [
     "title": "DisCos Issue Consumer Advisory on Prepaid Smart Meter Firmware Upgrades",
     "kicker": "PRACTICAL ADVISORY",
     "deck": "Ten million prepaid meters to receive automatic over-the-air firmware upgrades; distribution utilities publish schedule by state and ward.",
-    "category": "practical-nigerian-updates",
-    "categoryName": "Practical Updates",
+    "category": "newsbeat",
+    "categoryName": "Newsbeat",
     "author": {
       "name": "Bisi Alabi",
       "role": "Public Service \u0026 Utility Reporter"
@@ -455,8 +455,8 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [
     "title": "Commercial Lenders Expand Sovereign Local-Currency Trade Facilities",
     "kicker": "CAPITAL MARKETS",
     "deck": "Commercial banking syndicate structures N500bn trade financing liquidity pool for manufacturing exporters and agro-allied processors.",
-    "category": "business-institutions",
-    "categoryName": "Business \u0026 Institutions",
+    "category": "brands-smes",
+    "categoryName": "Brands & SMEs",
     "author": {
       "name": "Chukwudi Nwosu",
       "role": "Capital Markets Analyst"
@@ -508,8 +508,8 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [
     "title": "Letters on Awolowo Road: The Intimacy of Modern Distance in Ikoyi",
     "kicker": "STORIES \u0026 ROMANCE",
     "deck": "An evocative personal reflection on courtship, late-night dinners, and navigating emotional distance in Lagos.",
-    "category": "stories-romance",
-    "categoryName": "Stories \u0026 Romance",
+    "category": "opinions",
+    "categoryName": "Opinions",
     "author": {
       "name": "Amara Okonkwo",
       "role": "Special Features Columnist"
@@ -561,8 +561,8 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [
     "title": "Inside the Lagos Underground: The Sound Architects Engineering Polyphonic Afro-Fusion",
     "kicker": "SOUNDSCAPES \u0026 ACOUSTICS",
     "deck": "A technical exploration into the rhythmic syncopations and modular synthesizers defining new West African acoustics.",
-    "category": "entertainment-internet-culture",
-    "categoryName": "Entertainment \u0026 Internet Culture",
+    "category": "entertainment-lifestyle",
+    "categoryName": "Entertainment & Lifestyle",
     "author": {
       "name": "Funke Balogun",
       "role": "Culture Bureau Chief"
@@ -613,8 +613,8 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [
     "title": "Fermentation, Coastal Smoke \u0026 Heritage: The Contemporary Revival of Indigenous Grains",
     "kicker": "GASTRONOMY \u0026 BOTANY",
     "deck": "Culinary anthropologists and contemporary chefs recharting regional biodiversity across coastal markets and ancestral fermentation pits.",
-    "category": "entertainment-internet-culture",
-    "categoryName": "Entertainment \u0026 Internet Culture",
+    "category": "tour-hotels",
+    "categoryName": "Tour & Hotels",
     "author": {
       "name": "Funke Balogun",
       "role": "Culture Bureau Chief"
@@ -666,8 +666,8 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [
     "title": "Art X Lagos Finalizes 2026 Pavilions with 42 International Galleries",
     "kicker": "VISUAL ARTS · EXHIBITIONS",
     "deck": "West Africa's premier international art fair expands institutional programming, featuring pioneering digital sculpture and textile preservation pavilions.",
-    "category": "entertainment-internet-culture",
-    "categoryName": "Entertainment \u0026 Internet Culture",
+    "category": "entertainment-lifestyle",
+    "categoryName": "Entertainment & Lifestyle",
     "author": {
       "name": "Funke Balogun",
       "role": "Culture Bureau Chief"
@@ -718,8 +718,8 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [
     "title": "Preserving Highlife Wax: The Vinyl Restorers Digitizing Vintage Accra Sessions",
     "kicker": "ARCHIVES \u0026 SOUND PRESERVATION",
     "deck": "Sound archivists and audio restorers rescue irreplaceable 1960s master acetates and wax pressings from tropical heat and degradation.",
-    "category": "entertainment-internet-culture",
-    "categoryName": "Entertainment \u0026 Internet Culture",
+    "category": "entertainment-lifestyle",
+    "categoryName": "Entertainment & Lifestyle",
     "author": {
       "name": "Funke Balogun",
       "role": "Culture Bureau Chief"
@@ -770,8 +770,8 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [
     "title": "Sahelian Earth Hubs: Passive Cooling Innovations in Urban Architecture",
     "kicker": "ARCHITECTURE \u0026 SUSTAINABILITY",
     "deck": "Contemporary architects fuse compressed earth blocks, wind towers, and bioclimatic design to drop indoor temperatures without air conditioning.",
-    "category": "nigerian-current-affairs",
-    "categoryName": "Current Affairs",
+    "category": "education",
+    "categoryName": "Education",
     "author": {
       "name": "Tunde Oladipo",
       "role": "Senior Policy Correspondent"
@@ -822,8 +822,8 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [
     "title": "Independent Comics Guild Rewriting Regional Folklore for Young Audiences",
     "kicker": "GRAPHIC NOVELS · PUBLISHING",
     "deck": "Young illustrators and writers across Lagos and Ibadan bypass legacy publishing gatekeepers to print serialized comic anthologies rooted in local lore.",
-    "category": "entertainment-internet-culture",
-    "categoryName": "Entertainment \u0026 Internet Culture",
+    "category": "youth-corner",
+    "categoryName": "Youth Corner",
     "author": {
       "name": "Funke Balogun",
       "role": "Culture Bureau Chief"
@@ -874,8 +874,8 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [
     "title": "National Climate Council Disburses First Tranche of Subnational Adaptation Grants",
     "kicker": "CLIMATE GOVERNANCE · PUBLIC POLICY",
     "deck": "Sixteen ecological disaster-vulnerable states receive targeted matching capital for flood plain defense, mangrove restoration, and municipal drainage infrastructure.",
-    "category": "nigerian-current-affairs",
-    "categoryName": "Current Affairs",
+    "category": "state-affairs-environs",
+    "categoryName": "State Affairs & Environs",
     "author": {
       "name": "Amina Bello",
       "role": "Environment \u0026 Policy Desk"
@@ -936,8 +936,8 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [
     "title": "Federal Road Safety Corps Mandates Digital Passenger Manifests for Commercial Corridors",
     "kicker": "TRANSIT REGULATIONS · PUBLIC SAFETY",
     "deck": "Interstate transport operators must migrate paper logbooks to real-time QR passenger verification systems by mid-quarter to ensure rapid passenger welfare coverage.",
-    "category": "practical-nigerian-updates",
-    "categoryName": "Practical Updates",
+    "category": "sports",
+    "categoryName": "Sports",
     "author": {
       "name": "Chuka Obi",
       "role": "Public Service Correspondent"
@@ -998,8 +998,8 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [
     "title": "Standards Organisation of Nigeria Issues Mandatory Safety Labels for Residential Solar Kits",
     "kicker": "CONSUMER ADVISORY · ENERGY",
     "deck": "Inverters, lithium iron phosphate battery packs, and photovoltaic panels must carry tamper-proof holographic verification seals starting next month.",
-    "category": "practical-nigerian-updates",
-    "categoryName": "Practical Updates",
+    "category": "thrills-tricks",
+    "categoryName": "Thrills & Tricks",
     "author": {
       "name": "Tunde Oladipo",
       "role": "Senior Policy Correspondent"
@@ -1060,8 +1060,8 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [
     "title": "Institutional Investors Drive $450M Inflows into High-Yield Real Estate Investment Trusts",
     "kicker": "CAPITAL MARKETS · REAL ESTATE",
     "deck": "Grade-A commercial office towers and logistics warehouses across Victoria Island and Ikeja join dual-currency REIT platforms yielding inflation-hedged dividends.",
-    "category": "business-institutions",
-    "categoryName": "Business \u0026 Institutions",
+    "category": "brands-smes",
+    "categoryName": "Brands & SMEs",
     "author": {
       "name": "Emeka Nnamani",
       "role": "Financial Markets Editor"
@@ -1122,8 +1122,8 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [
     "title": "PenCom Approves 25% RSA Balance Drawdown for First-Time Residential Mortgages",
     "kicker": "RETIREMENT REFORM · HOUSING",
     "deck": "Thousands of salaried young professionals tap retirement savings accounts as verified primary equity contributions for long-term residential housing loans.",
-    "category": "business-institutions",
-    "categoryName": "Business \u0026 Institutions",
+    "category": "brands-smes",
+    "categoryName": "Brands & SMEs",
     "author": {
       "name": "Emeka Nnamani",
       "role": "Financial Markets Editor"
@@ -1184,8 +1184,8 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [
     "title": "Midnight Calls Across Six Time Zones: The Intimate Geometry of Diaspora Romance",
     "kicker": "PERSONAL ESSAY · MODERN LOVE",
     "deck": "Between erratic transatlantic flight schedules, spotty WiFi, and divergent daylight hours, contemporary Nigerian couples redefine emotional closeness from London to Lagos.",
-    "category": "stories-romance",
-    "categoryName": "Stories \u0026 Romance",
+    "category": "opinions",
+    "categoryName": "Opinions",
     "author": {
       "name": "Folashade Adeleke",
       "role": "Senior Essayist"
@@ -1246,8 +1246,8 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [
     "title": "Love on the Lekki Expressway: An Unlikely Serendipity in Gridlock",
     "kicker": "URBAN DISPATCH · ROMANCE",
     "deck": "When an overheating radiator stalled two cars side by side at Chevron tollgate in peak evening traffic, an unexpected shared laugh turned into four years of marriage.",
-    "category": "stories-romance",
-    "categoryName": "Stories \u0026 Romance",
+    "category": "opinions",
+    "categoryName": "Opinions",
     "author": {
       "name": "Folashade Adeleke",
       "role": "Senior Essayist"

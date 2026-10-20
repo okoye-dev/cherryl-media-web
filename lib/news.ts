@@ -20,7 +20,7 @@ export async function getDispatches(): Promise<CanonicalArticle[]> {
 
 export async function getOpinionColumns(): Promise<CanonicalArticle[]> {
   return CANONICAL_ARTICLES.filter(
-    (a) => a.category === "stories-romance" || a.category === "business-institutions"
+    (a) => a.category === "opinions" || a.category === "brands-smes"
   );
 }
 

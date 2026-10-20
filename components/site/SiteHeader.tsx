@@ -124,32 +124,32 @@ export default function SiteHeader() {
           </span>
         </div>
 
-        <nav aria-label="Menu" className="my-auto flex flex-col justify-center py-6 sm:py-8">
-          <ul className="flex flex-col divide-y divide-ink/10 sm:divide-y-0 sm:gap-2">
+        <nav aria-label="Menu" className="my-auto flex flex-col justify-center py-4 sm:py-6">
+          <ul className="flex flex-col divide-y divide-ink/10 sm:divide-y-0 sm:gap-1.5">
             {SITE.categories.map((cat, i) => {
               const active = pathname === `/category/${cat.slug}`;
               return (
                 <li
                   key={cat.slug}
                   className="overflow-hidden"
-                  style={{ transitionDelay: `${open ? 120 + i * 40 : 0}ms` }}
+                  style={{ transitionDelay: `${open ? 80 + i * 25 : 0}ms` }}
                 >
                   <Link
                     href={`/category/${cat.slug}`}
                     onClick={close}
                     className={cn(
-                      "group flex items-center justify-between gap-4 py-4 sm:py-3 transition-all duration-[900ms] ease-[cubic-bezier(0.32,0.72,0,1)]",
-                      open ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0",
+                      "group flex items-center justify-between gap-4 py-2 sm:py-2.5 transition-all duration-[700ms] ease-[cubic-bezier(0.32,0.72,0,1)]",
+                      open ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0",
                     )}
-                    style={{ transitionDelay: `${open ? 120 + i * 40 : 0}ms` }}
+                    style={{ transitionDelay: `${open ? 80 + i * 25 : 0}ms` }}
                   >
-                    <div className="flex items-baseline gap-4 md:gap-5 min-w-0">
-                      <span className="w-6 shrink-0 font-num text-xs sm:text-sm font-medium text-ink-soft md:w-8">
+                    <div className="flex items-baseline gap-3.5 md:gap-5 min-w-0">
+                      <span className="w-5 shrink-0 font-num text-xs sm:text-sm font-medium text-ink-soft md:w-7">
                         {String(i + 1).padStart(2, "0")}
                       </span>
                       <span
                         className={cn(
-                          "font-area text-[clamp(1.75rem,5.5vw,2.5rem)] font-light leading-[1.15] tracking-[-0.025em] transition-all duration-300 group-hover:italic group-hover:text-brand-red group-active:text-brand-red",
+                          "font-area text-[clamp(1.25rem,2.8vw,1.9rem)] font-light leading-[1.2] tracking-[-0.02em] transition-all duration-300 group-hover:italic group-hover:text-brand-red group-active:text-brand-red",
                           active ? "italic text-brand-red font-normal" : "text-ink",
                         )}
                       >

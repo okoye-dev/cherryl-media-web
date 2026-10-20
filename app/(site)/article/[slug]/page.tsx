@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import PageHeader from "@/components/site/PageHeader";
 import Pill from "@/components/site/Pill";
@@ -101,7 +102,7 @@ export default async function ArticlePage({ params }: { params: Params }) {
         <PageHeader
           label={article.kicker || formatCategoryName(article.categoryName || article.category)}
           title={article.title}
-          intro={article.deck}
+          intro={article.subtitle || article.deck}
           compact
           byline={
             <>
@@ -219,6 +220,83 @@ export default async function ArticlePage({ params }: { params: Params }) {
               </div>
             );
           })()}
+
+          {/* Tags */}
+          {article.tags && article.tags.length > 0 && (
+            <div className="mt-8 border-t border-ink/10 pt-6">
+              <span className="label text-[0.7rem] font-semibold tracking-wider text-ink/60 uppercase block mb-3">
+                Filed Under
+              </span>
+              <div className="flex flex-wrap items-center gap-2">
+                {article.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="rounded-full bg-paper-deep/70 px-3 py-1 font-mono text-[0.72rem] text-ink/80 border border-ink/10"
+                  >
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* More Stories (Related Posts Section) */}
+          {article.related_stories && article.related_stories.length > 0 && (
+            <div className="mt-12 border-t border-ink/10 pt-8">
+              <div className="flex items-center justify-between pb-4">
+                <h3 className="font-area text-lg font-semibold tracking-tight text-ink">
+                  More Stories
+                </h3>
+                <span className="label text-[0.65rem] font-medium text-brand-red uppercase">
+                  Curated Reading
+                </span>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {article.related_stories.map((story, i) => {
+                  const item = story as {
+                    slug?: string;
+                    url?: string;
+                    title?: string;
+                    deck?: string;
+                    category?: string;
+                    imageUrl?: string;
+                  };
+                  const targetHref = item.slug ? `/article/${item.slug}` : (item.url || "#");
+                  return (
+                    <Link
+                      key={i}
+                      href={targetHref}
+                      className="group block rounded-2xl border border-ink/10 bg-paper/50 p-4 transition-all duration-300 hover:border-brand-red/30 hover:bg-paper"
+                    >
+                      {item.imageUrl && (
+                        <div className="aspect-[16/9] w-full overflow-hidden rounded-xl bg-paper-deep/60 mb-3 border border-ink/5">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={resolveMediaUrl(item.imageUrl)}
+                            alt={item.title || ""}
+                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
+                        </div>
+                      )}
+                      {item.category && (
+                        <span className="label text-[0.62rem] font-semibold uppercase tracking-wider text-brand-red">
+                          {item.category}
+                        </span>
+                      )}
+                      <h4 className="mt-1 font-area font-bold text-sm md:text-base leading-snug text-ink group-hover:text-brand-red transition-colors line-clamp-2">
+                        {item.title}
+                      </h4>
+                      {item.deck && (
+                        <p className="mt-1.5 text-xs text-ink-soft leading-relaxed line-clamp-2">
+                          {item.deck}
+                        </p>
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Social Syndication */}
           {article.channelVariants && (

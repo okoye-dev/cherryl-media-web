@@ -24,7 +24,7 @@ export default function IndexList() {
               className="group grid grid-cols-[2.5rem_1fr] items-center gap-4 py-4 md:grid-cols-[3.5rem_18rem_1fr] lg:grid-cols-[4rem_21rem_1fr] md:gap-8 md:py-4.5"
             >
               <span className="font-num text-xs font-semibold text-brand-red md:text-sm leading-none">
-                0{i + 1}
+                {String(i + 1).padStart(2, "0")}
               </span>
 
               <div>

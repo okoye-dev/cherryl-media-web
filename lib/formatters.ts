@@ -1,9 +1,20 @@
 const CATEGORY_MAP: Record<string, string> = {
-  "nigerian-current-affairs": "Current Affairs",
-  "practical-nigerian-updates": "Practical Updates",
-  "business-institutions": "Business & Institutions",
-  "stories-romance": "Stories & Romance",
-  "entertainment-internet-culture": "Entertainment & Culture",
+  "state-affairs-environs": "State Affairs & Environs",
+  "newsbeat": "Newsbeat",
+  "brands-smes": "Brands & SMEs",
+  "opinions": "Opinions",
+  "sports": "Sports",
+  "entertainment-lifestyle": "Entertainment & Lifestyle",
+  "education": "Education",
+  "thrills-tricks": "Thrills & Tricks",
+  "youth-corner": "Youth Corner",
+  "tour-hotels": "Tour & Hotels",
+  // Legacy aliases
+  "nigerian-current-affairs": "State Affairs & Environs",
+  "practical-nigerian-updates": "Newsbeat",
+  "business-institutions": "Brands & SMEs",
+  "stories-romance": "Opinions",
+  "entertainment-internet-culture": "Entertainment & Lifestyle",
 };
 
 /** Formats a category slug or raw title into clean editorial display text */

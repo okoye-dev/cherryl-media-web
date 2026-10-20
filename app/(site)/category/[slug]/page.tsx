@@ -56,7 +56,7 @@ export default async function CategoryPage({ params }: { params: Params }) {
   return (
     <>
       <PageHeader
-        label={`Editorial Desk · ${category.channels ? category.channels.join(" · ") : "Multi-Platform"}`}
+        label="Editorial Desk · Verified Dispatches"
         title={category.name}
         intro={category.summary}
       />
@@ -74,12 +74,6 @@ export default async function CategoryPage({ params }: { params: Params }) {
               </span>
             ))}
           </div>
-          {category.channels && (
-            <div className="flex items-center gap-2 text-xs text-ink-soft">
-              <span className="label text-brand-red">Primary Channels:</span>
-              <span>{category.channels.join(" · ")}</span>
-            </div>
-          )}
         </div>
 
         <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">

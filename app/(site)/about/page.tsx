@@ -39,7 +39,7 @@ export default function AboutPage() {
               <div className="grid gap-6 sm:grid-cols-2">
                 {SITE.categories.map((cat) => (
                   <div key={cat.slug} className="rounded-2xl border border-ink/10 bg-paper-deep/30 p-6">
-                    <span className="font-num text-xs text-brand-red">{cat.channels ? cat.channels.join(" · ") : "Editorial Desk"}</span>
+                    <span className="font-num text-xs text-brand-red">{cat.subcategories ? cat.subcategories.slice(0, 3).join(" · ") : "Editorial Desk"}</span>
                     <h3 className="mt-2 font-area text-lg font-semibold tracking-[-0.015em] text-ink">{cat.name}</h3>
                     <p className="mt-2 text-xs font-light leading-relaxed text-ink-soft">{cat.summary}</p>
                     <div className="mt-4">
