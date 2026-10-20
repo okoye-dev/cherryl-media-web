@@ -43,3 +43,6 @@ next-env.d.ts
 # uploads
 /public/uploads/
 
+# local developer notes
+.local-notes/
+

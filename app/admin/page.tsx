@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { CANONICAL_ARTICLES } from "@/lib/articles";
+import { fetchArticles } from "@/services/articles";
 import { SITE } from "@/config/site";
 import type { CanonicalArticle } from "@/lib/types";
 
@@ -40,9 +41,7 @@ export default function AdminDashboardPage() {
   const [articles, setArticles] = useState<CanonicalArticle[]>(CANONICAL_ARTICLES);
 
   useEffect(() => {
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080";
-    fetch(`${backendUrl}/api/articles`)
-      .then((res) => (res.ok ? res.json() : null))
+    fetchArticles()
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {
           setArticles(data);

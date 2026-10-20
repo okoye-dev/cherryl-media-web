@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { DEFAULT_EDITORIAL_COPY, type EditorialCopy } from "@/lib/settings";
+import { fetchEditorialCopy, updateEditorialCopy } from "@/services/settings";
 
 export default function AdminSettingsPage() {
   const [copy, setCopy] = useState<EditorialCopy>(DEFAULT_EDITORIAL_COPY);
@@ -11,18 +12,10 @@ export default function AdminSettingsPage() {
   const [statusMessage, setStatusMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
 
   useEffect(() => {
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080";
-    fetch(`${backendUrl}/api/settings`)
-      .then((res) => (res.ok ? res.json() : null))
+    fetchEditorialCopy()
       .then((data) => {
-        if (data && data.editorial_copy) {
-          setCopy({
-            hero: { ...DEFAULT_EDITORIAL_COPY.hero, ...(data.editorial_copy.hero || {}) },
-            ticker: { ...DEFAULT_EDITORIAL_COPY.ticker, ...(data.editorial_copy.ticker || {}) },
-            dossier: { ...DEFAULT_EDITORIAL_COPY.dossier, ...(data.editorial_copy.dossier || {}) },
-            network: { ...DEFAULT_EDITORIAL_COPY.network, ...(data.editorial_copy.network || {}) },
-            footer: { ...DEFAULT_EDITORIAL_COPY.footer, ...(data.editorial_copy.footer || {}) },
-          });
+        if (data) {
+          setCopy(data);
         }
       })
       .catch(() => {});
@@ -33,15 +26,9 @@ export default function AdminSettingsPage() {
     setIsSaving(true);
     setStatusMessage(null);
 
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080";
     try {
-      const res = await fetch(`${backendUrl}/api/settings`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ editorial_copy: copy }),
-      });
-
-      if (res.ok) {
+      const res = await updateEditorialCopy(copy);
+      if (res.success) {
         setStatusMessage({ text: "✓ Site copy & configuration saved successfully!", type: "success" });
       } else {
         setStatusMessage({ text: "⚠️ Saved in local session (backend returned non-200)", type: "success" });
