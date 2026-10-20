@@ -70,7 +70,7 @@ export async function fetchEditorialCopy(): Promise<EditorialCopy> {
   try {
     const data = await request<{ editorial_copy?: Partial<EditorialCopy> }>("/api/settings", {
       next: { revalidate: 60 },
-      timeoutMs: 3000,
+      timeoutMs: 15000,
     });
     if (data && data.editorial_copy) {
       return {

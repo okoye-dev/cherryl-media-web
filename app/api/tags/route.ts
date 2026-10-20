@@ -14,7 +14,7 @@ export async function GET(req: Request) {
   try {
     const res = await fetch(
       `${backendUrl}/api/tags?q=${encodeURIComponent(q)}`,
-      { cache: "no-store", signal: AbortSignal.timeout(4000) }
+      { cache: "no-store", signal: AbortSignal.timeout(15000) }
     );
     if (res.ok) {
       const data = await res.json();

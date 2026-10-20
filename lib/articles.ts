@@ -18,7 +18,7 @@ export const CANONICAL_ARTICLES: CanonicalArticle[] = [];
 export async function getAllArticles(): Promise<CanonicalArticle[]> {
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 4000);
+    const timeout = setTimeout(() => controller.abort(), 15000);
 
     const res = await fetch(`${BACKEND_URL}/api/articles?status=published&limit=50`, {
       next: { revalidate: 30 },
@@ -75,7 +75,7 @@ export async function getArticleBySlug(slug: string): Promise<CanonicalArticle |
 
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 4000);
+    const timeout = setTimeout(() => controller.abort(), 15000);
 
     const res = await fetch(`${BACKEND_URL}/api/articles/${encodeURIComponent(normalized)}`, {
       next: { revalidate: 30 },

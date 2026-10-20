@@ -12,7 +12,7 @@ export class SettingsService implements ISettingsService {
         undefined,
         {
           next: { revalidate: 60 },
-          timeoutMs: 3000,
+          timeoutMs: 15000,
         }
       );
 

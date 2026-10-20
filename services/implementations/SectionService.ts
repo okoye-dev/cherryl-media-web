@@ -13,7 +13,7 @@ export class SectionService implements ISectionService {
     try {
       const data = await this.client.get<CuratedSectionsResponse>("/api/sections", undefined, {
         next: { revalidate: 30 },
-        timeoutMs: 3500,
+        timeoutMs: 15000,
       });
 
       if (data && data.byKey) {

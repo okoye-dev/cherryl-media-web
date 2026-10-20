@@ -19,7 +19,7 @@ export async function GET(req: Request) {
   try {
     const res = await fetch(
       `${backendUrl}/api/articles/check-slug?slug=${encodeURIComponent(slug)}&excludeId=${encodeURIComponent(excludeId)}`,
-      { cache: "no-store", signal: AbortSignal.timeout(4000) }
+      { cache: "no-store", signal: AbortSignal.timeout(15000) }
     );
     if (res.ok) {
       const data = await res.json();

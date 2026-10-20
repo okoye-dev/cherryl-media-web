@@ -82,7 +82,7 @@ export async function fetchCuratedSections(): Promise<CuratedSectionsResponse> {
   try {
     const data = await request<CuratedSectionsResponse>("/api/sections", {
       next: { revalidate: 30 },
-      timeoutMs: 4000,
+      timeoutMs: 15000,
     });
     if (data && data.byKey && Array.isArray(data.sections)) {
       return data;

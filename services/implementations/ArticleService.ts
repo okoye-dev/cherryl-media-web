@@ -36,17 +36,17 @@ export class ArticleService implements IArticleService {
 
   async checkSlugAvailability(slug: string, excludeId?: string): Promise<SlugCheckResult> {
     const url = typeof window !== "undefined" ? "/api/articles/check-slug" : "/api/articles/check-slug";
-    return this.client.get<SlugCheckResult>(url, { slug, excludeId }, { timeoutMs: 4000 });
+    return this.client.get<SlugCheckResult>(url, { slug, excludeId }, { timeoutMs: 15000 });
   }
 
   async searchTags(query: string): Promise<string[]> {
     const url = typeof window !== "undefined" ? "/api/tags" : "/api/tags";
-    const res = await this.client.get<{ tags: string[] }>(url, { q: query }, { timeoutMs: 3000 });
+    const res = await this.client.get<{ tags: string[] }>(url, { q: query }, { timeoutMs: 15000 });
     return Array.isArray(res.tags) ? res.tags : [];
   }
 
   async searchArticles(query: string, limit = 20): Promise<CanonicalArticle[]> {
-    return this.client.get<CanonicalArticle[]>("/api/articles", { q: query, limit }, { timeoutMs: 4000 });
+    return this.client.get<CanonicalArticle[]>("/api/articles", { q: query, limit }, { timeoutMs: 15000 });
   }
 
   async getCandidates(): Promise<ArticleCandidate[]> {

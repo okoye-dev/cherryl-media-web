@@ -51,7 +51,7 @@ export async function checkSlugAvailability(slug: string, excludeId?: string): P
   const url = typeof window !== "undefined" ? "/api/articles/check-slug" : "/api/articles/check-slug";
   return request<SlugCheckResult>(url, {
     params: { slug, excludeId },
-    timeoutMs: 4000,
+    timeoutMs: 15000,
   });
 }
 
@@ -59,7 +59,7 @@ export async function searchTags(query: string): Promise<string[]> {
   const url = typeof window !== "undefined" ? "/api/tags" : "/api/tags";
   const res = await request<TagsResult>(url, {
     params: { q: query },
-    timeoutMs: 3000,
+    timeoutMs: 15000,
   });
   return Array.isArray(res.tags) ? res.tags : [];
 }
@@ -67,6 +67,6 @@ export async function searchTags(query: string): Promise<string[]> {
 export async function searchArticles(query: string, limit = 20): Promise<CanonicalArticle[]> {
   return request<CanonicalArticle[]>("/api/articles", {
     params: { q: query, limit },
-    timeoutMs: 4000,
+    timeoutMs: 15000,
   });
 }
