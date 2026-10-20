@@ -3,10 +3,15 @@
  * Handles JWT token storage, login, logout, and current user retrieval.
  */
 
+const DEFAULT_BACKEND_URL =
+  process.env.NODE_ENV === "production"
+    ? "https://cherryl-media-engine.onrender.com"
+    : "http://localhost:8080";
+
 const BACKEND_URL =
   process.env.NEXT_PUBLIC_API_URL ||
   process.env.NEXT_PUBLIC_BACKEND_URL ||
-  "http://localhost:8080";
+  DEFAULT_BACKEND_URL;
 
 const TOKEN_KEY = "cherryl_newsroom_token";
 const USER_KEY = "cherryl_newsroom_user";

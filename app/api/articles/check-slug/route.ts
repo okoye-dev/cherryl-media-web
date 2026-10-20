@@ -9,7 +9,13 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Slug required", available: false }, { status: 400 });
   }
 
-  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080";
+  const backendUrl =
+    process.env.INTERNAL_BACKEND_URL ||
+    process.env.BACKEND_URL ||
+    process.env.NEXT_PUBLIC_BACKEND_URL ||
+    (process.env.NODE_ENV === "production"
+      ? "https://cherryl-media-engine.onrender.com"
+      : "http://localhost:8080");
   try {
     const res = await fetch(
       `${backendUrl}/api/articles/check-slug?slug=${encodeURIComponent(slug)}&excludeId=${encodeURIComponent(excludeId)}`,

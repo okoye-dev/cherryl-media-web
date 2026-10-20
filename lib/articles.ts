@@ -1,11 +1,16 @@
 // Canonical Article Client - Connected directly to Cherryl Media Engine & PostgreSQL DB
 import type { CanonicalArticle } from "./types";
 
+const DEFAULT_BACKEND_URL =
+  process.env.NODE_ENV === "production"
+    ? "https://cherryl-media-engine.onrender.com"
+    : "http://localhost:8080";
+
 const BACKEND_URL =
   process.env.INTERNAL_BACKEND_URL ||
   process.env.BACKEND_URL ||
   process.env.NEXT_PUBLIC_BACKEND_URL ||
-  "http://localhost:8080";
+  DEFAULT_BACKEND_URL;
 
 // Empty array for backward compatibility; all data is fetched live from the database.
 export const CANONICAL_ARTICLES: CanonicalArticle[] = [];
