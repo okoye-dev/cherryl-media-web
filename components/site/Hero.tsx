@@ -62,64 +62,71 @@ export default async function Hero() {
       </div>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[1.55fr_1fr] lg:gap-10">
-        <article
-          className="group relative flex flex-col justify-between rounded-card border border-ink/10 bg-cream/70 p-4 transition-all duration-500 hover:border-brand-red/40 hover:bg-cream sm:p-5 md:p-8"
-          style={{ animationDelay: "300ms" }}
-        >
-          <div>
-            <div className="flex items-center justify-between gap-3">
-              <span className="label-red font-medium min-w-0 truncate">
-                {leadStory.kicker}
-              </span>
-              <span className="font-num text-[0.72rem] font-medium text-ink-soft shrink-0 whitespace-nowrap">
-                {formatDate(leadStory.publishedAt)}
-              </span>
-            </div>
-
-            <div className="mt-4 aspect-[16/9] w-full overflow-hidden rounded-2xl bg-paper-deep/80 relative">
-              <div className="absolute inset-0 bg-gradient-to-t from-ink/30 via-transparent to-transparent z-10" />
-              <div className="absolute top-4 left-4 z-20">
-                <span className="rounded-full bg-brand-red px-3 py-1 font-num text-[0.68rem] font-medium uppercase tracking-wider text-white">
-                  Featured Story
+        {leadStory ? (
+          <article
+            className="group relative flex flex-col justify-between rounded-card border border-ink/10 bg-cream/70 p-4 transition-all duration-500 hover:border-brand-red/40 hover:bg-cream sm:p-5 md:p-8"
+            style={{ animationDelay: "300ms" }}
+          >
+            <div>
+              <div className="flex items-center justify-between gap-3">
+                <span className="label-red font-medium min-w-0 truncate">
+                  {leadStory.kicker || "NEWSROOM WIRE"}
+                </span>
+                <span className="font-num text-[0.72rem] font-medium text-ink-soft shrink-0 whitespace-nowrap">
+                  {formatDate(leadStory.publishedAt)}
                 </span>
               </div>
-              {leadStory.featuredImage?.url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={leadStory.featuredImage.url}
-                  alt={leadStory.title}
-                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-              ) : (
-                <div className="h-full w-full flex items-center justify-center text-ink/40 font-display italic text-xl">
-                  Cherryl Media
+
+              <div className="mt-4 aspect-[16/9] w-full overflow-hidden rounded-2xl bg-paper-deep/80 relative">
+                <div className="absolute inset-0 bg-gradient-to-t from-ink/30 via-transparent to-transparent z-10" />
+                <div className="absolute top-4 left-4 z-20">
+                  <span className="rounded-full bg-brand-red px-3 py-1 font-num text-[0.68rem] font-medium uppercase tracking-wider text-white">
+                    Featured Story
+                  </span>
                 </div>
-              )}
+                {leadStory.featuredImage?.url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={leadStory.featuredImage.url}
+                    alt={leadStory.title}
+                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                ) : (
+                  <div className="h-full w-full flex items-center justify-center text-ink/40 font-display italic text-xl">
+                    Cherryl Media
+                  </div>
+                )}
+              </div>
+
+              <Link href={`/article/${leadStory.slug}`} className="mt-4 block">
+                <h2 className="font-area text-[clamp(1.35rem,2.2vw,1.85rem)] font-semibold leading-snug tracking-[-0.02em] text-ink transition-all duration-200 group-hover:italic group-hover:text-brand-red">
+                  {leadStory.title}
+                </h2>
+              </Link>
+
+              <p className="mt-2.5 text-[0.98rem] font-normal leading-relaxed text-ink/80 line-clamp-2 md:line-clamp-3">
+                {leadStory.deck}
+              </p>
             </div>
 
-            <Link href={`/article/${leadStory.slug}`} className="mt-4 block">
-              <h2 className="font-area text-[clamp(1.35rem,2.2vw,1.85rem)] font-semibold leading-snug tracking-[-0.02em] text-ink transition-all duration-200 group-hover:italic group-hover:text-brand-red">
-                {leadStory.title}
-              </h2>
-            </Link>
-
-            <p className="mt-2.5 text-[0.98rem] font-normal leading-relaxed text-ink/80 line-clamp-2 md:line-clamp-3">
-              {leadStory.deck}
-            </p>
+            <div className="mt-6 flex items-center justify-between border-t border-ink/10 pt-3.5 text-xs">
+              <span className="text-ink-soft font-sans">
+                By <strong className="font-medium text-ink">{typeof leadStory.author === "string" ? leadStory.author : leadStory.author?.name || "Cherryl Media Desk"}</strong> · {formatReadTime(leadStory.readTime)}
+              </span>
+              <Link
+                href={`/article/${leadStory.slug}`}
+                className="font-medium text-brand-red transition-colors hover:text-brand-red-deep hover:underline underline-offset-4"
+              >
+                Read full story
+              </Link>
+            </div>
+          </article>
+        ) : (
+          <div className="flex flex-col items-center justify-center rounded-card border border-dashed border-ink/15 p-12 text-center text-ink-soft bg-cream/30">
+            <span className="font-display italic text-2xl text-ink/40">Cherryl Media Newsroom</span>
+            <p className="mt-2 text-xs max-w-sm text-ink-soft">Connecting to live editorial dispatches...</p>
           </div>
-
-          <div className="mt-6 flex items-center justify-between border-t border-ink/10 pt-3.5 text-xs">
-            <span className="text-ink-soft font-sans">
-              By <strong className="font-medium text-ink">{typeof leadStory.author === "string" ? leadStory.author : leadStory.author.name}</strong> · {formatReadTime(leadStory.readTime)}
-            </span>
-            <Link
-              href={`/article/${leadStory.slug}`}
-              className="font-medium text-brand-red transition-colors hover:text-brand-red-deep hover:underline underline-offset-4"
-            >
-              Read full story
-            </Link>
-          </div>
-        </article>
+        )}
 
         <div className="flex flex-col">
           <div className="flex items-center justify-between border-b border-ink/10 pb-3">
@@ -128,42 +135,48 @@ export default async function Hero() {
           </div>
 
           <div className="flex flex-col">
-            {trendingStories.slice(0, 3).map((story, i) => (
-              <div key={story.slug} className="w-full">
-                {i > 0 && <div className="w-full border-t border-ink/10" />}
-                <article
-                  className={`group relative -mx-4 px-4 rounded-2xl transition-colors duration-200 hover:bg-ink/[0.05] ${
-                    i === 0 ? "pt-3.5 pb-4 sm:pt-4 sm:pb-4.5" : "py-4 sm:py-4.5"
-                  }`}
-                >
-                  <div className="flex items-center gap-2 text-xs">
-                    <span className="font-num text-[0.7rem] font-bold text-brand-red leading-none">
-                      0{i + 1}
-                    </span>
-                    <span className="label text-[0.62rem] font-bold uppercase tracking-wider text-ink-soft leading-none">
-                      {formatCategoryName(story.categoryName || story.category)}
-                    </span>
-                    {story.urgent && (
-                      <span className="rounded bg-brand-red/10 px-1.5 py-0.5 text-[0.58rem] font-bold text-brand-red tracking-wider leading-none">
-                        URGENT
+            {trendingStories.length > 0 ? (
+              trendingStories.slice(0, 3).map((story, i) => (
+                <div key={story.slug} className="w-full">
+                  {i > 0 && <div className="w-full border-t border-ink/10" />}
+                  <article
+                    className={`group relative -mx-4 px-4 rounded-2xl transition-colors duration-200 hover:bg-ink/[0.05] ${
+                      i === 0 ? "pt-3.5 pb-4 sm:pt-4 sm:pb-4.5" : "py-4 sm:py-4.5"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className="font-num text-[0.7rem] font-bold text-brand-red leading-none">
+                        0{i + 1}
                       </span>
-                    )}
-                  </div>
+                      <span className="label text-[0.62rem] font-bold uppercase tracking-wider text-ink-soft leading-none">
+                        {formatCategoryName(story.categoryName || story.category)}
+                      </span>
+                      {story.urgent && (
+                        <span className="rounded bg-brand-red/10 px-1.5 py-0.5 text-[0.58rem] font-bold text-brand-red tracking-wider leading-none">
+                          URGENT
+                        </span>
+                      )}
+                    </div>
 
-                  <Link href={`/article/${story.slug}`} className="mt-2 block">
-                    <h4 className="font-area text-[1.12rem] md:text-[1.24rem] font-semibold leading-snug tracking-[-0.02em] text-ink transition-all duration-200 group-hover:italic group-hover:text-brand-red">
-                      {story.title}
-                    </h4>
-                  </Link>
+                    <Link href={`/article/${story.slug}`} className="mt-2 block">
+                      <h4 className="font-area text-[1.12rem] md:text-[1.24rem] font-semibold leading-snug tracking-[-0.02em] text-ink transition-all duration-200 group-hover:italic group-hover:text-brand-red">
+                        {story.title}
+                      </h4>
+                    </Link>
 
-                  <div className="mt-3 text-[0.72rem] text-ink-soft">
-                    <span className="font-medium text-ink-soft/90">
-                      {typeof story.author === "string" ? story.author : story.author.name} · {formatReadTime(story.readTime)}
-                    </span>
-                  </div>
-                </article>
+                    <div className="mt-3 text-[0.72rem] text-ink-soft">
+                      <span className="font-medium text-ink-soft/90">
+                        {typeof story.author === "string" ? story.author : story.author?.name || "Staff"} · {formatReadTime(story.readTime)}
+                      </span>
+                    </div>
+                  </article>
+                </div>
+              ))
+            ) : (
+              <div className="py-8 text-center text-xs text-ink-soft italic">
+                Awaiting dispatches.
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>
