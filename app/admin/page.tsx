@@ -3,11 +3,21 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { CANONICAL_ARTICLES } from "@/lib/articles";
-import { fetchArticles } from "@/services/articles";
+import { articleService } from "@/services";
 import { SITE } from "@/config/site";
 import type { CanonicalArticle } from "@/lib/types";
 
-const INGESTED_CANDIDATES = [
+interface StoryLead {
+  id: string;
+  title: string;
+  source: string;
+  freshness: string;
+  confidence: string;
+  category: string;
+  status: string;
+}
+
+const FALLBACK_CANDIDATES: StoryLead[] = [
   {
     id: "cand-01",
     title: "Federal Ministry of Transport Directs Regional Rail Link Feasibility Review",
@@ -39,15 +49,41 @@ const INGESTED_CANDIDATES = [
 
 export default function AdminDashboardPage() {
   const [articles, setArticles] = useState<CanonicalArticle[]>(CANONICAL_ARTICLES);
+  const [candidates, setCandidates] = useState<StoryLead[]>(FALLBACK_CANDIDATES);
 
   useEffect(() => {
-    fetchArticles()
+    let isMounted = true;
+
+    articleService
+      .getArticles({ status: "all" })
       .then((data) => {
-        if (Array.isArray(data) && data.length > 0) {
+        if (isMounted && Array.isArray(data) && data.length > 0) {
           setArticles(data);
         }
       })
       .catch(() => {});
+
+    articleService
+      .getCandidates()
+      .then((rawCandidates) => {
+        if (isMounted && Array.isArray(rawCandidates) && rawCandidates.length > 0) {
+          const mapped: StoryLead[] = rawCandidates.map((c, i) => ({
+            id: c.id || `lead-${i}`,
+            title: c.headline || "Untitled Lead",
+            source: c.source || "Automated Discovery",
+            freshness: c.freshness || "Recent",
+            confidence: c.confidence || "High",
+            category: c.category || "General",
+            status: c.status || "Ready to write",
+          }));
+          setCandidates(mapped);
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   return (
@@ -106,7 +142,7 @@ export default function AdminDashboardPage() {
         <div className="rounded-xl border border-white/[0.08] bg-[#16181D] p-4 sm:p-5 shadow-sm">
           <span className="label text-[0.62rem] font-semibold uppercase tracking-wider text-zinc-400">STORY LEADS</span>
           <div className="mt-2 font-num text-2xl sm:text-3xl font-semibold text-brand-red">
-            {INGESTED_CANDIDATES.length}
+            {candidates.length}
           </div>
           <span className="mt-1 block text-[0.72rem] text-zinc-400">In discovery inbox</span>
         </div>
@@ -130,7 +166,7 @@ export default function AdminDashboardPage() {
         </div>
 
         <div className="mt-4 divide-y divide-white/[0.06]">
-          {INGESTED_CANDIDATES.map((cand) => (
+          {candidates.map((cand) => (
             <div
               key={cand.id}
               className="flex flex-col justify-between gap-3.5 py-4 sm:flex-row sm:items-center transition-colors hover:bg-white/[0.02] -mx-2 px-2 rounded-xl"
