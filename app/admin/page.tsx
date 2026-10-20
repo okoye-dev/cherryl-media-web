@@ -50,6 +50,7 @@ const FALLBACK_CANDIDATES: StoryLead[] = [
 export default function AdminDashboardPage() {
   const [articles, setArticles] = useState<CanonicalArticle[]>(CANONICAL_ARTICLES);
   const [candidates, setCandidates] = useState<StoryLead[]>(FALLBACK_CANDIDATES);
+  const [statusFilter, setStatusFilter] = useState<"all" | "published" | "draft">("all");
 
   useEffect(() => {
     let isMounted = true;
@@ -86,6 +87,14 @@ export default function AdminDashboardPage() {
     };
   }, []);
 
+  const publishedCount = articles.filter((a) => a.status === "published").length;
+  const draftsCount = articles.filter((a) => a.status === "draft").length;
+
+  const filteredArticles = articles.filter((a) => {
+    if (statusFilter === "all") return true;
+    return a.status === statusFilter;
+  });
+
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
       {/* Header bar */}
@@ -117,26 +126,26 @@ export default function AdminDashboardPage() {
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         <div className="rounded-xl border border-white/[0.08] bg-[#16181D] p-4 sm:p-5 shadow-sm">
           <span className="label text-[0.62rem] font-semibold uppercase tracking-wider text-zinc-400">PUBLISHED STORIES</span>
-          <div className="mt-2 font-num text-2xl sm:text-3xl font-semibold text-white">
-            {articles.length}
+          <div className="mt-2 font-num text-2xl sm:text-3xl font-semibold text-emerald-400">
+            {publishedCount}
           </div>
           <span className="mt-1 block text-[0.72rem] text-zinc-400">Live on publication website</span>
         </div>
 
         <div className="rounded-xl border border-white/[0.08] bg-[#16181D] p-4 sm:p-5 shadow-sm">
-          <span className="label text-[0.62rem] font-semibold uppercase tracking-wider text-zinc-400">CATEGORIES</span>
+          <span className="label text-[0.62rem] font-semibold uppercase tracking-wider text-zinc-400">ACTIVE DRAFTS</span>
+          <div className="mt-2 font-num text-2xl sm:text-3xl font-semibold text-amber-400">
+            {draftsCount}
+          </div>
+          <span className="mt-1 block text-[0.72rem] text-zinc-400">In progress / ready to edit</span>
+        </div>
+
+        <div className="rounded-xl border border-white/[0.08] bg-[#16181D] p-4 sm:p-5 shadow-sm">
+          <span className="label text-[0.62rem] font-semibold uppercase tracking-wider text-zinc-400">PILLARS</span>
           <div className="mt-2 font-num text-2xl sm:text-3xl font-semibold text-white">
             {SITE.categories.length}
           </div>
           <span className="mt-1 block text-[0.72rem] text-zinc-400">Active publication pillars</span>
-        </div>
-
-        <div className="rounded-xl border border-white/[0.08] bg-[#16181D] p-4 sm:p-5 shadow-sm">
-          <span className="label text-[0.62rem] font-semibold uppercase tracking-wider text-zinc-400">CHANNELS</span>
-          <div className="mt-2 font-num text-2xl sm:text-3xl font-semibold text-white">4</div>
-          <span className="mt-1 block text-[0.72rem] font-medium text-emerald-400">
-            Web · X · FB · LinkedIn
-          </span>
         </div>
 
         <div className="rounded-xl border border-white/[0.08] bg-[#16181D] p-4 sm:p-5 shadow-sm">
@@ -204,21 +213,53 @@ export default function AdminDashboardPage() {
 
       {/* Published & Scheduled Articles */}
       <section className="rounded-2xl border border-white/[0.08] bg-[#16181D] p-5 sm:p-6 shadow-sm">
-        <div className="flex items-center justify-between border-b border-white/[0.08] pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-white/[0.08] pb-4 gap-3">
           <div>
             <h2 className="font-sans text-lg font-semibold text-white sm:text-xl">
-              Published &amp; Scheduled Stories
+              Published &amp; Draft Stories
             </h2>
             <p className="mt-0.5 text-xs text-zinc-400">
-              Active articles with formatted copy for social media and newsletter.
+              Manage live stories, edit active drafts, and prepare syndication blurbs.
             </p>
           </div>
-          <Link
-            href="/admin/editor"
-            className="text-xs font-semibold text-brand-red hover:underline"
-          >
-            + Write Story
-          </Link>
+          <div className="flex items-center gap-3">
+            {/* Status Tabs */}
+            <div className="flex items-center rounded-lg border border-white/10 bg-[#121317] p-1 text-xs">
+              <button
+                type="button"
+                onClick={() => setStatusFilter("all")}
+                className={`rounded-md px-3 py-1 font-medium transition-colors ${
+                  statusFilter === "all" ? "bg-white/10 text-white" : "text-zinc-400 hover:text-white"
+                }`}
+              >
+                All ({articles.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setStatusFilter("published")}
+                className={`rounded-md px-3 py-1 font-medium transition-colors ${
+                  statusFilter === "published" ? "bg-emerald-500/20 text-emerald-300" : "text-zinc-400 hover:text-white"
+                }`}
+              >
+                Published ({publishedCount})
+              </button>
+              <button
+                type="button"
+                onClick={() => setStatusFilter("draft")}
+                className={`rounded-md px-3 py-1 font-medium transition-colors ${
+                  statusFilter === "draft" ? "bg-amber-500/20 text-amber-300" : "text-zinc-400 hover:text-white"
+                }`}
+              >
+                Drafts ({draftsCount})
+              </button>
+            </div>
+            <Link
+              href="/admin/editor"
+              className="text-xs font-semibold text-brand-red hover:underline shrink-0"
+            >
+              + Write Story
+            </Link>
+          </div>
         </div>
 
         {/* Desktop Table View */}
@@ -235,7 +276,7 @@ export default function AdminDashboardPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/[0.06]">
-              {articles.map((art) => (
+              {filteredArticles.map((art) => (
                 <tr key={art.id} className="hover:bg-white/[0.02] transition-colors">
                   <td className="py-3.5 pr-4 font-medium text-zinc-100 max-w-sm truncate">
                     <Link href={`/admin/editor?slug=${art.slug}`} className="hover:text-brand-red">
@@ -245,7 +286,13 @@ export default function AdminDashboardPage() {
                   <td className="py-3.5 pr-4 text-zinc-400">{art.categoryName}</td>
                   <td className="py-3.5 pr-4 text-zinc-400">{typeof art.author === "string" ? art.author : art.author?.name}</td>
                   <td className="py-3.5 pr-4">
-                    <span className="rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[0.65rem] font-medium uppercase tracking-wider text-emerald-400 border border-emerald-500/20">
+                    <span
+                      className={`rounded-full px-2.5 py-0.5 text-[0.65rem] font-medium uppercase tracking-wider border ${
+                        art.status === "published"
+                          ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                          : "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                      }`}
+                    >
                       {art.status}
                     </span>
                   </td>
@@ -262,15 +309,17 @@ export default function AdminDashboardPage() {
                       href={`/admin/editor?slug=${art.slug}`}
                       className="font-medium text-brand-red hover:underline"
                     >
-                      Edit
+                      {art.status === "draft" ? "Resume Draft →" : "Edit"}
                     </Link>
-                    <Link
-                      href={`/article/${art.slug}`}
-                      target="_blank"
-                      className="text-zinc-400 hover:text-white hover:underline"
-                    >
-                      View ↗
-                    </Link>
+                    {art.status === "published" && (
+                      <Link
+                        href={`/article/${art.slug}`}
+                        target="_blank"
+                        className="text-zinc-400 hover:text-white hover:underline"
+                      >
+                        View ↗
+                      </Link>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -280,13 +329,19 @@ export default function AdminDashboardPage() {
 
         {/* Mobile & Tablet Card View (Responsive) */}
         <div className="mt-4 md:hidden divide-y divide-white/[0.06]">
-          {articles.map((art) => (
+          {filteredArticles.map((art) => (
             <div key={art.id} className="py-4 space-y-2">
               <div className="flex items-center justify-between text-xs">
                 <span className="label text-[0.6rem] font-semibold text-brand-red uppercase">
                   {art.categoryName}
                 </span>
-                <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[0.62rem] font-medium text-emerald-400 border border-emerald-500/20 uppercase">
+                <span
+                  className={`rounded-full px-2 py-0.5 text-[0.62rem] font-medium border uppercase ${
+                    art.status === "published"
+                      ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                      : "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                  }`}
+                >
                   {art.status}
                 </span>
               </div>
@@ -303,15 +358,17 @@ export default function AdminDashboardPage() {
                     href={`/admin/editor?slug=${art.slug}`}
                     className="font-medium text-brand-red"
                   >
-                    Edit
+                    {art.status === "draft" ? "Resume Draft →" : "Edit"}
                   </Link>
-                  <Link
-                    href={`/article/${art.slug}`}
-                    target="_blank"
-                    className="text-zinc-400 hover:text-white"
-                  >
-                    View ↗
-                  </Link>
+                  {art.status === "published" && (
+                    <Link
+                      href={`/article/${art.slug}`}
+                      target="_blank"
+                      className="text-zinc-400 hover:text-white"
+                    >
+                      View ↗
+                    </Link>
+                  )}
                 </div>
               </div>
             </div>

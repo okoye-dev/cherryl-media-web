@@ -75,9 +75,11 @@ export function usePublishPipeline() {
         await saveArticle({ ...payload, status: "published" });
         await publishArticle(articleSlug);
       } catch (err: unknown) {
-        // Fallback to local success if backend offline
-        const msg = err instanceof Error ? err.message : "Sync error";
-        console.warn("Backend engine publish note:", msg);
+        const msg = err instanceof Error ? err.message : "Failed to publish article";
+        console.error("Backend engine publish error:", msg);
+        setStepStates((prev) => ({ ...prev, engine: "error" }));
+        setErrorMessage(msg);
+        return false;
       }
 
       setStepStates((prev) => ({ ...prev, engine: "success" }));

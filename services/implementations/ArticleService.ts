@@ -52,4 +52,26 @@ export class ArticleService implements IArticleService {
   async getCandidates(): Promise<ArticleCandidate[]> {
     return this.client.get<ArticleCandidate[]>("/api/candidates").catch(() => []);
   }
+
+  async getFeatured(): Promise<CanonicalArticle> {
+    return this.client.get<CanonicalArticle>("/api/articles/featured");
+  }
+
+  async setFeatured(idOrSlug: string, isFeatured: boolean): Promise<{ success: boolean; article?: CanonicalArticle }> {
+    return this.client.post<{ success: boolean; article?: CanonicalArticle }>(
+      `/api/articles/${encodeURIComponent(idOrSlug)}/featured`,
+      { isFeatured }
+    );
+  }
+
+  async searchCuratedArticles(params?: { category?: string; query?: string; sort?: string; limit?: number }): Promise<CanonicalArticle[]> {
+    const queryParams: Record<string, string | number | undefined> = {};
+    if (params?.category) queryParams.category = params.category;
+    if (params?.query) queryParams.q = params.query;
+    if (params?.sort) queryParams.sort = params.sort;
+    if (params?.limit) queryParams.limit = params.limit;
+
+    const res = await this.client.get<{ articles: CanonicalArticle[] }>("/api/curation/search", queryParams);
+    return Array.isArray(res.articles) ? res.articles : [];
+  }
 }

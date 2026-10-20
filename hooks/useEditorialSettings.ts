@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { settingsService } from "@/services";
 import { DEFAULT_EDITORIAL_COPY, type EditorialCopy } from "@/lib/settings";
 
-export type SettingsTab = "hero" | "ticker" | "dossier" | "network" | "footer";
+export type SettingsTab = "hero" | "ticker" | "dossier" | "network" | "footer" | "subscribers";
 
 export function useEditorialSettings() {
   const [copy, setCopy] = useState<EditorialCopy>(DEFAULT_EDITORIAL_COPY);

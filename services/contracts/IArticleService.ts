@@ -33,4 +33,7 @@ export interface IArticleService {
   searchTags(query: string): Promise<string[]>;
   searchArticles(query: string, limit?: number): Promise<CanonicalArticle[]>;
   getCandidates(): Promise<ArticleCandidate[]>;
+  getFeatured(): Promise<CanonicalArticle>;
+  setFeatured(idOrSlug: string, isFeatured: boolean): Promise<{ success: boolean; article?: CanonicalArticle }>;
+  searchCuratedArticles(params?: { category?: string; query?: string; sort?: string; limit?: number }): Promise<CanonicalArticle[]>;
 }

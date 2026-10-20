@@ -46,14 +46,17 @@ export default async function Hero() {
           className="intro flex flex-wrap items-center gap-2"
           style={{ animationDelay: "200ms" }}
         >
-          <Pill href="/category/nigerian-current-affairs" variant="red">
-            Current Affairs
+          <Pill href="/category/state-affairs-environs" variant="red">
+            State Affairs
           </Pill>
-          <Pill href="/category/practical-nigerian-updates" variant="ghost">
-            Practical Updates
+          <Pill href="/category/newsbeat" variant="ghost">
+            Newsbeat
           </Pill>
-          <Pill href="/category/stories-romance" variant="ghost">
-            Stories &amp; Romance
+          <Pill href="/category/brands-smes" variant="ghost">
+            Brands &amp; SMEs
+          </Pill>
+          <Pill href="/category/opinions" variant="ghost">
+            Opinions
           </Pill>
         </div>
       </div>

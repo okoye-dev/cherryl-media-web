@@ -52,12 +52,22 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
+  const authHeaders: Record<string, string> = {};
+  if (typeof window !== "undefined") {
+    const token = localStorage.getItem("cherryl_newsroom_token");
+    if (token) {
+      authHeaders["Authorization"] = `Bearer ${token}`;
+    }
+  }
+
   try {
     const response = await fetch(url, {
       ...rest,
+      credentials: rest.credentials || "include",
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
+        ...authHeaders,
         ...headers,
       },
       signal: controller.signal,

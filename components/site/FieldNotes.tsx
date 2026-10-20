@@ -20,10 +20,10 @@ export default async function FieldNotes() {
     <section aria-labelledby="opinion-notes">
       <div className="flex items-center justify-between pb-4 text-ink-soft">
         <h2 id="opinion-notes" className="label text-ink-soft">
-          Narratives &amp; Perspectives
+          Opinions &amp; Perspectives
         </h2>
-        <Pill href="/category/stories-romance" variant="red-ghost">
-          All Stories &amp; Romance
+        <Pill href="/category/opinions" variant="red-ghost">
+          All Opinions
         </Pill>
       </div>
       <ol className="border-t border-ink/15 divide-y divide-ink/10">

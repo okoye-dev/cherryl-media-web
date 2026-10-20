@@ -7,6 +7,7 @@ import { TickerSettingsPanel } from "@/components/admin/settings/TickerSettingsP
 import { DossierSettingsPanel } from "@/components/admin/settings/DossierSettingsPanel";
 import { NetworkSettingsPanel } from "@/components/admin/settings/NetworkSettingsPanel";
 import { FooterSettingsPanel } from "@/components/admin/settings/FooterSettingsPanel";
+import { SubscribersSettingsPanel } from "@/components/admin/settings/SubscribersSettingsPanel";
 
 const TABS: { id: SettingsTab; label: string }[] = [
   { id: "hero", label: "1. Homepage Hero" },
@@ -14,6 +15,7 @@ const TABS: { id: SettingsTab; label: string }[] = [
   { id: "dossier", label: "3. Weekend Dossier" },
   { id: "network", label: "4. Distribution Network" },
   { id: "footer", label: "5. Masthead & Footer" },
+  { id: "subscribers", label: "6. Notification Emails & Subscribers" },
 ];
 
 export default function AdminSettingsPage() {
@@ -105,6 +107,7 @@ export default function AdminSettingsPage() {
         {activeTab === "dossier" && <DossierSettingsPanel copy={copy} setCopy={setCopy} />}
         {activeTab === "network" && <NetworkSettingsPanel copy={copy} setCopy={setCopy} />}
         {activeTab === "footer" && <FooterSettingsPanel copy={copy} setCopy={setCopy} />}
+        {activeTab === "subscribers" && <SubscribersSettingsPanel />}
       </div>
 
       <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/[0.08]">
