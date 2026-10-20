@@ -10,17 +10,8 @@
  * 5. Return confirmed public CDN/S3 URL
  */
 
+import { BACKEND_URL } from "./backend-url";
 import { compressImage, validateMediaFile } from "./image-compress";
-
-const DEFAULT_BACKEND_URL =
-  process.env.NODE_ENV === "production"
-    ? "https://cherryl-media-engine.onrender.com"
-    : "http://localhost:8080";
-
-const BACKEND_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
-  process.env.NEXT_PUBLIC_BACKEND_URL ||
-  DEFAULT_BACKEND_URL;
 
 export interface PresignResponse {
   upload_url: string;

@@ -1,16 +1,11 @@
+import { BACKEND_URL } from "@/lib/backend-url";
 import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const q = (searchParams.get("q") || "").trim().toLowerCase();
 
-  const backendUrl =
-    process.env.INTERNAL_BACKEND_URL ||
-    process.env.BACKEND_URL ||
-    process.env.NEXT_PUBLIC_BACKEND_URL ||
-    (process.env.NODE_ENV === "production"
-      ? "https://cherryl-media-engine.onrender.com"
-      : "http://localhost:8080");
+  const backendUrl = BACKEND_URL;
   try {
     const res = await fetch(
       `${backendUrl}/api/tags?q=${encodeURIComponent(q)}`,

@@ -14,25 +14,8 @@ export class ApiError extends Error {
   }
 }
 
-const PRODUCTION_BACKEND_FALLBACK = "https://cherryl-media-engine.onrender.com";
-const LOCAL_BACKEND_FALLBACK = "http://localhost:8080";
-
-export function getBackendUrl(): string {
-  const fallback =
-    process.env.NODE_ENV === "production"
-      ? PRODUCTION_BACKEND_FALLBACK
-      : LOCAL_BACKEND_FALLBACK;
-
-  if (typeof window !== "undefined") {
-    return process.env.NEXT_PUBLIC_BACKEND_URL || fallback;
-  }
-  return (
-    process.env.INTERNAL_BACKEND_URL ||
-    process.env.BACKEND_URL ||
-    process.env.NEXT_PUBLIC_BACKEND_URL ||
-    fallback
-  );
-}
+import { getBackendUrl } from "@/lib/backend-url";
+export { getBackendUrl };
 
 export interface RequestOptions extends RequestInit {
   timeoutMs?: number;

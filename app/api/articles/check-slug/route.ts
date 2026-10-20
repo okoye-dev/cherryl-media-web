@@ -1,3 +1,4 @@
+import { BACKEND_URL } from "@/lib/backend-url";
 import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
@@ -9,13 +10,7 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Slug required", available: false }, { status: 400 });
   }
 
-  const backendUrl =
-    process.env.INTERNAL_BACKEND_URL ||
-    process.env.BACKEND_URL ||
-    process.env.NEXT_PUBLIC_BACKEND_URL ||
-    (process.env.NODE_ENV === "production"
-      ? "https://cherryl-media-engine.onrender.com"
-      : "http://localhost:8080");
+  const backendUrl = BACKEND_URL;
   try {
     const res = await fetch(
       `${backendUrl}/api/articles/check-slug?slug=${encodeURIComponent(slug)}&excludeId=${encodeURIComponent(excludeId)}`,
