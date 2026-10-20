@@ -6,11 +6,17 @@ const DEFAULT_BACKEND_URL =
     ? "https://cherryl-media-engine.onrender.com"
     : "http://localhost:8080";
 
-const BACKEND_URL =
+const CONFIGURED_BACKEND_URL =
   process.env.INTERNAL_BACKEND_URL ||
   process.env.BACKEND_URL ||
   process.env.NEXT_PUBLIC_BACKEND_URL ||
   DEFAULT_BACKEND_URL;
+
+// A production build must never point at localhost, even if the host's env says so.
+const BACKEND_URL =
+  process.env.NODE_ENV === "production" && /localhost|127\.0\.0\.1/.test(CONFIGURED_BACKEND_URL)
+    ? DEFAULT_BACKEND_URL
+    : CONFIGURED_BACKEND_URL;
 
 // Empty array for backward compatibility; all data is fetched live from the database.
 export const CANONICAL_ARTICLES: CanonicalArticle[] = [];

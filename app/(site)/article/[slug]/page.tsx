@@ -9,9 +9,16 @@ import { getAllArticleSlugs, getArticleBySlug } from "@/lib/news";
 import { resolveMediaUrl } from "@/lib/url-utils";
 import { formatDate, formatCategoryName, formatReadTime } from "@/lib/formatters";
 
+export const dynamicParams = true;
+export const revalidate = 30;
+
 export async function generateStaticParams() {
-  const slugs = await getAllArticleSlugs();
-  return slugs.map((slug) => ({ slug }));
+  try {
+    const slugs = await getAllArticleSlugs();
+    return slugs.map((slug) => ({ slug }));
+  } catch {
+    return [];
+  }
 }
 
 type Params = Promise<{ slug: string }>;
