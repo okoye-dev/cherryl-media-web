@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { CANONICAL_ARTICLES } from "@/lib/articles";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -9,28 +8,17 @@ export async function GET(req: Request) {
   try {
     const res = await fetch(
       `${backendUrl}/api/tags?q=${encodeURIComponent(q)}`,
-      { cache: "no-store", signal: AbortSignal.timeout(3000) }
+      { cache: "no-store", signal: AbortSignal.timeout(4000) }
     );
     if (res.ok) {
       const data = await res.json();
       return NextResponse.json(data);
     }
-  } catch {
-    // Backend offline; fallback to canonical articles
+  } catch (err) {
+    console.error("tags proxy error:", err);
   }
 
-  const allTags = new Set<string>();
-  for (const art of CANONICAL_ARTICLES) {
-    if (Array.isArray(art.tags)) {
-      for (const t of art.tags) {
-        if (!q || t.toLowerCase().includes(q)) {
-          allTags.add(t);
-        }
-      }
-    }
-  }
-
-  // Common default tags for newsroom if set is small
+  // Common default tags for newsroom if backend offline
   const defaultSeeds = [
     "Nigeria",
     "Abuja",
@@ -47,13 +35,9 @@ export async function GET(req: Request) {
     "Youth Innovation",
     "SME Growth",
   ];
-  for (const s of defaultSeeds) {
-    if (!q || s.toLowerCase().includes(q)) {
-      allTags.add(s);
-    }
-  }
 
+  const matched = defaultSeeds.filter((s) => !q || s.toLowerCase().includes(q));
   return NextResponse.json({
-    tags: Array.from(allTags).slice(0, 30),
+    tags: matched.slice(0, 30),
   });
 }

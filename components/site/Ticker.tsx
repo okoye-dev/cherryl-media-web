@@ -11,10 +11,10 @@ export default async function Ticker() {
   ]);
 
   const items = [
-    ...(copy.ticker.customNotice
+    ...(copy.ticker.customNotice && lead
       ? [{ tag: "SPECIAL WIRE", title: copy.ticker.customNotice, slug: lead.slug }]
       : []),
-    { tag: "BREAKING", title: lead.title, slug: lead.slug },
+    ...(lead ? [{ tag: "BREAKING", title: lead.title, slug: lead.slug }] : []),
     ...dispatches.map((d) => ({
       tag: formatCategoryName(d.categoryName || d.category),
       title: d.title,
@@ -56,7 +56,7 @@ export default async function Ticker() {
       </div>
 
       <div className="hidden shrink-0 border-l border-ink/15 px-4 font-num text-[0.72rem] text-ink-soft md:block">
-        {formatDate(lead.publishedAt)}
+        {lead?.publishedAt ? formatDate(lead.publishedAt) : new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
       </div>
     </div>
   );

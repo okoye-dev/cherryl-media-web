@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { sectionService, articleService } from "@/services";
 import type { CuratedSection } from "@/services/contracts/ISectionService";
 import type { CanonicalArticle } from "@/lib/types";
-import { CANONICAL_ARTICLES } from "@/lib/articles";
 
 export interface SlotTarget {
   sectionKey: string;
@@ -28,11 +27,11 @@ export function useCuratedSections() {
       try {
         const [secData, arts] = await Promise.all([
           sectionService.getCuratedSections(),
-          articleService.getArticles({ status: "all" }).catch(() => CANONICAL_ARTICLES),
+          articleService.getArticles({ status: "all" }).catch(() => []),
         ]);
         if (isMounted) {
           setSections(secData.byKey || {});
-          setCatalog(Array.isArray(arts) && arts.length > 0 ? arts : CANONICAL_ARTICLES);
+          setCatalog(Array.isArray(arts) ? arts : []);
         }
       } catch (err) {
         console.error("Failed to load curated sections", err);

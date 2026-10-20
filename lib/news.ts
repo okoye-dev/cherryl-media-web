@@ -1,5 +1,5 @@
 import {
-  CANONICAL_ARTICLES,
+  getAllArticles as findAllArticles,
   getLeadStory as getLeadArticle,
   getDispatches as getArticleDispatches,
   getArticleBySlug as findArticleBySlug,
@@ -10,7 +10,7 @@ import type { CanonicalArticle } from "./types";
 
 export type EditorialArticle = CanonicalArticle;
 
-export async function getLeadStory(): Promise<CanonicalArticle> {
+export async function getLeadStory(): Promise<CanonicalArticle | null> {
   return getLeadArticle();
 }
 
@@ -19,13 +19,14 @@ export async function getDispatches(): Promise<CanonicalArticle[]> {
 }
 
 export async function getOpinionColumns(): Promise<CanonicalArticle[]> {
-  return CANONICAL_ARTICLES.filter(
+  const all = await findAllArticles();
+  return all.filter(
     (a) => a.category === "opinions" || a.category === "brands-smes"
   );
 }
 
 export async function getAllArticles(): Promise<CanonicalArticle[]> {
-  return CANONICAL_ARTICLES;
+  return findAllArticles();
 }
 
 export async function getArticleBySlug(slug: string): Promise<CanonicalArticle | null> {

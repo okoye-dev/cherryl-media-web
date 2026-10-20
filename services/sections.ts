@@ -1,6 +1,5 @@
 import { request } from "./api-client";
 import type { CanonicalArticle } from "@/lib/types";
-import { CANONICAL_ARTICLES } from "@/lib/articles";
 
 export interface CuratedSection {
   sectionKey: string;
@@ -63,62 +62,14 @@ export const SECTION_METADATA: Record<
 export const DEFAULT_SECTION_KEYS = Object.keys(SECTION_METADATA);
 
 export function buildFallbackSections(): CuratedSectionsResponse {
-  const byID: Record<string, CanonicalArticle> = {};
-  for (const a of CANONICAL_ARTICLES) {
-    byID[a.id] = a;
-    byID[a.slug] = a;
-  }
-
-  const defaultAllocations: Record<string, string[]> = {
-    hero_lead: ["2f405add-8bba-5261-99af-15feaa62754b"],
-    hero_trending: [
-      "35588574-ec88-5a81-be90-8c46283c24de",
-      "decd08ac-ef71-54ee-ac58-fd2480c007fa",
-      "f10fad9c-c601-552e-a7b2-816b8c370ecc",
-    ],
-    state_affairs: [
-      "2f405add-8bba-5261-99af-15feaa62754b",
-      "25386df5-95e6-50ad-bc4c-3b6db589992d",
-      "d41935e4-a14a-555e-85c1-e78d655f4886",
-      "93630737-14e4-5cb8-a578-1cb81c7f9fc9",
-    ],
-    newsbeat: [
-      "25386df5-95e6-50ad-bc4c-3b6db589992d",
-      "d41935e4-a14a-555e-85c1-e78d655f4886",
-      "b5585b9b-9c74-5555-897b-cfd8c0b58e7b",
-      "f10fad9c-c601-552e-a7b2-816b8c370ecc",
-    ],
-    brands_smes: [
-      "decd08ac-ef71-54ee-ac58-fd2480c007fa",
-      "6df67a6d-e4fb-5b23-a2a0-410a74799052",
-      "c1995ecf-38ea-5a9e-8c53-c977792e3a8d",
-    ],
-    opinions: [
-      "6df67a6d-e4fb-5b23-a2a0-410a74799052",
-      "c1995ecf-38ea-5a9e-8c53-c977792e3a8d",
-      "970ca881-bf9d-5eb0-a540-34444585145b",
-    ],
-    weekend_dossier: [
-      "970ca881-bf9d-5eb0-a540-34444585145b",
-      "35588574-ec88-5a81-be90-8c46283c24de",
-      "b5585b9b-9c74-5555-897b-cfd8c0b58e7b",
-      "1d607e1e-0ca8-51f6-ae18-f2991dbbc1a3",
-    ],
-  };
-
   const sections: CuratedSection[] = [];
   const byKey: Record<string, CuratedSection> = {};
 
   for (const key of DEFAULT_SECTION_KEYS) {
-    const ids = defaultAllocations[key] || [];
-    const arts: CanonicalArticle[] = [];
-    for (const id of ids) {
-      if (byID[id]) arts.push(byID[id]);
-    }
     const sec: CuratedSection = {
       sectionKey: key,
-      articleIds: ids,
-      articles: arts,
+      articleIds: [],
+      articles: [],
     };
     sections.push(sec);
     byKey[key] = sec;
@@ -128,24 +79,18 @@ export function buildFallbackSections(): CuratedSectionsResponse {
 }
 
 export async function fetchCuratedSections(): Promise<CuratedSectionsResponse> {
-  const fallback = buildFallbackSections();
   try {
     const data = await request<CuratedSectionsResponse>("/api/sections", {
       next: { revalidate: 30 },
-      timeoutMs: 3500,
+      timeoutMs: 4000,
     });
-    if (data && data.byKey) {
-      for (const key of DEFAULT_SECTION_KEYS) {
-        if (!data.byKey[key] || !Array.isArray(data.byKey[key].articles) || data.byKey[key].articles.length === 0) {
-          data.byKey[key] = fallback.byKey[key];
-        }
-      }
+    if (data && data.byKey && Array.isArray(data.sections)) {
       return data;
     }
-  } catch {
-    // Fall back to canonical fallback dataset
+  } catch (err) {
+    console.warn("fetchCuratedSections warning:", err);
   }
-  return fallback;
+  return buildFallbackSections();
 }
 
 export async function updateCuratedSections(

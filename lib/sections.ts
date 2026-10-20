@@ -8,7 +8,6 @@ import {
   updateCuratedSections,
 } from "@/services/sections";
 import { searchArticles as serviceSearchArticles, fetchArticles } from "@/services/articles";
-import { CANONICAL_ARTICLES } from "./articles";
 
 export {
   SECTION_METADATA,
@@ -24,30 +23,25 @@ export async function getCuratedSections(): Promise<CuratedSectionsResponse> {
 export async function searchArticles(query: string, limit = 20): Promise<CanonicalArticle[]> {
   try {
     const results = await serviceSearchArticles(query, limit);
-    if (Array.isArray(results) && results.length > 0) {
+    if (Array.isArray(results)) {
       return results;
     }
-  } catch {}
-
-  const q = query.toLowerCase().trim();
-  return CANONICAL_ARTICLES.filter(
-    (a) =>
-      !q ||
-      a.title.toLowerCase().includes(q) ||
-      (a.kicker && a.kicker.toLowerCase().includes(q)) ||
-      (a.deck && a.deck.toLowerCase().includes(q)) ||
-      a.category.toLowerCase().includes(q)
-  ).slice(0, limit);
+  } catch (err) {
+    console.warn("searchArticles error:", err);
+  }
+  return [];
 }
 
 export async function fetchAllArticles(): Promise<CanonicalArticle[]> {
   try {
     const list = await fetchArticles({ status: "all" });
-    if (Array.isArray(list) && list.length > 0) {
+    if (Array.isArray(list)) {
       return list;
     }
-  } catch {}
-  return CANONICAL_ARTICLES;
+  } catch (err) {
+    console.warn("fetchAllArticles error:", err);
+  }
+  return [];
 }
 
 export async function updateCuratedSection(

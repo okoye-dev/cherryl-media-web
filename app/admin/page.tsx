@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { CANONICAL_ARTICLES } from "@/lib/articles";
 import { articleService } from "@/services";
 import { SITE } from "@/config/site";
 import type { CanonicalArticle } from "@/lib/types";
@@ -48,7 +47,7 @@ const FALLBACK_CANDIDATES: StoryLead[] = [
 ];
 
 export default function AdminDashboardPage() {
-  const [articles, setArticles] = useState<CanonicalArticle[]>(CANONICAL_ARTICLES);
+  const [articles, setArticles] = useState<CanonicalArticle[]>([]);
   const [candidates, setCandidates] = useState<StoryLead[]>(FALLBACK_CANDIDATES);
   const [statusFilter, setStatusFilter] = useState<"all" | "published" | "draft">("all");
 

@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { CANONICAL_ARTICLES } from "@/lib/articles";
 import { fetchArticles, fetchArticleBySlug, saveArticle } from "@/services/articles";
 import type {
   ContentBlock,
@@ -16,62 +15,52 @@ export interface SourceItem {
 }
 
 export function useArticleEditor(initialSlug?: string | null) {
-  const [articlesList, setArticlesList] = useState<CanonicalArticle[]>(CANONICAL_ARTICLES);
-  const [selectedSlug, setSelectedSlug] = useState<string>(initialSlug || CANONICAL_ARTICLES[0].slug);
-  const [currentArticleId, setCurrentArticleId] = useState<string>(CANONICAL_ARTICLES[0].id || "");
+  const [articlesList, setArticlesList] = useState<CanonicalArticle[]>([]);
+  const [selectedSlug, setSelectedSlug] = useState<string>(initialSlug || "__new__");
+  const [currentArticleId, setCurrentArticleId] = useState<string>("");
 
   // Metadata
-  const [title, setTitle] = useState(CANONICAL_ARTICLES[0].title);
-  const [subtitle, setSubtitle] = useState(CANONICAL_ARTICLES[0].subtitle || "");
-  const [excerpt, setExcerpt] = useState(CANONICAL_ARTICLES[0].excerpt || CANONICAL_ARTICLES[0].deck || "");
-  const [kicker, setKicker] = useState(CANONICAL_ARTICLES[0].kicker);
-  const [category, setCategory] = useState<PillarCategory>(CANONICAL_ARTICLES[0].category);
-  const [slug, setSlug] = useState(CANONICAL_ARTICLES[0].slug);
+  const [title, setTitle] = useState("");
+  const [subtitle, setSubtitle] = useState("");
+  const [excerpt, setExcerpt] = useState("");
+  const [kicker, setKicker] = useState("NEWSROOM · DESK DISPATCH");
+  const [category, setCategory] = useState<PillarCategory>("state-affairs-environs");
+  const [slug, setSlug] = useState("");
   const [slugManual, setSlugManual] = useState(false);
-  const [authorName, setAuthorName] = useState(CANONICAL_ARTICLES[0].author.name);
-  const [authorRole, setAuthorRole] = useState(CANONICAL_ARTICLES[0].author.role);
-  const [status, setStatus] = useState<PublishingStatus>("published");
+  const [authorName, setAuthorName] = useState("Newsroom Desk");
+  const [authorRole, setAuthorRole] = useState("Staff Reporter");
+  const [status, setStatus] = useState<PublishingStatus>("draft");
   const [sendWebpushr, setSendWebpushr] = useState(false);
-  const [tags, setTags] = useState<string[]>(CANONICAL_ARTICLES[0].tags || ["Nigeria"]);
+  const [tags, setTags] = useState<string[]>(["Nigeria"]);
 
   // Media & Cover
-  const [coverUrl, setCoverUrl] = useState(CANONICAL_ARTICLES[0].featuredImage.url);
-  const [coverCaption, setCoverCaption] = useState(CANONICAL_ARTICLES[0].featuredImage.caption || "");
-  const [coverCredit, setCoverCredit] = useState(CANONICAL_ARTICLES[0].featuredImage.credit || "Cherryl Media");
+  const [coverUrl, setCoverUrl] = useState("");
+  const [coverCaption, setCoverCaption] = useState("");
+  const [coverCredit, setCoverCredit] = useState("Cherryl Media");
   const [inFlightUploads, setInFlightUploads] = useState(0);
 
   // Blocks & More Stories
-  const [blocks, setBlocks] = useState<ContentBlock[]>(
-    CANONICAL_ARTICLES[0].body.map((b, idx) => ({ ...b, order_id: b.order_id || idx + 1 }))
-  );
-  const [relatedStories, setRelatedStories] = useState<RelatedStory[]>(
-    Array.isArray(CANONICAL_ARTICLES[0].related_stories)
-      ? CANONICAL_ARTICLES[0].related_stories.map((b, idx) => ({ ...b, order_id: b.order_id || idx + 1 }))
-      : []
-  );
-
-  // SEO
-  const [seoTitle, setSeoTitle] = useState(CANONICAL_ARTICLES[0].seo_title || "");
-  const [seoSlug, setSeoSlug] = useState(CANONICAL_ARTICLES[0].seo_slug || "");
-  const [seoDescription, setSeoDescription] = useState(CANONICAL_ARTICLES[0].seo_description || "");
-
-  // Social & Sources
-  const [xPost, setXPost] = useState(CANONICAL_ARTICLES[0].channelVariants?.x || "");
-  const [fbPost, setFbPost] = useState(CANONICAL_ARTICLES[0].channelVariants?.facebook || "");
-  const [liPost, setLiPost] = useState(CANONICAL_ARTICLES[0].channelVariants?.linkedin || "");
-  const [nlPost, setNlPost] = useState(CANONICAL_ARTICLES[0].channelVariants?.newsletter || "");
-  const [sources, setSources] = useState<SourceItem[]>([
+  const [blocks, setBlocks] = useState<ContentBlock[]>([
     {
-      url: "https://statehouse.gov.ng",
-      publisher: "State House Communications",
-      claimSummary: "Federal Executive Council approval of national clean energy transition framework.",
-    },
-    {
-      url: "https://nerc.gov.ng",
-      publisher: "NERC Official Gazette",
-      claimSummary: "Decentralized sub-national mini-grid guidelines and tariff ring-fencing for Band A.",
+      order_id: 1,
+      type: "paragraph",
+      text: "",
+      isDropCap: true,
     },
   ]);
+  const [relatedStories, setRelatedStories] = useState<RelatedStory[]>([]);
+
+  // SEO
+  const [seoTitle, setSeoTitle] = useState("");
+  const [seoSlug, setSeoSlug] = useState("");
+  const [seoDescription, setSeoDescription] = useState("");
+
+  // Social & Sources
+  const [xPost, setXPost] = useState("");
+  const [fbPost, setFbPost] = useState("");
+  const [liPost, setLiPost] = useState("");
+  const [nlPost, setNlPost] = useState("");
+  const [sources, setSources] = useState<SourceItem[]>([]);
 
   // Status & Feedback
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -192,14 +181,10 @@ export function useArticleEditor(initialSlug?: string | null) {
       .then((art) => {
         if (art && art.title) {
           populateArticleData(art);
-        } else {
-          const fallback = CANONICAL_ARTICLES.find((a) => a.slug === selectedSlug);
-          if (fallback) populateArticleData(fallback);
         }
       })
-      .catch(() => {
-        const fallback = CANONICAL_ARTICLES.find((a) => a.slug === selectedSlug);
-        if (fallback) populateArticleData(fallback);
+      .catch((err) => {
+        console.warn("fetchArticleBySlug failed:", err);
       });
   }, [selectedSlug, populateArticleData]);
 

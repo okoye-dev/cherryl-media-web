@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { CANONICAL_ARTICLES } from "@/lib/articles";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -14,22 +13,18 @@ export async function GET(req: Request) {
   try {
     const res = await fetch(
       `${backendUrl}/api/articles/check-slug?slug=${encodeURIComponent(slug)}&excludeId=${encodeURIComponent(excludeId)}`,
-      { cache: "no-store", signal: AbortSignal.timeout(3000) }
+      { cache: "no-store", signal: AbortSignal.timeout(4000) }
     );
     if (res.ok) {
       const data = await res.json();
       return NextResponse.json(data);
     }
-  } catch {
-    // Backend offline; fallback to canonical articles check
+  } catch (err) {
+    console.error("check-slug proxy error:", err);
   }
-
-  const exists = CANONICAL_ARTICLES.some(
-    (a) => a.slug.toLowerCase() === slug.toLowerCase() && (!excludeId || a.id !== excludeId)
-  );
 
   return NextResponse.json({
     slug,
-    available: !exists,
+    available: true,
   });
 }
