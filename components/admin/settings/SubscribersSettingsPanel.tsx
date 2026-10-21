@@ -100,7 +100,7 @@ export function SubscribersSettingsPanel() {
         )}
         {error && <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-400">{error}</div>}
 
-        <form ref={formRef} onSubmit={handleAdd} className="space-y-3 rounded-lg border border-white/10 bg-white/[0.02] p-4">
+        <form ref={formRef} onSubmit={handleAdd} className="space-y-3 rounded-lg border border-white/10 bg-white/[0.02] p-3 sm:p-4">
           <h3 className="text-sm font-semibold text-white">Add a recipient</h3>
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
             <div>

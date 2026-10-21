@@ -176,7 +176,7 @@ export default function ImageUploadField({
           type="button"
           onClick={() => fileInputRef.current?.click()}
           disabled={isUploading}
-          className={`flex min-h-20 w-full items-center justify-center gap-3 rounded-xl border-2 border-dashed p-4 transition-colors disabled:opacity-50 ${
+          className={`flex min-h-20 w-full items-center justify-center gap-3 rounded-xl border-2 border-dashed p-3 transition-colors sm:p-4 disabled:opacity-50 ${
             hasError
               ? "border-red-500/80 bg-red-950/20 text-red-200"
               : "border-white/15 bg-[#1A1D24]/60 text-zinc-300 hover:border-brand-red hover:bg-[#1A1D24] hover:text-white"
