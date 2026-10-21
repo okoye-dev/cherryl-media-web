@@ -73,6 +73,26 @@ html[data-menu="open"] {
   color: #f4f3ee;
 }
 
+/* Section bar button: short label when the bar is narrow, full label when there is room.
+   Uses the bar's own width (a container query), so it works in two-column layouts too. */
+.section-bar {
+  container: secbar / inline-size;
+}
+.pill-long {
+  display: none;
+}
+.pill-short {
+  display: inline;
+}
+@container secbar (min-width: 38rem) {
+  .pill-long {
+    display: inline;
+  }
+  .pill-short {
+    display: none;
+  }
+}
+
 /* Section titles stay readable under the fixed header while you scroll */
 .section-sticky {
   position: sticky;
@@ -184,7 +204,55 @@ html[data-menu="open"] #page {
   }
 }
 
+/* Background artwork fades out in one direction: downwards and a little sideways.
+   fade-dl: strongest at the top right, fading towards the bottom left.
+   fade-dr: strongest at the top left, fading towards the bottom right. */
+.fade-dl {
+  -webkit-mask-image: linear-gradient(205deg, #000 0%, rgb(0 0 0 / 0.55) 35%, transparent 78%);
+  mask-image: linear-gradient(205deg, #000 0%, rgb(0 0 0 / 0.55) 35%, transparent 78%);
+}
+.fade-dr {
+  -webkit-mask-image: linear-gradient(155deg, #000 0%, rgb(0 0 0 / 0.55) 35%, transparent 78%);
+  mask-image: linear-gradient(155deg, #000 0%, rgb(0 0 0 / 0.55) 35%, transparent 78%);
+}
+
+/* Backdrop artwork moves with the scroll. Only where the browser supports scroll timelines. */
+@supports (animation-timeline: view()) {
+  .bd-rise {
+    animation: bd-rise linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 55%;
+  }
+  .bd-spin {
+    animation: bd-spin linear both;
+    animation-timeline: view();
+    animation-range: cover 0% cover 100%;
+  }
+  .bd-drift {
+    animation: bd-drift linear both;
+    animation-timeline: view();
+    animation-range: cover 0% cover 100%;
+  }
+}
+@keyframes bd-rise {
+  from { transform: translateY(28vh) scale(0.92); }
+  to { transform: none; }
+}
+@keyframes bd-spin {
+  from { transform: rotate(-25deg); }
+  to { transform: rotate(35deg); }
+}
+@keyframes bd-drift {
+  from { translate: 0 8vh; }
+  to { translate: 0 -8vh; }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .bd-rise,
+  .bd-spin,
+  .bd-drift {
+    animation: none;
+  }
   html {
     scroll-behavior: auto;
   }

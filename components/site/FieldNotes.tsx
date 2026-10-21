@@ -17,7 +17,7 @@ export default async function FieldNotes() {
       : defaultOpinion;
 
   return (
-    <section aria-labelledby="opinion-notes" className="min-w-0">
+    <section aria-labelledby="opinion-notes" className="min-w-0 md:row-span-2 md:grid md:grid-rows-subgrid">
       <SectionHeader
         id="opinion-notes"
         title="Opinions & Perspectives"

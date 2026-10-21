@@ -3,10 +3,13 @@ import Hero from "@/components/site/Hero";
 import IndexList from "@/components/site/IndexList";
 import FieldNotes from "@/components/site/FieldNotes";
 import FigureCard from "@/components/site/FigureCard";
+import OverlayCard from "@/components/site/OverlayCard";
 import MediaDistributionStrip from "@/components/site/MediaDistributionStrip";
 import EditorialDossier from "@/components/site/EditorialDossier";
 import SectionHeader from "@/components/site/SectionHeader";
+import SectionArt from "@/components/site/SectionArt";
 import { getCuratedSections } from "@/lib/sections";
+import { authorName } from "@/lib/formatters";
 
 export const revalidate = 30; // ISR revalidation every 30 seconds
 
@@ -35,8 +38,10 @@ export default async function Home() {
       <IndexList />
 
       {/* Flagship Section 1: State Affairs & Environs (10,000+ post archive pillar) */}
-      <div className="mx-auto mt-20 grid w-full max-w-[90rem] gap-14 px-5 md:mt-28 md:grid-cols-[1.35fr_1fr] md:gap-14 md:px-10 xl:px-16">
-        <section aria-labelledby="state-affairs-dispatches" className="min-w-0">
+      <div className="relative isolate mx-auto mt-20 grid w-full max-w-[90rem] gap-14 px-5 md:mt-28 md:grid-cols-[1.35fr_1fr] md:grid-rows-[auto_1fr] md:gap-x-14 md:gap-y-0 md:px-10 xl:px-16">
+        <SectionArt name="contours" />
+        <SectionArt name="bubbles" />
+        <section aria-labelledby="state-affairs-dispatches" className="min-w-0 md:row-span-2 md:grid md:grid-rows-subgrid">
           <SectionHeader
             id="state-affairs-dispatches"
             title="State Affairs & Environs"
@@ -65,23 +70,25 @@ export default async function Home() {
       {/* Flagship Section 3: Brands & SMEs Commercial Coverage */}
       <section
         aria-labelledby="brands-smes"
-        className="mx-auto mt-20 w-full max-w-[90rem] px-5 md:mt-28 md:px-10 xl:px-16"
+        className="relative isolate mx-auto mt-20 w-full max-w-[90rem] px-5 md:mt-28 md:px-10 xl:px-16"
       >
+        <SectionArt name="network" />
         <SectionHeader
           id="brands-smes"
           title="Brands & SMEs"
           href="/category/brands-smes"
           linkLabel="View all"
         />
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:gap-8 lg:grid-cols-3">
-          {brandsStories.map((story, i) => (
-            <FigureCard
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:gap-6 lg:grid-cols-3 2xl:grid-cols-4 max-sm:[&>*:nth-child(n+4)]:hidden lg:[&>*:nth-child(n+4)]:hidden 2xl:[&>*:nth-child(n+4)]:block">
+          {brandsStories.map((story) => (
+            <OverlayCard
               key={story.slug || story.id}
-              index={i + 1}
               name={story.title}
               category={story.categoryName || story.category}
               href={`/article/${story.slug}`}
               readTime={story.readTime}
+              author={authorName(story)}
+              showCategory={false}
               imageUrl={story.featuredImage?.url}
             />
           ))}

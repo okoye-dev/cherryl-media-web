@@ -57,7 +57,7 @@ export default function ArticleBody({ blocks }: { blocks: ContentBlock[] }) {
           case "image":
             return (
               <figure key={idx} className="my-8">
-                <div className="aspect-[16/10] w-full overflow-hidden rounded-2xl border border-ink/10 bg-paper-deep/70 relative flex items-center justify-center text-ink/50 font-display italic text-lg">
+                <div className="aspect-[16/10] w-full overflow-hidden rounded-2xl border border-ink/10 bg-paper-deep relative flex items-center justify-center text-ink/50 font-display italic text-lg">
                   {block.src ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img

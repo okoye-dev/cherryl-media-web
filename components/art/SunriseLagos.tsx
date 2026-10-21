@@ -2,6 +2,7 @@
  * Flat illustration for the newsletter block: sunrise behind the Lekki-Ikoyi
  * cable-stayed bridge, with the Lagos skyline either side. Drawn by hand as SVG,
  * so it is crisp at any size. Crops to the centre (sun and bridge) on phones.
+ * Pass fade to let the top dissolve, so the scene can sit behind text.
  */
 
 // Same pseudo-random numbers every render, so server and browser agree.
@@ -83,7 +84,7 @@ function Towers({ towers, seed }: { towers: Tower[]; seed: number }) {
   );
 }
 
-export default function SunriseLagos({ className }: { className?: string }) {
+export default function SunriseLagos({ className, fade = false }: { className?: string; fade?: boolean }) {
   // Bridge cables: eight on each side, fanning from the tower down to the deck.
   const cables = Array.from({ length: 8 }, (_, i) => ({
     topY: 168 + i * 8,
@@ -98,6 +99,14 @@ export default function SunriseLagos({ className }: { className?: string }) {
       viewBox="0 0 1200 400"
       preserveAspectRatio="xMidYMax slice"
       className={className}
+      style={
+        fade
+          ? {
+              maskImage: "linear-gradient(to top, #000 55%, transparent 100%)",
+              WebkitMaskImage: "linear-gradient(to top, #000 55%, transparent 100%)",
+            }
+          : undefined
+      }
       role="img"
       aria-label="Sunrise over the Lagos skyline and the Lekki-Ikoyi bridge"
     >
@@ -140,8 +149,8 @@ export default function SunriseLagos({ className }: { className?: string }) {
         <line key={y} x1={a} y1={y} x2={b} y2={y} stroke="#FF8A5C" strokeWidth={2} strokeLinecap="round" opacity={0.7} />
       ))}
 
-      {/* birds */}
-      {[[286, 84], [330, 62], [892, 104]].map(([x, y], i) => (
+      {/* birds (left out when the scene sits behind text) */}
+      {!fade && [[286, 84], [330, 62], [892, 104]].map(([x, y], i) => (
         <path
           key={i}
           d={`M${x} ${y} q7 -7 14 0 q7 -7 14 0`}

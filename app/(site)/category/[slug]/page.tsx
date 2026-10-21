@@ -58,6 +58,7 @@ export default async function CategoryPage({ params }: { params: Params }) {
       <PageHeader
         label="Editorial Desk · Verified Dispatches"
         title={category.name}
+        stop
         intro={category.summary}
       />
 

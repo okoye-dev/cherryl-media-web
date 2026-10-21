@@ -33,7 +33,7 @@ export function SocialIcon({ name, className }: { name: SocialKey; className?: s
   return (
     <svg
       viewBox="0 0 24 24"
-      className={className ?? "h-[1.05rem] w-[1.05rem]"}
+      className={className ?? "h-[1.3rem] w-[1.3rem]"}
       fill="none"
       stroke="currentColor"
       strokeWidth="1.6"
@@ -81,10 +81,10 @@ export default function SocialLinks({
           target="_blank"
           rel="noreferrer"
           aria-label={s.label}
-          className={cn(PILL_BASE, "h-9 w-9 justify-center border p-0",
-            tone === "dark" ? "border-snow/25 text-snow" : "border-ink/20 text-ink",)}
+          className={cn(PILL_BASE, "h-11 w-11 justify-center border p-0",
+            tone === "dark" ? "border-snow/25 bg-snow/[0.08] text-snow backdrop-blur-md" : "border-ink/20 text-ink",)}
         >
-          <SocialIcon name={s.key as SocialKey} />
+          <SocialIcon name={s.key as SocialKey} className="h-[1.4rem] w-[1.4rem]" />
         </a>
       ))}
     </div>

@@ -1,9 +1,12 @@
+import { withStop } from "@/lib/formatters";
+
 export default function PageHeader({
   label,
   title,
   intro,
   compact = false,
   byline,
+  stop = false,
 }: {
   label: string;
   title: React.ReactNode;
@@ -11,6 +14,8 @@ export default function PageHeader({
   /** Smaller title, for long titles such as a field note */
   compact?: boolean;
   byline?: React.ReactNode;
+  /** Add a full stop after a plain-text title (desk and section pages) */
+  stop?: boolean;
 }) {
   return (
     <div className="mx-auto w-full max-w-[90rem] px-5 pb-6 pt-24 md:px-10 md:pt-32 xl:px-16">
@@ -23,7 +28,7 @@ export default function PageHeader({
         }
         style={{ animationDelay: "100ms" }}
       >
-        {title}
+        {stop && typeof title === "string" ? withStop(title) : title}
       </h1>
       {intro && (
         <p

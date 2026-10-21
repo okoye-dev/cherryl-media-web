@@ -1,5 +1,6 @@
 import Link from "next/link";
 import SectionHeader from "./SectionHeader";
+import SectionArt from "./SectionArt";
 import { getEditorialCopy } from "@/lib/settings";
 import { getCuratedSections } from "@/lib/sections";
 import {
@@ -17,7 +18,7 @@ type Story = NonNullable<
 /** A small label above a title. Quiet on purpose, so the title leads. */
 function Kicker({ story }: { story: Story }) {
   return (
-    <span className="label text-[0.6rem] font-medium leading-none text-ink-soft/70">
+    <span className="label text-[0.62rem] font-semibold leading-none text-brand-red/85">
       {story.kicker || formatCategoryName(story.categoryName || story.category)}
     </span>
   );
@@ -49,9 +50,10 @@ export default async function EditorialDossier() {
 
   return (
     <section
-      className="mx-auto mt-24 w-full max-w-[90rem] px-5 md:mt-36 md:px-10 xl:px-16"
+      className="relative isolate mx-auto mt-24 w-full max-w-[90rem] px-5 md:mt-36 md:px-10 xl:px-16"
       aria-labelledby="dossier-heading"
     >
+      <SectionArt name="waveform" />
       <SectionHeader
         id="dossier-heading"
         eyebrow={copy.dossier.issueBadge}
@@ -63,18 +65,18 @@ export default async function EditorialDossier() {
         {copy.dossier.subheading}
       </p>
 
-      <div className="grid gap-10 lg:grid-cols-12 lg:gap-4 xl:gap-5">
+      <div className="grid gap-10 lg:grid-cols-12 lg:items-start lg:gap-4 xl:gap-5">
         {/* The feature lead: the only card here that carries a byline */}
         {leadStory && (
-          <article className="group flex flex-col justify-between rounded-[1.75rem] border border-ink/10 bg-cream p-3 transition-all duration-300 hover:border-brand-red/40 sm:p-4 lg:col-span-5 lg:p-5">
+          <article className="group flex flex-col rounded-[1.75rem] border border-ink/10 bg-cream p-3 transition-all duration-300 hover:border-brand-red/40 sm:p-4 lg:col-span-5 lg:p-5">
             <div>
-              <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[1.1rem] border border-ink/10 bg-paper-deep/60">
+              <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[1.1rem] border border-ink/10 bg-paper-deep">
                 {leadStory.featuredImage?.url && (
                   <>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={leadStory.featuredImage.url}
-                      alt={leadStory.title}
+                      alt=""
                       className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-night/70 via-transparent to-transparent" />
@@ -90,13 +92,13 @@ export default async function EditorialDossier() {
                 <h3 className="mt-4 font-area text-[1.35rem] font-semibold leading-snug tracking-[-0.02em] text-ink transition-all duration-200 group-hover:italic group-hover:text-brand-red md:text-[1.5rem]">
                   <Link href={`/article/${leadStory.slug}`}>{leadStory.title}</Link>
                 </h3>
-                <p className="mt-4 line-clamp-3 text-sm font-normal leading-relaxed text-ink/75">
+                <p className="mt-4 line-clamp-4 text-sm font-normal leading-relaxed text-ink/75 md:line-clamp-none">
                   {leadStory.deck || leadStory.excerpt}
                 </p>
               </div>
             </div>
 
-            <div className="mx-2 mt-8 flex items-center justify-between border-t border-ink/10 pt-4 text-xs font-medium text-ink-soft sm:mx-1">
+            <div className="mx-2 mt-6 flex items-center justify-between border-t border-ink/10 pt-4 text-xs font-medium text-ink-soft sm:mx-1">
               <span>By {authorName(leadStory) || TEAM_BYLINE}</span>
               <span className="font-num text-[0.7rem]">{formatDate(leadStory.publishedAt)}</span>
             </div>
@@ -108,7 +110,7 @@ export default async function EditorialDossier() {
           {sideCards.map((story) => (
             <article
               key={story.slug}
-              className="group flex flex-1 flex-col justify-between rounded-[1.75rem] border border-ink/10 bg-cream p-6 transition-all duration-300 hover:border-brand-red/40 md:p-7"
+              className="group flex flex-col rounded-[1.75rem] border border-ink/10 bg-cream p-6 transition-all duration-300 hover:border-brand-red/40 md:p-7"
             >
               <div>
                 <div className="flex items-center justify-between gap-3 text-xs text-ink-soft">
@@ -118,7 +120,7 @@ export default async function EditorialDossier() {
                 <h3 className="mt-5 font-area text-[1.2rem] font-semibold leading-snug tracking-[-0.02em] text-ink transition-all duration-200 group-hover:italic group-hover:text-brand-red">
                   <Link href={`/article/${story.slug}`}>{story.title}</Link>
                 </h3>
-                <p className="mt-4 line-clamp-2 text-[0.82rem] font-normal leading-relaxed text-ink/70">
+                <p className="mt-4 line-clamp-4 text-[0.82rem] font-normal leading-relaxed text-ink/70 lg:line-clamp-none">
                   {story.deck || story.excerpt}
                 </p>
               </div>
@@ -149,7 +151,7 @@ export default async function EditorialDossier() {
                       {item.title}
                     </h4>
                     {(item.deck || item.excerpt) && (
-                      <p className="mt-3 line-clamp-2 text-xs font-normal leading-relaxed text-ink/70">
+                      <p className="mt-3 line-clamp-3 text-xs font-normal leading-relaxed text-ink/70">
                         {item.deck || item.excerpt}
                       </p>
                     )}

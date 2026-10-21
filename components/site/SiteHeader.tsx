@@ -7,6 +7,7 @@ import { SITE } from "@/config/site";
 import { cn } from "@/utils";
 import ThemeToggle from "./ThemeToggle";
 import SocialLinks from "./SocialLinks";
+import { Ripples, Cherries, CowrieRing, Contours, Sparkle } from "@/components/art";
 
 export default function SiteHeader() {
   const [open, setOpen] = useState(false);
@@ -115,11 +116,21 @@ export default function SiteHeader() {
         id="site-menu"
         aria-label="Editorial Index"
         className={cn(
-          "fixed inset-y-0 right-0 z-30 flex w-full flex-col justify-between overflow-y-auto bg-cream px-6 pb-8 pt-24 transition-[transform,visibility] duration-[900ms] ease-[cubic-bezier(0.32,0.72,0,1)] md:w-[68vw] md:px-14 md:pb-12 xl:px-20",
+          "fixed inset-y-0 right-0 z-30 flex h-dvh w-full flex-col justify-between overflow-y-auto overflow-x-hidden bg-cream px-6 pb-[clamp(1rem,5vh,3.5rem)] pt-[clamp(4.5rem,10vh,6.5rem)] transition-[transform,visibility] duration-[900ms] ease-[cubic-bezier(0.32,0.72,0,1)] md:w-[68vw] md:px-14 xl:px-20",
           open ? "visible translate-x-0" : "invisible translate-x-full",
         )}
       >
-        <div className="flex items-center justify-between border-b border-ink/10 pb-4 shrink-0">
+        {/* Faint artwork behind the menu */}
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+          <Ripples className="absolute -right-32 -top-24 h-[34rem] w-[34rem] opacity-[0.07] fade-dl" />
+          <Contours className="absolute -bottom-28 -left-24 h-[30rem] w-[30rem] opacity-[0.06] fade-dr" />
+          <Cherries className="absolute right-6 top-[46%] h-28 w-28 rotate-12 opacity-[0.1] fade-dl md:right-16 md:h-40 md:w-40" />
+          <CowrieRing className="absolute -right-10 bottom-4 hidden h-56 w-56 opacity-[0.07] fade-dl md:block" />
+          <Sparkle className="absolute left-[8%] top-[34%] h-5 w-5 text-brand-red opacity-[0.15]" />
+          <Sparkle className="absolute right-[34%] top-[78%] h-3.5 w-3.5 text-orange opacity-[0.18]" />
+        </div>
+
+        <div className="relative flex items-center justify-between border-b border-ink/10 pb-[1.5vh] shrink-0">
           <span className="label font-medium text-ink-soft">
             Editorial Categories &amp; Sections
           </span>
@@ -128,8 +139,8 @@ export default function SiteHeader() {
           </span>
         </div>
 
-        <nav aria-label="Menu" className="my-auto flex flex-col justify-center py-4 sm:py-6">
-          <ul className="flex flex-col sm:gap-1.5">
+        <nav aria-label="Menu" className="relative flex min-h-0 flex-1 flex-col justify-center py-[1.5vh]">
+          <ul className="flex flex-col">
             {SITE.categories.map((cat, i) => {
               const active = pathname === `/category/${cat.slug}`;
               return (
@@ -141,7 +152,7 @@ export default function SiteHeader() {
                   <Link
                     href={`/category/${cat.slug}`}
                     onClick={close}
-                    className="group flex items-center justify-between gap-4 py-2 sm:py-2.5"
+                    className="group flex items-center justify-between gap-4 py-[0.7vh]"
                   >
                     <div className="flex items-baseline gap-3.5 md:gap-5 min-w-0">
                       <span className="w-5 shrink-0 font-num text-xs sm:text-sm font-medium text-ink-soft md:w-7">
@@ -149,7 +160,7 @@ export default function SiteHeader() {
                       </span>
                       <span
                         className={cn(
-                          "font-area text-[clamp(1.25rem,2.8vw,1.9rem)] font-light leading-[1.2] tracking-[-0.02em] transition-all duration-300 group-hover:italic group-hover:text-brand-red group-active:text-brand-red",
+                          "font-area text-[clamp(1.05rem,min(2.8vw,3.9vh),1.9rem)] font-light leading-[1.2] tracking-[-0.02em] transition-all duration-300 group-hover:italic group-hover:text-brand-red group-active:text-brand-red",
                           active ? "italic text-brand-red font-normal" : "text-ink",
                         )}
                       >
@@ -163,7 +174,7 @@ export default function SiteHeader() {
           </ul>
         </nav>
 
-        <div className="flex flex-col gap-6 border-t border-ink/10 pt-6 text-[0.88rem] shrink-0 sm:flex-row sm:items-end sm:justify-between">
+        <div className="relative flex flex-col gap-6 border-t border-ink/10 pt-[2.5vh] text-[0.88rem] shrink-0 sm:flex-row sm:items-end sm:justify-between">
           <div className="flex flex-col gap-1.5">
             <p className="label font-medium text-ink-soft">Cherryl Media Newsroom</p>
             <a

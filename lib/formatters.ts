@@ -81,3 +81,8 @@ export function authorName(article: WithAuthor): string {
 
 /** For large featured spots only: the author, or the team when nobody is named. */
 export const TEAM_BYLINE = "Cherryl Media Team";
+
+/** Adds a full stop to a section or page title, unless it already ends with punctuation. */
+export function withStop(title: string): string {
+  return /[.!?…]$/.test(title.trim()) ? title : `${title}.`;
+}

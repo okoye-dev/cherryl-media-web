@@ -130,7 +130,7 @@ export default async function ArticlePage({ params }: { params: Params }) {
 
         <div className="mx-auto w-full max-w-[55rem] px-5 pt-8 md:px-10">
           <figure className="mb-12">
-            <div className="aspect-[16/9] w-full rounded-2xl bg-paper-deep/80 relative flex items-center justify-center border border-ink/10 text-ink-soft/40 font-display italic text-2xl overflow-hidden">
+            <div className="aspect-[16/9] w-full rounded-2xl bg-paper-deep relative flex items-center justify-center border border-ink/10 text-ink-soft/40 font-display italic text-2xl overflow-hidden">
               {article.featuredImage.url && !article.featuredImage.url.includes("sample.webp") ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -277,7 +277,7 @@ export default async function ArticlePage({ params }: { params: Params }) {
                       className="group block rounded-2xl border border-ink/10 bg-paper/50 p-4 transition-all duration-300 hover:border-brand-red/30 hover:bg-paper"
                     >
                       {item.imageUrl && (
-                        <div className="aspect-[16/9] w-full overflow-hidden rounded-xl bg-paper-deep/60 mb-3 border border-ink/5">
+                        <div className="aspect-[16/9] w-full overflow-hidden rounded-xl bg-paper-deep mb-3 border border-ink/5">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={resolveMediaUrl(item.imageUrl)}

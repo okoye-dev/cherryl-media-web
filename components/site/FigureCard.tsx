@@ -16,12 +16,12 @@ export default function FigureCard({
 }) {
   return (
     <Link href={href} className="group block">
-      <div className="aspect-[16/10] rounded-[1.25rem] text-[0.8rem] relative overflow-hidden transition-all duration-500 group-hover:border-brand-red/30 border border-ink/10 bg-paper-deep/60">
+      <div className="aspect-[16/10] rounded-[1.25rem] text-[0.8rem] relative overflow-hidden transition-all duration-500 group-hover:border-brand-red/30 border border-ink/10 bg-paper-deep">
         {imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={imageUrl}
-            alt={name}
+            alt=""
             className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
         ) : (
@@ -34,7 +34,7 @@ export default function FigureCard({
         </span>
       </div>
       <div className="mt-4 mb-2">
-        <span className="block font-area text-[1.05rem] md:text-[1.15rem] font-semibold leading-snug tracking-[-0.02em] text-ink transition-all duration-200 group-hover:italic group-hover:text-brand-red">
+        <span title={name} className="line-clamp-3 block font-area text-[1.05rem] md:text-[1.15rem] md:line-clamp-4 font-semibold leading-snug tracking-[-0.02em] text-ink transition-all duration-200 group-hover:italic group-hover:text-brand-red">
           {name}
         </span>
       </div>
