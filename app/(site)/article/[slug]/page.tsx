@@ -8,7 +8,7 @@ import ArticleBody from "@/components/site/ArticleBody";
 import { SITE } from "@/config/site";
 import { getAllArticleSlugs, getArticleBySlug } from "@/lib/news";
 import { resolveMediaUrl } from "@/lib/url-utils";
-import { formatDate, formatCategoryName, formatReadTime } from "@/lib/formatters";
+import { formatDate, formatCategoryName, formatReadTime, authorName, TEAM_BYLINE } from "@/lib/formatters";
 
 export const dynamicParams = true;
 export const revalidate = 30;
@@ -54,7 +54,7 @@ export async function generateMetadata({
       locale: "en_NG",
       type: "article",
       publishedTime: article.publishedAt,
-      authors: [article.author.name],
+      authors: [authorName(article) || TEAM_BYLINE],
     },
     twitter: {
       card: "summary_large_image",
@@ -78,12 +78,11 @@ export default async function ArticlePage({ params }: { params: Params }) {
     description: article.deck,
     datePublished: article.publishedAt,
     dateModified: article.updatedAt || article.publishedAt,
+    // A story with no named author is credited to the newsroom, as an organisation.
     author: [
-      {
-        "@type": "Person",
-        name: article.author.name,
-        jobTitle: article.author.role,
-      },
+      authorName(article)
+        ? { "@type": "Person", name: authorName(article), jobTitle: article.author.role || undefined }
+        : { "@type": "Organization", name: TEAM_BYLINE },
     ],
     publisher: {
       "@type": "NewsMediaOrganization",
@@ -116,7 +115,7 @@ export default async function ArticlePage({ params }: { params: Params }) {
             <>
               <div className="flex items-center gap-2">
                 <span>
-                  By <strong className="font-semibold text-ink">{article.author.name}</strong>
+                  By <strong className="font-semibold text-ink">{authorName(article) || TEAM_BYLINE}</strong>
                 </span>
                 <span>·</span>
                 <span className="font-num whitespace-nowrap">{formatDate(article.publishedAt)}</span>
@@ -233,7 +232,7 @@ export default async function ArticlePage({ params }: { params: Params }) {
           {article.tags && article.tags.length > 0 && (
             <div className="mt-8 border-t border-ink/10 pt-6">
               <span className="label text-[0.7rem] font-semibold tracking-wider text-ink/60 uppercase block mb-3">
-                Filed Under
+                Tags
               </span>
               <div className="flex flex-wrap items-center gap-2">
                 {article.tags.map((tag) => (
@@ -241,7 +240,7 @@ export default async function ArticlePage({ params }: { params: Params }) {
                     key={tag}
                     className="rounded-full bg-paper-deep/70 px-3 py-1 font-mono text-[0.72rem] text-ink/80 border border-ink/10"
                   >
-                    #{tag}
+                    {tag}
                   </span>
                 ))}
               </div>

@@ -2,379 +2,362 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { articleService } from "@/services";
+import { fetchArticlesPage, fetchCandidatesPage } from "@/services/articles";
 import { SITE } from "@/config/site";
+import { Btn, Panel, PageTitle, Badge, Tabs, Pagination } from "@/components/admin/ui";
 import type { CanonicalArticle } from "@/lib/types";
+import QuickPublishSheet from "@/components/admin/dashboard/QuickPublishSheet";
+import { leadToArticle, type RawLead } from "@/lib/leadToArticle";
+import { formatCategoryName } from "@/lib/formatters";
 
 interface StoryLead {
   id: string;
   title: string;
-  source: string;
-  freshness: string;
-  confidence: string;
+  pitch: string;
   category: string;
-  status: string;
+  relevance: number | null;
+  sources: number;
+  facts: number;
+  hasDraft: boolean;
+  raw?: RawLead;
 }
 
-const FALLBACK_CANDIDATES: StoryLead[] = [
-  {
-    id: "cand-01",
-    title: "Federal Ministry of Transport Directs Regional Rail Link Feasibility Review",
-    source: "Federal Gazette Feed",
-    freshness: "14m ago",
-    confidence: "Confirmed",
-    category: "Current Affairs",
-    status: "Ready to write",
-  },
-  {
-    id: "cand-02",
-    title: "DisCos Issue Consumer Advisory on Prepaid Smart Meter Firmware Upgrades",
-    source: "NERC Official Feed",
-    freshness: "42m ago",
-    confidence: "Official Release",
-    category: "Practical Updates",
-    status: "Draft Ready",
-  },
-  {
-    id: "cand-03",
-    title: "Nollywood Independent Producers Conclude Historic Co-Production Deal",
-    source: "Film Guild Statement",
-    freshness: "2h ago",
-    confidence: "Verified",
-    category: "Entertainment & Internet Culture",
-    status: "Needs Fact Check",
-  },
-];
+type Filter = "all" | "published" | "draft";
+
+function authorOf(a: CanonicalArticle) {
+  return typeof a.author === "string" ? a.author : a.author?.name;
+}
+
+const niceCategory = (v: string) => formatCategoryName(v);
+
+function formatDate(a: CanonicalArticle) {
+  const raw = a.updatedAt || a.publishedAt;
+  if (!raw) return "";
+  const d = new Date(raw);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+}
+
+function StatusBadge({ status }: { status: string }) {
+  return <Badge tone={status === "published" ? "green" : "amber"}>{status === "published" ? "Published" : "Draft"}</Badge>;
+}
+
+const STORY_PAGE = 10;
+const LEAD_PAGE = 8;
+
+function toLead(c: RawLead, i: number): StoryLead {
+  const score = typeof c.relevanceScore === "number" ? c.relevanceScore : null;
+  return {
+    id: c.id || `lead-${i}`,
+    title: c.headline || "Untitled lead",
+    pitch: c.pitch || "",
+    category: niceCategory(c.category || "General"),
+    relevance: score === null ? null : Math.round(score <= 1 ? score * 100 : score),
+    sources: Array.isArray(c.sources) ? c.sources.length : 0,
+    facts: Array.isArray(c.extractedFacts) ? c.extractedFacts.length : 0,
+    hasDraft: Array.isArray(c.suggestedDraft) && c.suggestedDraft.length > 0,
+    raw: c,
+  };
+}
 
 export default function AdminDashboardPage() {
+  // Stories: one server page at a time, filtered by status on the server.
   const [articles, setArticles] = useState<CanonicalArticle[]>([]);
-  const [candidates, setCandidates] = useState<StoryLead[]>(FALLBACK_CANDIDATES);
-  const [statusFilter, setStatusFilter] = useState<"all" | "published" | "draft">("all");
+  const [statusFilter, setStatusFilter] = useState<Filter>("all");
+  const [storyPage, setStoryPage] = useState(1);
+  const [storyInfo, setStoryInfo] = useState({ total: 0, totalPages: 1, pageSize: STORY_PAGE });
+  const [counts, setCounts] = useState({ all: 0, published: 0, draft: 0 });
+  const [storiesBusy, setStoriesBusy] = useState(true);
+  // Leads: also one server page at a time.
+  const [candidates, setCandidates] = useState<StoryLead[]>([]);
+  const [leadPage, setLeadPage] = useState(1);
+  const [leadInfo, setLeadInfo] = useState({ total: 0, totalPages: 1, pageSize: LEAD_PAGE });
+  const [leadsBusy, setLeadsBusy] = useState(true);
+  const [reload, setReload] = useState(0);
+  const [quick, setQuick] = useState<{ draft: Partial<CanonicalArticle>; editHref: string; from: "lead" | "draft"; leadId?: string } | null>(null);
+
+  // The three tab counts come from the server totals (three one-item requests).
+  useEffect(() => {
+    let alive = true;
+    Promise.all(["all", "published", "draft"].map((st) => fetchArticlesPage({ status: st, page: 1, pageSize: 1 })))
+      .then(([all, pub, dr]) => alive && setCounts({ all: all.total, published: pub.total, draft: dr.total }))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [reload]);
 
   useEffect(() => {
-    let isMounted = true;
-
-    articleService
-      .getArticles({ status: "all" })
-      .then((data) => {
-        if (isMounted && Array.isArray(data) && data.length > 0) {
-          setArticles(data);
-        }
+    let alive = true;
+    setStoriesBusy(true);
+    fetchArticlesPage({ status: statusFilter, page: storyPage, pageSize: STORY_PAGE })
+      .then((r) => {
+        if (!alive) return;
+        setArticles(r.items);
+        setStoryInfo({ total: r.total, totalPages: r.totalPages, pageSize: r.pageSize });
       })
-      .catch(() => {});
-
-    articleService
-      .getCandidates()
-      .then((rawCandidates) => {
-        if (isMounted && Array.isArray(rawCandidates) && rawCandidates.length > 0) {
-          const mapped: StoryLead[] = rawCandidates.map((c, i) => ({
-            id: c.id || `lead-${i}`,
-            title: c.headline || "Untitled Lead",
-            source: c.source || "Automated Discovery",
-            freshness: c.freshness || "Recent",
-            confidence: c.confidence || "High",
-            category: c.category || "General",
-            status: c.status || "Ready to write",
-          }));
-          setCandidates(mapped);
-        }
-      })
-      .catch(() => {});
-
+      .catch(() => {})
+      .finally(() => alive && setStoriesBusy(false));
     return () => {
-      isMounted = false;
+      alive = false;
     };
-  }, []);
+  }, [statusFilter, storyPage, reload]);
 
-  const publishedCount = articles.filter((a) => a.status === "published").length;
-  const draftsCount = articles.filter((a) => a.status === "draft").length;
+  useEffect(() => {
+    let alive = true;
+    setLeadsBusy(true);
+    fetchCandidatesPage({ page: leadPage, pageSize: LEAD_PAGE })
+      .then((r) => {
+        if (!alive) return;
+        setCandidates((r.items as RawLead[]).map(toLead));
+        setLeadInfo({ total: r.total, totalPages: r.totalPages, pageSize: r.pageSize });
+      })
+      .catch(() => {})
+      .finally(() => alive && setLeadsBusy(false));
+    return () => {
+      alive = false;
+    };
+  }, [leadPage, reload]);
 
-  const filteredArticles = articles.filter((a) => {
-    if (statusFilter === "all") return true;
-    return a.status === statusFilter;
-  });
+  const publishedCount = counts.published;
+  const draftsCount = counts.draft;
+  const filteredArticles = articles;
+  const visibleLeads = candidates;
+  const openLeads = candidates;
+
+  const stats = [
+    { label: "Published", value: publishedCount, tone: "text-emerald-400" },
+    { label: "Drafts", value: draftsCount, tone: "text-amber-400" },
+    { label: "Categories", value: SITE.categories.length, tone: "text-white" },
+    { label: "Leads", value: leadInfo.total, tone: "text-violet-300" },
+  ];
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto">
-      {/* Header bar */}
-      <div className="flex flex-col gap-4 border-b border-white/[0.08] pb-6 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <span className="label text-[0.68rem] font-semibold tracking-wider text-brand-red">NEWSROOM DESK</span>
-          <h1 className="mt-1 font-sans text-2xl font-semibold text-white sm:text-3xl tracking-tight">
-            Stories &amp; Publishing Control
-          </h1>
-        </div>
-        <div className="flex items-center gap-3">
-          <Link
-            href="/admin/settings"
-            className="w-full sm:w-auto inline-flex items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] px-4 py-2 text-xs font-semibold text-zinc-300 hover:text-white hover:bg-white/[0.08] transition-all"
-          >
-            Site Copy &amp; Config
-          </Link>
-          <Link
-            href="/admin/editor"
-            className="w-full sm:w-auto inline-flex items-center justify-center rounded-lg bg-brand-red px-4 py-2 text-xs font-semibold text-white shadow transition-all hover:bg-brand-red/90"
-          >
-            + Write New Story
-          </Link>
-        </div>
+    <div className="mx-auto max-w-7xl space-y-5">
+      <PageTitle
+        title="Stories"
+        actions={
+          <Btn href="/admin/editor" variant="primary" block>
+            Write story
+          </Btn>
+        }
+      />
+
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {stats.map((s) => (
+          <div key={s.label} className="rounded-xl border border-white/[0.08] bg-[#16181D] px-4 py-3">
+            <p className="text-xs text-zinc-400">{s.label}</p>
+            <p className={`mt-0.5 font-num text-xl font-semibold ${s.tone}`}>{s.value}</p>
+          </div>
+        ))}
       </div>
 
-
-      {/* Metrics grid */}
-      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-xl border border-white/[0.08] bg-[#16181D] p-4 sm:p-5 shadow-sm">
-          <span className="label text-[0.62rem] font-semibold uppercase tracking-wider text-zinc-400">PUBLISHED STORIES</span>
-          <div className="mt-2 font-num text-2xl sm:text-3xl font-semibold text-emerald-400">
-            {publishedCount}
-          </div>
-          <span className="mt-1 block text-[0.72rem] text-zinc-400">Live on publication website</span>
-        </div>
-
-        <div className="rounded-xl border border-white/[0.08] bg-[#16181D] p-4 sm:p-5 shadow-sm">
-          <span className="label text-[0.62rem] font-semibold uppercase tracking-wider text-zinc-400">ACTIVE DRAFTS</span>
-          <div className="mt-2 font-num text-2xl sm:text-3xl font-semibold text-amber-400">
-            {draftsCount}
-          </div>
-          <span className="mt-1 block text-[0.72rem] text-zinc-400">In progress / ready to edit</span>
-        </div>
-
-        <div className="rounded-xl border border-white/[0.08] bg-[#16181D] p-4 sm:p-5 shadow-sm">
-          <span className="label text-[0.62rem] font-semibold uppercase tracking-wider text-zinc-400">PILLARS</span>
-          <div className="mt-2 font-num text-2xl sm:text-3xl font-semibold text-white">
-            {SITE.categories.length}
-          </div>
-          <span className="mt-1 block text-[0.72rem] text-zinc-400">Active publication pillars</span>
-        </div>
-
-        <div className="rounded-xl border border-white/[0.08] bg-[#16181D] p-4 sm:p-5 shadow-sm">
-          <span className="label text-[0.62rem] font-semibold uppercase tracking-wider text-zinc-400">STORY LEADS</span>
-          <div className="mt-2 font-num text-2xl sm:text-3xl font-semibold text-brand-red">
-            {candidates.length}
-          </div>
-          <span className="mt-1 block text-[0.72rem] text-zinc-400">In discovery inbox</span>
-        </div>
-      </div>
-
-      {/* Story Ideas & Discovery Inbox */}
-      <section className="rounded-2xl border border-white/[0.08] bg-[#16181D] p-5 sm:p-6 shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-white/[0.08] pb-4 gap-2">
-          <div>
-            <h2 className="font-sans text-lg font-semibold text-white sm:text-xl">
-              Story Ideas &amp; Discovery Inbox
-            </h2>
-            <p className="mt-0.5 text-xs text-zinc-400">
-              Verified public updates and feeds ready for editorial selection and drafting.
-            </p>
-          </div>
-          <span className="inline-flex self-start sm:self-auto items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 font-mono text-[0.68rem] text-emerald-300">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            Feed Monitoring Active
-          </span>
-        </div>
-
-        <div className="mt-4 divide-y divide-white/[0.06]">
-          {candidates.map((cand) => (
-            <div
-              key={cand.id}
-              className="flex flex-col justify-between gap-3.5 py-4 sm:flex-row sm:items-center transition-colors hover:bg-white/[0.02] -mx-2 px-2 rounded-xl"
-            >
-              <div className="min-w-0 flex-1 space-y-1.5">
-                <div className="flex flex-wrap items-center gap-2 text-xs">
-                  <span className="label text-[0.6rem] font-semibold text-brand-red uppercase tracking-wider">
-                    {cand.category}
-                  </span>
-                  <span className="text-zinc-600">·</span>
-                  <span className="text-zinc-400 text-[0.72rem]">{cand.source}</span>
-                  <span className="text-zinc-600">·</span>
-                  <span className="font-mono text-[0.68rem] text-zinc-500">{cand.freshness}</span>
-                </div>
-                <h3 className="text-sm font-semibold text-zinc-100 sm:text-base leading-snug">
-                  {cand.title}
-                </h3>
-              </div>
-
-              <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0 pt-1 sm:pt-0">
-                <span className="rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[0.65rem] font-medium text-emerald-400 border border-emerald-500/20">
-                  {cand.confidence}
-                </span>
-                <Link
-                  href={`/admin/editor?candidate=${cand.id}`}
-                  className="rounded-lg bg-zinc-800 hover:bg-brand-red px-3.5 py-1.5 text-xs font-medium text-white transition-colors"
+      <Panel tone="ai" title="AI leads" description="Story ideas found by AI. Open one to edit it, or publish it straight away.">
+        {leadsBusy && openLeads.length === 0 ? (
+          <p className="rounded-lg border border-dashed border-white/10 px-4 py-8 text-center text-sm text-zinc-400">Loading leads...</p>
+        ) : openLeads.length === 0 ? (
+          <p className="rounded-lg border border-dashed border-white/10 px-4 py-8 text-center text-sm text-zinc-400">
+            No leads yet. New ideas will show up here.
+          </p>
+        ) : (
+          <>
+            <ul className="-mx-2 divide-y divide-white/[0.06] sm:-mx-1">
+              {visibleLeads.map((c) => (
+                <li
+                  key={c.id}
+                  className="relative flex items-center gap-3 rounded-lg px-2 py-2.5 transition-colors hover:bg-white/[0.05] sm:px-3"
                 >
-                  Start Writing →
-                </Link>
+                  <div className="min-w-0 flex-1">
+                    <p className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[0.7rem] text-zinc-500">
+                      <span className="font-medium text-brand-red/90">{c.category}</span>
+                      {c.relevance !== null && <span className="text-emerald-400">{c.relevance}%</span>}
+                      <span>
+                        {c.sources} {c.sources === 1 ? "source" : "sources"}
+                      </span>
+                      <span>
+                        {c.facts} {c.facts === 1 ? "fact" : "facts"}
+                      </span>
+                      {c.hasDraft && <span className="text-violet-300">Draft ready</span>}
+                    </p>
+                    <h3 className="mt-0.5 line-clamp-2 text-sm font-medium leading-snug text-zinc-100 sm:line-clamp-1">
+                      <Link href={`/admin/editor?candidate=${encodeURIComponent(c.id)}`} className="after:absolute after:inset-0">
+                        {c.title}
+                      </Link>
+                    </h3>
+                  </div>
+                  <Btn
+                    size="sm"
+                    className="relative z-10 !h-10 sm:!h-9"
+                    onClick={() =>
+                      setQuick({
+                        draft: leadToArticle(c.raw || { headline: c.title, pitch: c.pitch }),
+                        editHref: `/admin/editor?candidate=${encodeURIComponent(c.id)}`,
+                        from: "lead",
+                        leadId: c.id,
+                      })
+                    }
+                  >
+                    Quick publish
+                  </Btn>
+                </li>
+              ))}
+            </ul>
+            <Pagination className="mt-3" page={leadPage} totalPages={leadInfo.totalPages} total={leadInfo.total} pageSize={leadInfo.pageSize} onPage={setLeadPage} busy={leadsBusy} />
+          </>
+        )}
+      </Panel>
+
+      <Panel
+        title="Your stories"
+        actions={
+          <Tabs<Filter>
+            value={statusFilter}
+            onChange={(f) => {
+              setStatusFilter(f);
+              setStoryPage(1);
+            }}
+            items={[
+              { id: "all", label: "All", count: counts.all },
+              { id: "published", label: "Published", count: counts.published },
+              { id: "draft", label: "Drafts", count: counts.draft },
+            ]}
+          />
+        }
+      >
+        {storiesBusy && filteredArticles.length === 0 ? (
+          <p className="rounded-lg border border-dashed border-white/10 px-4 py-8 text-center text-sm text-zinc-400">Loading stories...</p>
+        ) : filteredArticles.length === 0 ? (
+          <div className="rounded-lg border border-dashed border-white/10 px-4 py-8 text-center">
+            <p className="text-sm text-zinc-400">{counts.all === 0 ? "No stories yet." : "No stories in this view."}</p>
+            {counts.all === 0 && (
+              <div className="mt-4 flex justify-center">
+                <Btn href="/admin/editor" variant="primary">
+                  Write story
+                </Btn>
               </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Published & Scheduled Articles */}
-      <section className="rounded-2xl border border-white/[0.08] bg-[#16181D] p-5 sm:p-6 shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-white/[0.08] pb-4 gap-3">
-          <div>
-            <h2 className="font-sans text-lg font-semibold text-white sm:text-xl">
-              Published &amp; Draft Stories
-            </h2>
-            <p className="mt-0.5 text-xs text-zinc-400">
-              Manage live stories, edit active drafts, and prepare syndication blurbs.
-            </p>
+            )}
           </div>
-          <div className="flex items-center gap-3">
-            {/* Status Tabs */}
-            <div className="flex items-center rounded-lg border border-white/10 bg-[#121317] p-1 text-xs">
-              <button
-                type="button"
-                onClick={() => setStatusFilter("all")}
-                className={`rounded-md px-3 py-1 font-medium transition-colors ${
-                  statusFilter === "all" ? "bg-white/10 text-white" : "text-zinc-400 hover:text-white"
-                }`}
-              >
-                All ({articles.length})
-              </button>
-              <button
-                type="button"
-                onClick={() => setStatusFilter("published")}
-                className={`rounded-md px-3 py-1 font-medium transition-colors ${
-                  statusFilter === "published" ? "bg-emerald-500/20 text-emerald-300" : "text-zinc-400 hover:text-white"
-                }`}
-              >
-                Published ({publishedCount})
-              </button>
-              <button
-                type="button"
-                onClick={() => setStatusFilter("draft")}
-                className={`rounded-md px-3 py-1 font-medium transition-colors ${
-                  statusFilter === "draft" ? "bg-amber-500/20 text-amber-300" : "text-zinc-400 hover:text-white"
-                }`}
-              >
-                Drafts ({draftsCount})
-              </button>
-            </div>
-            <Link
-              href="/admin/editor"
-              className="text-xs font-semibold text-brand-red hover:underline shrink-0"
-            >
-              + Write Story
-            </Link>
-          </div>
-        </div>
-
-        {/* Desktop Table View */}
-        <div className="mt-4 hidden md:block overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead>
-              <tr className="border-b border-white/[0.08] text-zinc-400 font-medium">
-                <th className="py-3">Headline</th>
-                <th className="py-3">Category</th>
-                <th className="py-3">Author</th>
-                <th className="py-3">Status</th>
-                <th className="py-3">Channels</th>
-                <th className="py-3 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/[0.06]">
-              {filteredArticles.map((art) => (
-                <tr key={art.id} className="hover:bg-white/[0.02] transition-colors">
-                  <td className="py-3.5 pr-4 font-medium text-zinc-100 max-w-sm truncate">
-                    <Link href={`/admin/editor?slug=${art.slug}`} className="hover:text-brand-red">
-                      {art.title}
+        ) : (
+          <>
+            {/* Card list below lg */}
+            <ul className="space-y-3 lg:hidden">
+              {filteredArticles.map((a) => (
+                <li
+                  key={a.id}
+                  className="relative rounded-xl border border-white/[0.08] bg-[#121317] p-4 transition-colors hover:bg-white/[0.04]"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="min-w-0 truncate text-xs font-medium text-brand-red">{niceCategory(a.categoryName)}</p>
+                    <StatusBadge status={a.status} />
+                  </div>
+                  <h3 className="mt-1 text-sm font-semibold leading-snug text-zinc-100">
+                    <Link href={`/admin/editor?slug=${encodeURIComponent(a.slug)}`} className="after:absolute after:inset-0 after:rounded-xl">
+                      {a.title}
                     </Link>
-                  </td>
-                  <td className="py-3.5 pr-4 text-zinc-400">{art.categoryName}</td>
-                  <td className="py-3.5 pr-4 text-zinc-400">{typeof art.author === "string" ? art.author : art.author?.name}</td>
-                  <td className="py-3.5 pr-4">
-                    <span
-                      className={`rounded-full px-2.5 py-0.5 text-[0.65rem] font-medium uppercase tracking-wider border ${
-                        art.status === "published"
-                          ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                          : "bg-amber-500/10 text-amber-400 border-amber-500/20"
-                      }`}
-                    >
-                      {art.status}
+                  </h3>
+                  <div className="mt-2 flex items-center justify-between gap-3 text-xs text-zinc-400">
+                    <span className="min-w-0 truncate">
+                      {authorOf(a) ? `${authorOf(a)}, ` : ""}
+                      {formatDate(a)}
                     </span>
-                  </td>
-                  <td className="py-3.5 pr-4">
-                    <div className="flex items-center gap-1.5 font-mono text-[0.65rem] text-zinc-400">
-                      {art.channelVariants?.x && <span className="rounded bg-zinc-800 px-1 py-0.5">X</span>}
-                      {art.channelVariants?.facebook && <span className="rounded bg-zinc-800 px-1 py-0.5">FB</span>}
-                      {art.channelVariants?.linkedin && <span className="rounded bg-zinc-800 px-1 py-0.5">LI</span>}
-                      {art.channelVariants?.newsletter && <span className="rounded bg-zinc-800 px-1 py-0.5">NL</span>}
-                    </div>
-                  </td>
-                  <td className="py-3.5 text-right space-x-3">
-                    <Link
-                      href={`/admin/editor?slug=${art.slug}`}
-                      className="font-medium text-brand-red hover:underline"
-                    >
-                      {art.status === "draft" ? "Resume Draft →" : "Edit"}
-                    </Link>
-                    {art.status === "published" && (
+                    {a.status === "published" && (
                       <Link
-                        href={`/article/${art.slug}`}
+                        href={`/article/${a.slug}`}
                         target="_blank"
-                        className="text-zinc-400 hover:text-white hover:underline"
+                        className="relative z-10 -my-2 -mr-2 inline-flex h-10 shrink-0 items-center whitespace-nowrap rounded-lg px-3 font-medium text-zinc-200 hover:bg-white/10 hover:text-white"
                       >
-                        View ↗
+                        View live
                       </Link>
                     )}
-                  </td>
-                </tr>
+                    {a.status === "draft" && (
+                      <Btn
+                        size="sm"
+                        className="relative z-10 -my-1 !h-10"
+                        onClick={() => setQuick({ draft: a, editHref: `/admin/editor?slug=${encodeURIComponent(a.slug)}`, from: "draft" })}
+                      >
+                        Quick publish
+                      </Btn>
+                    )}
+                  </div>
+                </li>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </ul>
 
-        {/* Mobile & Tablet Card View (Responsive) */}
-        <div className="mt-4 md:hidden divide-y divide-white/[0.06]">
-          {filteredArticles.map((art) => (
-            <div key={art.id} className="py-4 space-y-2">
-              <div className="flex items-center justify-between text-xs">
-                <span className="label text-[0.6rem] font-semibold text-brand-red uppercase">
-                  {art.categoryName}
-                </span>
-                <span
-                  className={`rounded-full px-2 py-0.5 text-[0.62rem] font-medium border uppercase ${
-                    art.status === "published"
-                      ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                      : "bg-amber-500/10 text-amber-400 border-amber-500/20"
-                  }`}
-                >
-                  {art.status}
-                </span>
+            {/* Table from lg */}
+            <div className="hidden lg:block">
+              <div className="grid grid-cols-[minmax(0,1fr)_11rem_6rem_7rem_8rem] gap-4 border-b border-white/[0.08] px-3 pb-2 text-xs font-medium text-zinc-400">
+                <span>Headline</span>
+                <span>Category</span>
+                <span>Status</span>
+                <span>Updated</span>
+                <span className="sr-only">Actions</span>
               </div>
-              <Link
-                href={`/admin/editor?slug=${art.slug}`}
-                className="block text-sm font-semibold text-zinc-100 hover:text-brand-red leading-snug"
-              >
-                {art.title}
-              </Link>
-              <div className="flex items-center justify-between text-xs text-zinc-400 pt-1">
-                <span>By {typeof art.author === "string" ? art.author : art.author?.name}</span>
-                <div className="flex items-center gap-3">
-                  <Link
-                    href={`/admin/editor?slug=${art.slug}`}
-                    className="font-medium text-brand-red"
+              <ul className="divide-y divide-white/[0.06]">
+                {filteredArticles.map((a) => (
+                  <li
+                    key={a.id}
+                    className="relative grid grid-cols-[minmax(0,1fr)_11rem_6rem_7rem_8rem] items-center gap-4 px-3 py-3 text-sm transition-colors hover:bg-white/[0.04]"
                   >
-                    {art.status === "draft" ? "Resume Draft →" : "Edit"}
-                  </Link>
-                  {art.status === "published" && (
                     <Link
-                      href={`/article/${art.slug}`}
-                      target="_blank"
-                      className="text-zinc-400 hover:text-white"
+                      href={`/admin/editor?slug=${encodeURIComponent(a.slug)}`}
+                      className="truncate font-medium text-zinc-100 after:absolute after:inset-0"
                     >
-                      View ↗
+                      {a.title}
                     </Link>
-                  )}
-                </div>
-              </div>
+                    <span className="truncate text-xs text-zinc-400">{niceCategory(a.categoryName)}</span>
+                    <span>
+                      <StatusBadge status={a.status} />
+                    </span>
+                    <span className="text-xs text-zinc-400">{formatDate(a)}</span>
+                    <span className="flex justify-end">
+                      {a.status === "published" && (
+                        <Link
+                          href={`/article/${a.slug}`}
+                          target="_blank"
+                          className="relative z-10 inline-flex h-9 items-center whitespace-nowrap rounded-lg px-3 text-xs font-medium text-zinc-200 hover:bg-white/10 hover:text-white"
+                        >
+                          View live
+                        </Link>
+                      )}
+                      {a.status === "draft" && (
+                        <Btn
+                          size="sm"
+                          className="relative z-10 !h-9"
+                          onClick={() => setQuick({ draft: a, editHref: `/admin/editor?slug=${encodeURIComponent(a.slug)}`, from: "draft" })}
+                        >
+                          Quick publish
+                        </Btn>
+                      )}
+                    </span>
+                  </li>
+                ))}
+              </ul>
             </div>
-          ))}
-        </div>
+            <Pagination
+              className="mt-4"
+              page={storyPage}
+              totalPages={storyInfo.totalPages}
+              total={storyInfo.total}
+              pageSize={storyInfo.pageSize}
+              onPage={setStoryPage}
+              busy={storiesBusy}
+            />
+          </>
+        )}
+      </Panel>
 
-      </section>
+      {quick && (
+        <QuickPublishSheet
+          draft={quick.draft}
+          editHref={quick.editHref}
+          from={quick.from}
+          onClose={() => setQuick(null)}
+          onPublished={() => {
+            // Reload the counts and both lists from the server so the new story or draft appears
+            setReload((n) => n + 1);
+          }}
+        />
+      )}
     </div>
   );
 }

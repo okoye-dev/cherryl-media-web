@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import { subscriberService } from "@/services";
 import type { PostSubscriber } from "@/services/contracts/ISubscriberService";
 import { SITE } from "@/config/site";
+import { Btn, Panel, Label, Badge, TextInput, inputClass, Pagination } from "@/components/admin/ui";
+
+const PAGE_SIZE = 10;
 
 export function SubscribersSettingsPanel() {
   const [subscribers, setSubscribers] = useState<PostSubscriber[]>([]);
@@ -13,25 +16,42 @@ export function SubscribersSettingsPanel() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  const loadSubscribers = async () => {
+  const formRef = React.useRef<HTMLFormElement>(null);
+  const submitOnEnter = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") formRef.current?.requestSubmit();
+  };
+
+  const [page, setPage] = useState(1);
+  const [paging, setPaging] = useState({ total: 0, totalPages: 1 });
+
+  const loadSubscribers = async (target = page) => {
     try {
-      const data = await subscriberService.getSubscribers(false);
-      setSubscribers(data);
+      const data = await subscriberService.getSubscribers(false, target, PAGE_SIZE);
+      // If the page we asked for is past the end (the last row was removed), step back.
+      if (data.subscribers.length === 0 && data.total > 0 && target > 1) {
+        setPage(target - 1);
+        return loadSubscribers(target - 1);
+      }
+      setSubscribers(data.subscribers);
+      setPaging({ total: data.total, totalPages: data.totalPages });
+      setPage(data.page);
     } catch (err) {
       console.error("Failed to load subscribers", err);
+      setError("Could not read the list from the server.");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadSubscribers();
-  }, []);
+    loadSubscribers(page);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page]);
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newEmail || !newEmail.includes("@")) {
-      setError("Please provide a valid email address.");
+      setError("Enter a valid email address.");
       return;
     }
 
@@ -45,152 +65,154 @@ export function SubscribersSettingsPanel() {
       setNewEmail("");
       setNewName("");
       setSelectedCategory("");
-      setSuccess("Subscriber email added successfully!");
       await loadSubscribers();
+      setSuccess("Added. The list below is read back from the server.");
       setTimeout(() => setSuccess(null), 4000);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to add subscriber");
+      setError(err instanceof Error ? `Not added. ${err.message}` : "Not added. Something went wrong.");
     } finally {
       setSaving(false);
     }
   };
 
   const handleRemove = async (email: string) => {
-    if (!confirm(`Remove ${email} from post publishing notifications?`)) return;
+    if (!confirm(`Remove ${email} from notifications?`)) return;
+    setError(null);
+    setSuccess(null);
     try {
       await subscriberService.removeSubscriber(email);
       await loadSubscribers();
+      setSuccess(`Removed ${email}.`);
+      setTimeout(() => setSuccess(null), 4000);
     } catch (err) {
-      console.error("Failed to remove subscriber", err);
+      setError(err instanceof Error ? `Not removed. ${err.message}` : "Not removed. Something went wrong.");
     }
   };
 
   return (
-    <div className="space-y-6">
-      <div className="border-b border-white/[0.08] pb-3">
-        <h2 className="text-base font-semibold text-white">
-          Post Publishing Notification Subscribers
-        </h2>
-        <p className="text-xs text-zinc-400">
-          Emails listed here receive instant notification dispatches in the database queue whenever a new story is published.
-        </p>
-      </div>
-
-      {success && (
-        <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-xs text-emerald-400">
-          ✓ {success}
-        </div>
-      )}
-      {error && (
-        <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-xs text-red-400">
-          ⚠ {error}
-        </div>
-      )}
-
-      {/* Add Subscriber Form */}
-      <form onSubmit={handleAdd} className="rounded-xl border border-white/10 bg-white/[0.02] p-4 space-y-3">
-        <h3 className="text-xs font-semibold text-zinc-200 uppercase tracking-wider">
-          + Add Notification Recipient Email
-        </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div>
-            <label className="block text-[0.68rem] text-zinc-400 uppercase tracking-wider mb-1">
-              Email Address *
-            </label>
-            <input
-              type="email"
-              value={newEmail}
-              onChange={(e) => setNewEmail(e.target.value)}
-              placeholder="editor@cherrylmedia.com"
-              required
-              className="w-full rounded-lg border border-white/10 bg-zinc-900/80 px-3 py-2 text-xs text-white placeholder-zinc-500 focus:border-brand-red focus:outline-none"
-            />
-          </div>
-          <div>
-            <label className="block text-[0.68rem] text-zinc-400 uppercase tracking-wider mb-1">
-              Recipient Name
-            </label>
-            <input
-              type="text"
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              placeholder="e.g. Lead Newsroom Editor"
-              className="w-full rounded-lg border border-white/10 bg-zinc-900/80 px-3 py-2 text-xs text-white placeholder-zinc-500 focus:border-brand-red focus:outline-none"
-            />
-          </div>
-          <div>
-            <label className="block text-[0.68rem] text-zinc-400 uppercase tracking-wider mb-1">
-              Category Pillar Filter
-            </label>
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full rounded-lg border border-white/10 bg-zinc-900/80 px-3 py-2 text-xs text-white focus:border-brand-red focus:outline-none"
-            >
-              <option value="">All Pillars (All Stories)</option>
-              {SITE.categories.map((c) => (
-                <option key={c.slug} value={c.slug}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-        <div className="flex justify-end pt-1">
-          <button
-            type="submit"
-            disabled={saving}
-            className="rounded-lg bg-brand-red px-4 py-1.5 text-xs font-semibold text-white hover:bg-brand-red/90 disabled:opacity-50 transition-colors"
-          >
-            {saving ? "Registering..." : "+ Register Email"}
-          </button>
-        </div>
-      </form>
-
-      {/* Existing Subscribers Table */}
-      <div className="space-y-2">
-        <h3 className="text-xs font-semibold text-zinc-300 uppercase tracking-wider">
-          Active Recipients ({subscribers.length})
-        </h3>
-        {loading ? (
-          <div className="p-8 text-center text-xs text-zinc-500">Loading notification recipients...</div>
-        ) : subscribers.length === 0 ? (
-          <div className="p-8 text-center text-xs text-zinc-500 rounded-xl border border-dashed border-white/10">
-            No notification subscriber emails registered yet. Add recipient emails above to receive instant dispatches on post publication.
-          </div>
-        ) : (
-          <div className="divide-y divide-white/[0.06] rounded-xl border border-white/10 bg-[#121317]">
-            {subscribers.map((sub) => (
-              <div key={sub.id} className="p-3.5 flex items-center justify-between gap-4">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold text-white">{sub.email}</span>
-                    {sub.name && <span className="text-xs text-zinc-400">({sub.name})</span>}
-                    <span className="rounded bg-emerald-500/10 px-2 py-0.5 font-mono text-[0.62rem] text-emerald-400 border border-emerald-500/20">
-                      ACTIVE
-                    </span>
-                  </div>
-                  <div className="mt-1 flex items-center gap-2 text-[0.68rem] text-zinc-500">
-                    <span>
-                      Beats:{" "}
-                      {sub.categories && sub.categories.length > 0
-                        ? sub.categories.join(", ")
-                        : "All Editorial Pillars"}
-                    </span>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => handleRemove(sub.email)}
-                  className="rounded-lg border border-red-500/20 bg-red-500/10 px-2.5 py-1 text-xs text-red-400 hover:bg-red-500/20 transition-colors"
-                >
-                  Remove
-                </button>
-              </div>
-            ))}
-          </div>
+    <Panel
+      title="Subscribers"
+      description="These emails get a notice whenever a story is published."
+    >
+      <div className="space-y-5">
+        {success && (
+          <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-3 text-sm text-emerald-400">{success}</div>
         )}
+        {error && <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-400">{error}</div>}
+
+        <form ref={formRef} onSubmit={handleAdd} className="space-y-3 rounded-lg border border-white/10 bg-white/[0.02] p-4">
+          <h3 className="text-sm font-semibold text-white">Add a recipient</h3>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+            <div>
+              <Label htmlFor="sub-email">Email address</Label>
+              <TextInput
+                id="sub-email"
+                inputMode="email"
+                autoComplete="email"
+                autoCapitalize="none"
+                maxLength={120}
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value.trim())}
+                onKeyDown={submitOnEnter}
+                placeholder="editor@cherrylmedia.com"
+              />
+            </div>
+            <div>
+              <Label htmlFor="sub-name">Name</Label>
+              <TextInput
+                id="sub-name"
+                maxLength={80}
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                onKeyDown={submitOnEnter}
+                placeholder="Lead editor"
+              />
+            </div>
+            <div className="md:col-span-2 lg:col-span-1">
+              <Label htmlFor="sub-cat">Category</Label>
+              <select id="sub-cat" value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)} className={inputClass}>
+                <option value="">All categories</option>
+                {SITE.categories.map((c) => (
+                  <option key={c.slug} value={c.slug}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="flex sm:justify-end">
+            <Btn type="submit" variant="primary" block disabled={saving}>
+              {saving ? "Adding..." : "Add recipient"}
+            </Btn>
+          </div>
+        </form>
+
+        <div className="space-y-2">
+          <h3 className="text-sm font-semibold text-white">Active recipients ({paging.total})</h3>
+          {loading ? (
+            <div className="p-6 text-center text-sm text-zinc-500">Loading recipients...</div>
+          ) : subscribers.length === 0 ? (
+            <div className="rounded-lg border border-dashed border-white/10 p-6 text-center text-sm text-zinc-500">
+              No recipients yet. Add one above.
+            </div>
+          ) : (
+            <>
+              {/* Card list below lg */}
+              <ul className="space-y-2 lg:hidden">
+                {subscribers.map((sub) => (
+                  <li key={sub.id} className="rounded-lg border border-white/10 bg-[#121317] p-3">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="min-w-0 break-all text-sm font-medium text-white">{sub.email}</span>
+                      <Badge tone="green">Active</Badge>
+                    </div>
+                    {sub.name && <p className="mt-0.5 text-xs text-zinc-400">{sub.name}</p>}
+                    <p className="mt-1 text-xs text-zinc-500">
+                      Categories: {sub.categories && sub.categories.length > 0 ? sub.categories.join(", ") : "All"}
+                    </p>
+                    <Btn variant="danger" block className="mt-3" onClick={() => handleRemove(sub.email)}>
+                      Remove
+                    </Btn>
+                  </li>
+                ))}
+              </ul>
+              {/* Table from lg */}
+              <div className="hidden overflow-hidden rounded-lg border border-white/10 bg-[#121317] lg:block">
+                <table className="w-full text-left text-sm">
+                  <thead className="border-b border-white/10 text-xs text-zinc-500">
+                    <tr>
+                      <th className="px-4 py-2.5 font-medium">Email</th>
+                      <th className="px-4 py-2.5 font-medium">Name</th>
+                      <th className="px-4 py-2.5 font-medium">Categories</th>
+                      <th className="px-4 py-2.5 font-medium">Status</th>
+                      <th className="w-28 px-4 py-2.5" />
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/[0.06]">
+                    {subscribers.map((sub) => (
+                      <tr key={sub.id}>
+                        <td className="px-4 py-2.5 font-medium text-white">{sub.email}</td>
+                        <td className="px-4 py-2.5 text-zinc-400">{sub.name || "-"}</td>
+                        <td className="px-4 py-2.5 text-xs text-zinc-400">
+                          {sub.categories && sub.categories.length > 0 ? sub.categories.join(", ") : "All"}
+                        </td>
+                        <td className="px-4 py-2.5">
+                          <Badge tone="green">Active</Badge>
+                        </td>
+                        <td className="px-4 py-2 text-right">
+                          <Btn size="sm" variant="danger" onClick={() => handleRemove(sub.email)}>
+                            Remove
+                          </Btn>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <Pagination page={page} totalPages={paging.totalPages} total={paging.total} pageSize={PAGE_SIZE} onPage={setPage} busy={loading} />
+            </>
+          )}
+        </div>
       </div>
-    </div>
+    </Panel>
   );
 }

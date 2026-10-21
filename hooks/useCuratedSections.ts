@@ -1,7 +1,29 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { sectionService, articleService } from "@/services";
+import { sectionService } from "@/services";
+import { fetchArticlesByIds } from "@/services/articles";
 import type { CuratedSection } from "@/services/contracts/ISectionService";
 import type { CanonicalArticle } from "@/lib/types";
+import { request } from "@/services/api-client";
+import { enforceSectionLimits, mergeLegacySections, type CuratedSectionsResponse } from "@/services/sections";
+
+type IdMap = Record<string, string[]>;
+
+function toIds(byKey: Record<string, CuratedSection> | undefined): IdMap {
+  const out: IdMap = {};
+  for (const [k, v] of Object.entries(byKey || {})) out[k] = v.articleIds || [];
+  return out;
+}
+
+/** True when both layouts hold the same ids in the same order. A missing section counts as empty. */
+function sameIds(a: IdMap, b: IdMap) {
+  const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
+  for (const k of keys) {
+    const x = a[k] || [];
+    const y = b[k] || [];
+    if (x.length !== y.length || x.some((id, i) => id !== y[i])) return false;
+  }
+  return true;
+}
 
 export interface SlotTarget {
   sectionKey: string;
@@ -10,11 +32,14 @@ export interface SlotTarget {
 
 export function useCuratedSections() {
   const [sections, setSections] = useState<Record<string, CuratedSection>>({});
-  const [catalog, setCatalog] = useState<CanonicalArticle[]>([]);
+  /** Only the stories that sit in a slot (plus any just picked), looked up by id */
+  const [lookup, setLookup] = useState<Record<string, CanonicalArticle>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
+  /** The slots as last loaded from, or confirmed by, the backend */
+  const [savedIds, setSavedIds] = useState<IdMap | null>(null);
 
   // Active slot picker modal state
   const [activePicker, setActivePicker] = useState<SlotTarget | null>(null);
@@ -25,13 +50,18 @@ export function useCuratedSections() {
 
     async function loadData() {
       try {
-        const [secData, arts] = await Promise.all([
-          sectionService.getCuratedSections(),
-          articleService.getArticles({ status: "all" }).catch(() => []),
-        ]);
+        const secData = await sectionService.getCuratedSections();
+        const byKey = secData.byKey || {};
+        const ids = [...new Set(Object.values(byKey).flatMap((s) => s.articleIds || []))];
+        const known: Record<string, CanonicalArticle> = {};
+        for (const s of Object.values(byKey)) for (const a of s.articles || []) if (a?.id) known[a.id] = a;
+        // One call for every story in a slot, not the whole catalogue.
+        const fetched = await fetchArticlesByIds(ids.filter((id) => !known[id])).catch(() => []);
+        for (const a of fetched) known[a.id] = a;
         if (isMounted) {
-          setSections(secData.byKey || {});
-          setCatalog(Array.isArray(arts) ? arts : []);
+          setSections(byKey);
+          setSavedIds(toIds(byKey));
+          setLookup(known);
         }
       } catch (err) {
         console.error("Failed to load curated sections", err);
@@ -51,12 +81,12 @@ export function useCuratedSections() {
   // Quick lookup map for catalog articles by ID or slug
   const articleMap = useMemo(() => {
     const map = new Map<string, CanonicalArticle>();
-    for (const a of catalog) {
+    for (const a of Object.values(lookup)) {
       map.set(a.id, a);
       map.set(a.slug, a);
     }
     return map;
-  }, [catalog]);
+  }, [lookup]);
 
   const openPicker = useCallback((sectionKey: string, slotIndex: number) => {
     setActivePicker({ sectionKey, slotIndex });
@@ -70,6 +100,7 @@ export function useCuratedSections() {
     (article: CanonicalArticle) => {
       if (!activePicker) return;
       const { sectionKey, slotIndex } = activePicker;
+      setLookup((prev) => ({ ...prev, [article.id]: article }));
 
       setSections((prev) => {
         const currentSec = prev[sectionKey] || {
@@ -158,32 +189,56 @@ export function useCuratedSections() {
     setSaveSuccess(null);
     setSaveError(null);
 
-    const payload = Object.entries(sections).map(([key, sec]) => ({
-      sectionKey: key,
-      articleIds: sec.articleIds,
-      metadata: sec.metadata || {},
-    }));
+    // Send only the sections whose stories changed since the last load or save.
+    const payload = Object.entries(sections)
+      .filter(([key, sec]) => !sameIds({ [key]: sec.articleIds || [] }, { [key]: savedIds?.[key] || [] }))
+      .map(([key, sec]) => ({
+        sectionKey: key,
+        articleIds: sec.articleIds,
+        metadata: sec.metadata || {},
+      }));
+    if (payload.length === 0) {
+      setSaving(false);
+      return;
+    }
 
     try {
       const res = await sectionService.updateCuratedSections(payload);
-      if (res.success) {
-        setSaveSuccess(`All layout sections saved successfully at ${new Date().toLocaleTimeString()}`);
-        setTimeout(() => setSaveSuccess(null), 5000);
+      if (!res.success) {
+        setSaveError("The server did not accept the layout. Nothing was saved.");
       } else {
-        setSaveError("Failed to persist changes to backend API");
+        // Read it back from the database (no cache) to confirm it really stored.
+        const fresh = await request<CuratedSectionsResponse>("/api/sections", {
+          cache: "no-store",
+          params: { _: Date.now() },
+          timeoutMs: 15000,
+        });
+        const stored = toIds(enforceSectionLimits(mergeLegacySections(fresh)).byKey);
+        setSavedIds(stored);
+        const sent: IdMap = {};
+        for (const p of payload) sent[p.sectionKey] = p.articleIds;
+        const mismatch = Object.keys(sent).filter((k) => !sameIds({ [k]: sent[k] }, { [k]: stored[k] || [] }));
+        if (mismatch.length === 0) {
+          setSaveSuccess(`Saved and confirmed from the database at ${new Date().toLocaleTimeString()}`);
+          setTimeout(() => setSaveSuccess(null), 5000);
+        } else {
+          setSaveError(`Saved, but the database returned different stories for: ${mismatch.join(", ")}. Review and save again.`);
+        }
       }
     } catch (err: unknown) {
       setSaveError(
-        err instanceof Error ? err.message : "An unexpected error occurred while saving"
+        err instanceof Error ? `Not saved. ${err.message}` : "Not saved. Something went wrong."
       );
     } finally {
       setSaving(false);
     }
-  }, [sections]);
+  }, [sections, savedIds]);
+
+  const dirty = useMemo(() => savedIds !== null && !sameIds(toIds(sections), savedIds), [sections, savedIds]);
 
   return {
+    dirty,
     sections,
-    catalog,
     articleMap,
     loading,
     saving,

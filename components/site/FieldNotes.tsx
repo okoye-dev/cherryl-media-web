@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getOpinionColumns } from "@/lib/news";
-import { getCuratedSections } from "@/lib/sections";
+import { getCuratedSections, sectionArticles } from "@/lib/sections";
 import { formatCategoryName, authorName } from "@/lib/formatters";
 import SectionHeader from "./SectionHeader";
 
@@ -10,11 +10,8 @@ export default async function FieldNotes() {
     getOpinionColumns(),
   ]);
 
-  const opinionColumns =
-    curated.byKey?.perspectives?.articles &&
-    curated.byKey.perspectives.articles.length > 0
-      ? curated.byKey.perspectives.articles
-      : defaultOpinion;
+  const curatedOpinions = sectionArticles(curated, "perspectives");
+  const opinionColumns = curatedOpinions.length > 0 ? curatedOpinions : defaultOpinion.slice(0, 3);
 
   return (
     <section aria-labelledby="opinion-notes" className="min-w-0 md:row-span-2 md:grid md:grid-rows-subgrid">

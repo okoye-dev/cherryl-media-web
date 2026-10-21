@@ -12,11 +12,6 @@ export async function getEditorialCopy(): Promise<EditorialCopy> {
   return fetchEditorialCopy();
 }
 
-export async function saveEditorialCopy(copy: EditorialCopy): Promise<boolean> {
-  try {
-    const res = await updateEditorialCopy(copy);
-    return Boolean(res.success);
-  } catch {
-    return false;
-  }
+export async function saveEditorialCopy(copy: EditorialCopy): Promise<EditorialCopy> {
+  return updateEditorialCopy(copy);
 }

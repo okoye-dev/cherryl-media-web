@@ -16,6 +16,12 @@ export {
   type CuratedSectionsResponse,
 };
 
+/** The stories for one homepage spot: exactly what is curated there, never more than the spot has room for. */
+export function sectionArticles(curated: CuratedSectionsResponse, key: string): CanonicalArticle[] {
+  const max = SECTION_METADATA[key]?.maxSlots ?? Infinity;
+  return (curated.byKey?.[key]?.articles || []).slice(0, max);
+}
+
 export async function getCuratedSections(): Promise<CuratedSectionsResponse> {
   return fetchCuratedSections();
 }

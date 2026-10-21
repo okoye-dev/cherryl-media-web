@@ -1,69 +1,97 @@
 import { useState, useEffect, useCallback } from "react";
 import { settingsService } from "@/services";
+import { changedNested, isEmpty } from "@/lib/diff";
 import { DEFAULT_EDITORIAL_COPY, type EditorialCopy } from "@/lib/settings";
 
-export type SettingsTab = "hero" | "ticker" | "dossier" | "network" | "footer" | "subscribers";
+export type SettingsTab = "hero" | "ticker" | "dossier" | "footer" | "subscribers";
+
+/** Plain names for the field paths the backend reports problems against. */
+const FIELD_LABELS: Record<string, string> = {
+  "hero.editionBadge": "Homepage badge",
+  "hero.titleLead": "Headline",
+  "hero.titleAccent": "Headline accent word",
+  "hero.titleTrail": "Headline ending",
+  "hero.description": "Homepage description",
+  "ticker.label": "Ticker label",
+  "ticker.customNotice": "Ticker notice",
+  "dossier.issueBadge": "Culture issue badge",
+  "dossier.heading": "Culture heading",
+  "dossier.subheading": "Culture subheading",
+  "footer.tagline": "Footer tagline",
+  "footer.locations": "Footer locations",
+  "footer.contactEmail": "Contact email",
+  "footer.copyrightNotice": "Copyright line",
+};
+
+export interface SettingsStatus {
+  text: string;
+  type: "success" | "error";
+  /** Problems with specific fields, when the backend rejected the save */
+  problems?: string[];
+}
 
 export function useEditorialSettings() {
   const [copy, setCopy] = useState<EditorialCopy>(DEFAULT_EDITORIAL_COPY);
+  /** The copy as last stored by the backend. Used to tell whether anything has changed. */
+  const [savedCopy, setSavedCopy] = useState<EditorialCopy | null>(null);
   const [activeTab, setActiveTab] = useState<SettingsTab>("hero");
   const [isSaving, setIsSaving] = useState(false);
-  const [statusMessage, setStatusMessage] = useState<{
-    text: string;
-    type: "success" | "error";
-  } | null>(null);
+  const [statusMessage, setStatusMessage] = useState<SettingsStatus | null>(null);
 
   useEffect(() => {
-    let isMounted = true;
+    let alive = true;
     settingsService
       .getEditorialCopy()
       .then((data) => {
-        if (isMounted && data) {
-          setCopy(data);
-        }
+        if (!alive) return;
+        setCopy(data);
+        setSavedCopy(data);
       })
-      .catch(() => {});
-
+      .catch(() => {
+        if (alive) setSavedCopy(DEFAULT_EDITORIAL_COPY);
+      });
     return () => {
-      isMounted = false;
+      alive = false;
     };
   }, []);
 
   const saveCopy = useCallback(async () => {
     setIsSaving(true);
     setStatusMessage(null);
-
     try {
-      const res = await settingsService.updateEditorialCopy(copy);
-      if (res.success) {
-        setStatusMessage({
-          text: "✓ Site copy & configuration saved successfully!",
-          type: "success",
-        });
-      } else {
-        setStatusMessage({
-          text: "⚠️ Saved in local session (backend returned non-200)",
-          type: "success",
-        });
+      const changes = changedNested(savedCopy as unknown as Record<string, Record<string, unknown>> | null, copy as unknown as Record<string, Record<string, unknown>>);
+      if (isEmpty(changes)) {
+        setStatusMessage({ text: "Nothing has changed.", type: "success" });
+        setTimeout(() => setStatusMessage(null), 3000);
+        return;
       }
-    } catch {
-      setStatusMessage({
-        text: "✓ Saved locally in editorial desk session",
-        type: "success",
-      });
+      const saved = await settingsService.patchEditorialCopy(changes as Parameters<typeof settingsService.patchEditorialCopy>[0]);
+      setCopy(saved);
+      setSavedCopy(saved);
+      setStatusMessage({ text: "Saved. The site picks up the new text within a minute.", type: "success" });
+      setTimeout(() => setStatusMessage(null), 6000);
+    } catch (err) {
+      const status = (err as { status?: number } | null)?.status;
+      const data = (err as { data?: unknown } | null)?.data;
+      if (status === 400) {
+        const fields = (data as { fields?: Record<string, string> } | undefined)?.fields ?? {};
+        const problems = Object.entries(fields).map(([path, msg]) => `${FIELD_LABELS[path] ?? path}: ${msg}`);
+        setStatusMessage({ text: "Not saved. Fix these and try again.", type: "error", problems });
+      } else if (status === 0) {
+        setStatusMessage({ text: "Not saved. Could not reach the server. Check your connection and try again.", type: "error" });
+      } else {
+        const detail = err instanceof Error ? err.message : "Unknown error";
+        setStatusMessage({ text: `Not saved. The server said: ${detail}`, type: "error" });
+      }
     } finally {
       setIsSaving(false);
-      setTimeout(() => setStatusMessage(null), 5000);
     }
-  }, [copy]);
+  }, [copy, savedCopy]);
 
   const resetDefaults = useCallback(() => {
-    if (confirm("Reset all site editorial copy back to default newsroom values?")) {
+    if (confirm("Reset all site text back to the standard newsroom wording? Nothing is saved until you press Save.")) {
       setCopy(DEFAULT_EDITORIAL_COPY);
-      setStatusMessage({
-        text: "Reset form to default values. Click 'Save Changes' to commit.",
-        type: "success",
-      });
+      setStatusMessage({ text: "Reset in the form. Press Save to keep it.", type: "success" });
       setTimeout(() => setStatusMessage(null), 4000);
     }
   }, []);
@@ -71,6 +99,7 @@ export function useEditorialSettings() {
   return {
     copy,
     setCopy,
+    savedCopy,
     activeTab,
     setActiveTab,
     isSaving,

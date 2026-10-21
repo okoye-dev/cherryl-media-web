@@ -2,7 +2,7 @@ import Link from "next/link";
 import SectionHeader from "./SectionHeader";
 import SectionArt from "./SectionArt";
 import { getEditorialCopy } from "@/lib/settings";
-import { getCuratedSections } from "@/lib/sections";
+import { getCuratedSections, sectionArticles } from "@/lib/sections";
 import {
   formatDate,
   formatReadTime,
@@ -41,12 +41,10 @@ export default async function EditorialDossier() {
     getEditorialCopy(),
   ]);
 
-  const leadStory = curated.byKey?.dossier_lead?.articles?.[0];
-  const soundscapesStory = curated.byKey?.dossier_soundscapes?.articles?.[0];
-  const gastronomyStory = curated.byKey?.dossier_gastronomy?.articles?.[0];
-  const radarStories = curated.byKey?.dossier_radar?.articles || [];
+  const leadStory = sectionArticles(curated, "dossier_lead")[0];
+  const radarStories = sectionArticles(curated, "dossier_radar");
 
-  const sideCards = [soundscapesStory, gastronomyStory].filter(Boolean) as Story[];
+  const sideCards = sectionArticles(curated, "dossier_side") as Story[];
 
   return (
     <section
@@ -68,7 +66,7 @@ export default async function EditorialDossier() {
       <div className="grid gap-10 lg:grid-cols-12 lg:items-start lg:gap-4 xl:gap-5">
         {/* The feature lead: the only card here that carries a byline */}
         {leadStory && (
-          <article className="group flex flex-col rounded-[1.75rem] border border-ink/10 bg-cream p-3 transition-all duration-300 hover:border-brand-red/40 sm:p-4 lg:col-span-5 lg:p-5">
+          <article className="group relative flex flex-col rounded-[1.75rem] border border-ink/10 bg-cream p-3 transition-all duration-300 hover:border-brand-red/40 sm:p-4 lg:col-span-5 lg:p-5">
             <div>
               <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[1.1rem] border border-ink/10 bg-paper-deep">
                 {leadStory.featuredImage?.url && (
@@ -90,7 +88,7 @@ export default async function EditorialDossier() {
                   <span className="font-num font-medium">{formatReadTime(leadStory.readTime)}</span>
                 </div>
                 <h3 className="mt-4 font-area text-[1.35rem] font-semibold leading-snug tracking-[-0.02em] text-ink transition-all duration-200 group-hover:italic group-hover:text-brand-red md:text-[1.5rem]">
-                  <Link href={`/article/${leadStory.slug}`}>{leadStory.title}</Link>
+                  <Link href={`/article/${leadStory.slug}`} className="after:absolute after:inset-0 after:content-['']">{leadStory.title}</Link>
                 </h3>
                 <p className="mt-4 line-clamp-4 text-sm font-normal leading-relaxed text-ink/75 md:line-clamp-none">
                   {leadStory.deck || leadStory.excerpt}
@@ -110,7 +108,7 @@ export default async function EditorialDossier() {
           {sideCards.map((story) => (
             <article
               key={story.slug}
-              className="group flex flex-col rounded-[1.75rem] border border-ink/10 bg-cream p-6 transition-all duration-300 hover:border-brand-red/40 md:p-7"
+              className="group relative flex flex-col rounded-[1.75rem] border border-ink/10 bg-cream p-6 transition-all duration-300 hover:border-brand-red/40 md:p-7"
             >
               <div>
                 <div className="flex items-center justify-between gap-3 text-xs text-ink-soft">
@@ -118,7 +116,7 @@ export default async function EditorialDossier() {
                   <span className="font-num font-medium">{formatReadTime(story.readTime)}</span>
                 </div>
                 <h3 className="mt-5 font-area text-[1.2rem] font-semibold leading-snug tracking-[-0.02em] text-ink transition-all duration-200 group-hover:italic group-hover:text-brand-red">
-                  <Link href={`/article/${story.slug}`}>{story.title}</Link>
+                  <Link href={`/article/${story.slug}`} className="after:absolute after:inset-0 after:content-['']">{story.title}</Link>
                 </h3>
                 <p className="mt-4 line-clamp-4 text-[0.82rem] font-normal leading-relaxed text-ink/70 lg:line-clamp-none">
                   {story.deck || story.excerpt}

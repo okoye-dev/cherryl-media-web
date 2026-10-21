@@ -1,119 +1,59 @@
 import React from "react";
 import type { EditorialCopy } from "@/lib/settings";
+import { Panel } from "@/components/admin/ui";
+import { Field } from "./Field";
 
 interface HeroSettingsPanelProps {
   copy: EditorialCopy;
   setCopy: React.Dispatch<React.SetStateAction<EditorialCopy>>;
 }
 
+/** Stored as three parts. Shown as one line with the accent word between asterisks. */
+function joinHeadline(h: { titleLead: string; titleAccent: string; titleTrail: string }) {
+  if (!h.titleAccent) return h.titleLead + h.titleTrail;
+  return `${h.titleLead}*${h.titleAccent}*${h.titleTrail}`;
+}
+
+function splitHeadline(text: string) {
+  const open = text.indexOf("*");
+  const close = open >= 0 ? text.indexOf("*", open + 1) : -1;
+  if (open < 0 || close < 0) return { titleLead: text, titleAccent: "", titleTrail: "" };
+  return {
+    titleLead: text.slice(0, open),
+    titleAccent: text.slice(open + 1, close),
+    titleTrail: text.slice(close + 1),
+  };
+}
+
 export function HeroSettingsPanel({ copy, setCopy }: HeroSettingsPanelProps) {
+  const hero = copy.hero;
+  const setField = (k: "editionBadge" | "description") => (v: string) =>
+    setCopy((prev) => ({ ...prev, hero: { ...prev.hero, [k]: v } }));
+  const setHeadline = (v: string) => setCopy((prev) => ({ ...prev, hero: { ...prev.hero, ...splitHeadline(v) } }));
+
   return (
-    <div className="space-y-6">
-      <div className="border-b border-white/[0.08] pb-3">
-        <h2 className="text-base font-semibold text-white">Homepage Hero &amp; Masthead Title</h2>
-        <p className="text-xs text-zinc-400">
-          Controls the primary title and description visible when readers land on Cherryl Media.
-        </p>
+    <Panel title="Homepage top" description="Top of the homepage.">
+      <div className="grid grid-cols-1 gap-4">
+        <Field label="Badge" maxLength={60} value={hero.editionBadge} onChange={setField("editionBadge")} className="sm:max-w-xs" />
+        <Field
+          label="Headline"
+          maxLength={280}
+          value={joinHeadline(hero)}
+          onChange={setHeadline}
+          note="Put *asterisks* around the word that shows in italic red."
+        />
+        <Field label="Description" maxLength={400} value={hero.description} onChange={setField("description")} rows={3} />
       </div>
-
-      <div className="space-y-4">
-        <div>
-          <label className="block text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-1.5">
-            Edition Badge
-          </label>
-          <input
-            type="text"
-            value={copy.hero.editionBadge}
-            onChange={(e) =>
-              setCopy((prev) => ({
-                ...prev,
-                hero: { ...prev.hero, editionBadge: e.target.value },
-              }))
-            }
-            className="w-full rounded-lg border border-white/10 bg-zinc-900/80 px-3.5 py-2 text-xs text-white focus:border-brand-red focus:outline-none"
-          />
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div>
-            <label className="block text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-1.5">
-              Title Lead
-            </label>
-            <input
-              type="text"
-              value={copy.hero.titleLead}
-              onChange={(e) =>
-                setCopy((prev) => ({
-                  ...prev,
-                  hero: { ...prev.hero, titleLead: e.target.value },
-                }))
-              }
-              className="w-full rounded-lg border border-white/10 bg-zinc-900/80 px-3.5 py-2 text-xs text-white focus:border-brand-red focus:outline-none"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-1.5">
-              Title Accent (Italic Crimson)
-            </label>
-            <input
-              type="text"
-              value={copy.hero.titleAccent}
-              onChange={(e) =>
-                setCopy((prev) => ({
-                  ...prev,
-                  hero: { ...prev.hero, titleAccent: e.target.value },
-                }))
-              }
-              className="w-full rounded-lg border border-brand-red/30 bg-zinc-900/80 px-3.5 py-2 text-xs text-white focus:border-brand-red focus:outline-none"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-1.5">
-              Title Trail
-            </label>
-            <input
-              type="text"
-              value={copy.hero.titleTrail}
-              onChange={(e) =>
-                setCopy((prev) => ({
-                  ...prev,
-                  hero: { ...prev.hero, titleTrail: e.target.value },
-                }))
-              }
-              className="w-full rounded-lg border border-white/10 bg-zinc-900/80 px-3.5 py-2 text-xs text-white focus:border-brand-red focus:outline-none"
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-1.5">
-            Editorial Description
-          </label>
-          <textarea
-            rows={3}
-            value={copy.hero.description}
-            onChange={(e) =>
-              setCopy((prev) => ({
-                ...prev,
-                hero: { ...prev.hero, description: e.target.value },
-              }))
-            }
-            className="w-full rounded-lg border border-white/10 bg-zinc-900/80 px-3.5 py-2 text-xs text-white focus:border-brand-red focus:outline-none"
-          />
-        </div>
-
-        {/* Live Preview */}
-        <div className="rounded-xl border border-white/10 bg-[#0d0e12] p-4 space-y-2">
-          <span className="label text-[0.62rem] text-zinc-400 uppercase tracking-wider">Hero Preview</span>
-          <p className="label-red text-xs font-semibold text-brand-red">{copy.hero.editionBadge}</p>
-          <h3 className="text-xl font-bold text-white">
-            <span>{copy.hero.titleLead}</span>
-            <span className="italic font-serif text-brand-red">{copy.hero.titleAccent}</span>
-            <span>{copy.hero.titleTrail}</span>
-          </h3>
-          <p className="text-xs text-zinc-400 max-w-xl">{copy.hero.description}</p>
-        </div>
+      <div className="mt-5 min-w-0 rounded-lg border border-white/10 bg-[#0d0e12] p-4">
+        <p className="text-[0.7rem] font-medium text-zinc-500">Preview</p>
+        <p className="mt-3 text-xs font-medium text-brand-red">{hero.editionBadge}</p>
+        <h3 className="mt-1.5 whitespace-pre-wrap break-words text-2xl font-bold leading-tight text-white">
+          <span>{hero.titleLead}</span>
+          <span className="font-serif italic text-brand-red">{hero.titleAccent}</span>
+          <span>{hero.titleTrail}</span>
+        </h3>
+        <p className="mt-2 max-w-xl text-sm text-zinc-400">{hero.description}</p>
       </div>
-    </div>
+    </Panel>
   );
 }

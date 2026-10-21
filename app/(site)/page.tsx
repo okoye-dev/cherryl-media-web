@@ -8,7 +8,7 @@ import MediaDistributionStrip from "@/components/site/MediaDistributionStrip";
 import EditorialDossier from "@/components/site/EditorialDossier";
 import SectionHeader from "@/components/site/SectionHeader";
 import SectionArt from "@/components/site/SectionArt";
-import { getCuratedSections } from "@/lib/sections";
+import { getCuratedSections, sectionArticles } from "@/lib/sections";
 import { authorName } from "@/lib/formatters";
 
 export const revalidate = 30; // ISR revalidation every 30 seconds
@@ -16,20 +16,10 @@ export const revalidate = 30; // ISR revalidation every 30 seconds
 export default async function Home() {
   const curated = await getCuratedSections();
 
-  // Top pillars informed by the 28,000+ posts database inventory:
-  // 1. State Affairs & Environs (10,033 posts)
-  // 2. Newsbeat (9,946 posts)
-  // 3. Brands & SMEs (2,063 posts)
-  // 4. Opinions (2,027 posts)
-  const stateAffairsStories =
-    curated.byKey?.state_affairs?.articles ||
-    curated.byKey?.featured_updates?.articles?.slice(0, 4) ||
-    [];
-
-  const brandsStories =
-    curated.byKey?.brands_smes?.articles ||
-    curated.byKey?.hero_trending?.articles?.slice(0, 3) ||
-    [];
+  // Exactly what is curated for each spot, never more than the spot has room for.
+  // These limits come from the same list the admin uses (services/sections.ts).
+  const stateAffairsStories = sectionArticles(curated, "state_affairs");
+  const brandsStories = sectionArticles(curated, "brands_smes");
 
   return (
     <>
@@ -68,6 +58,7 @@ export default async function Home() {
       </div>
 
       {/* Flagship Section 3: Brands & SMEs Commercial Coverage */}
+      {brandsStories.length > 0 && (
       <section
         aria-labelledby="brands-smes"
         className="relative isolate mx-auto mt-20 w-full max-w-[90rem] px-5 md:mt-28 md:px-10 xl:px-16"
@@ -79,7 +70,7 @@ export default async function Home() {
           href="/category/brands-smes"
           linkLabel="View all"
         />
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:gap-6 lg:grid-cols-3 2xl:grid-cols-4 max-sm:[&>*:nth-child(n+4)]:hidden lg:[&>*:nth-child(n+4)]:hidden 2xl:[&>*:nth-child(n+4)]:block">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-3 md:gap-6">
           {brandsStories.map((story) => (
             <OverlayCard
               key={story.slug || story.id}
@@ -94,6 +85,7 @@ export default async function Home() {
           ))}
         </div>
       </section>
+      )}
 
       {/* Multi-channel Media Distribution Network Strip */}
       <MediaDistributionStrip />

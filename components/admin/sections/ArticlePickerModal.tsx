@@ -1,85 +1,56 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import type { CanonicalArticle } from "@/lib/types";
 import { SECTION_METADATA } from "@/lib/sections";
 import { articleService } from "@/services";
+import { searchCurationPage } from "@/services/sections";
 import type { SlotTarget } from "@/hooks/useCuratedSections";
 import { SITE } from "@/config/site";
 import { formatDate } from "@/lib/formatters";
+import { Badge, Btn, Pagination, TextInput, inputClass } from "@/components/admin/ui";
+
+const PAGE_SIZE = 8;
 
 interface ArticlePickerModalProps {
   picker: SlotTarget;
-  catalog: CanonicalArticle[];
   onSelect: (article: CanonicalArticle) => void;
   onClose: () => void;
 }
 
-export function ArticlePickerModal({
-  picker,
-  catalog,
-  onSelect,
-  onClose,
-}: ArticlePickerModalProps) {
+export function ArticlePickerModal({ picker, onSelect, onClose }: ArticlePickerModalProps) {
   const meta = SECTION_METADATA[picker.sectionKey];
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string>(
-    meta?.categoryHint || ""
-  );
+  const [selectedCategory, setSelectedCategory] = useState<string>(meta?.categoryHint || "");
   const [sortOrder, setSortOrder] = useState<"recent" | "relevance">("recent");
-  const [searchResults, setSearchResults] = useState<CanonicalArticle[]>(() =>
-    catalog.slice(0, 25)
-  );
-  const [searching, setSearching] = useState(false);
+  const [page, setPage] = useState(1);
+  const [searchResults, setSearchResults] = useState<CanonicalArticle[]>([]);
+  const [paging, setPaging] = useState({ total: 0, totalPages: 1, pageSize: PAGE_SIZE });
+  const [searching, setSearching] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const seq = useRef(0);
+
+  // Changing the search, category or sort starts again from page 1.
+  useEffect(() => setPage(1), [searchQuery, selectedCategory, sortOrder]);
 
   useEffect(() => {
-    const timeout = setTimeout(async () => {
-      setSearching(true);
-      try {
-        const q = searchQuery.toLowerCase().trim();
-        const results = await articleService.searchCuratedArticles({
-          category: selectedCategory,
-          query: q,
-          sort: sortOrder,
-          limit: 35,
-        }).catch(() => []);
-
-        if (results && results.length > 0) {
-          setSearchResults(results);
-        } else {
-          // Fallback to local catalog filtering
-          let filtered = catalog.filter((a) => {
-            if (selectedCategory && a.category !== selectedCategory && a.categoryName !== selectedCategory) {
-              return false;
-            }
-            if (!q) return true;
-            return (
-              a.title.toLowerCase().includes(q) ||
-              (a.kicker && a.kicker.toLowerCase().includes(q)) ||
-              (a.deck && a.deck.toLowerCase().includes(q)) ||
-              (a.subtitle && a.subtitle.toLowerCase().includes(q)) ||
-              (a.excerpt && a.excerpt.toLowerCase().includes(q))
-            );
-          });
-
-          if (sortOrder === "recent") {
-            filtered = [...filtered].sort((a, b) => {
-              const tA = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
-              const tB = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
-              return tB - tA;
-            });
-          }
-
-          setSearchResults(filtered.slice(0, 35));
-        }
-      } catch (err) {
-        console.error("Curation search error", err);
-      } finally {
-        setSearching(false);
-      }
-    }, 150);
-
-    return () => clearTimeout(timeout);
-  }, [searchQuery, selectedCategory, sortOrder, catalog]);
+    const mine = ++seq.current;
+    setSearching(true);
+    const t = setTimeout(
+      () => {
+        searchCurationPage({ q: searchQuery.trim(), category: selectedCategory, sort: sortOrder, page, pageSize: PAGE_SIZE })
+          .then((r) => {
+            if (mine !== seq.current) return;
+            setSearchResults(r.articles);
+            setPaging({ total: r.total, totalPages: r.totalPages, pageSize: r.pageSize });
+            setError(null);
+          })
+          .catch((e) => mine === seq.current && setError(e instanceof Error ? e.message : "Could not load stories"))
+          .finally(() => mine === seq.current && setSearching(false));
+      },
+      searchQuery ? 300 : 0
+    );
+    return () => clearTimeout(t);
+  }, [searchQuery, selectedCategory, sortOrder, page]);
 
   const handleSelectFeatured = async (art: CanonicalArticle) => {
     try {
@@ -88,203 +59,149 @@ export function ArticlePickerModal({
     onSelect(art);
   };
 
+  const isHero = picker.sectionKey === "hero_lead";
+  const pick = (art: CanonicalArticle) => (isHero ? handleSelectFeatured(art) : onSelect(art));
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-md animate-in fade-in">
-      <div className="w-full max-w-4xl rounded-2xl border border-white/15 bg-[#16181D] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-        {/* Modal Header */}
-        <div className="flex items-center justify-between border-b border-white/10 p-5 bg-[#141519]">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-xs uppercase tracking-wider text-brand-red font-bold">
-                {picker.sectionKey}
-              </span>
-              <span className="text-zinc-600">·</span>
-              <h3 className="text-sm sm:text-base font-semibold text-white">
-                Select Article for &ldquo;{meta?.title || picker.sectionKey}&rdquo;
-              </h3>
-            </div>
-            <p className="mt-1 text-xs text-zinc-400">
-              Pick by recency, search by headline, or filter by editorial section. Inspect the full story gist below.
-            </p>
+    <div
+      role="dialog"
+      aria-modal="true"
+      className="fixed inset-0 z-50 flex items-stretch justify-center bg-black/85 backdrop-blur-md sm:items-center sm:p-6"
+    >
+      <div className="flex h-dvh w-full flex-col overflow-hidden border-white/15 bg-[#16181D] shadow-2xl sm:h-auto sm:max-h-[90vh] sm:max-w-3xl sm:rounded-xl sm:border">
+        {/* Header */}
+        <div className="flex items-start justify-between gap-3 border-b border-white/10 bg-[#141519] px-4 py-3 sm:px-5">
+          <div className="min-w-0">
+            <h3 className="truncate text-base font-semibold text-white">
+              Pick a story for {meta?.title || picker.sectionKey}
+            </h3>
+            <p className="mt-0.5 text-xs text-zinc-400">Search by headline or filter by category.</p>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg p-2 text-zinc-400 hover:bg-white/[0.06] hover:text-white transition-colors"
-          >
-            ✕
-          </button>
+          <Btn variant="ghost" onClick={onClose} className="-mr-2 shrink-0">
+            Close
+          </Btn>
         </div>
 
-        {/* Filters and Search Bar */}
-        <div className="p-4 border-b border-white/10 bg-[#121317] space-y-3">
-          <div className="flex flex-col sm:flex-row items-center gap-3">
-            {/* Search Input */}
-            <div className="relative flex-1 w-full">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by title, gist, keywords, or kicker..."
-                autoFocus
-                className="w-full rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-xs sm:text-sm text-white placeholder-zinc-500 focus:border-brand-red focus:outline-none"
-              />
-              {searching && (
-                <div className="absolute right-3.5 top-3 h-4 w-4 animate-spin rounded-full border-2 border-brand-red border-t-transparent" />
-              )}
-            </div>
-
-            {/* Category Filter */}
+        {/* Search and filters (stays at the top while results scroll) */}
+        <div className="space-y-2 border-b border-white/10 bg-[#121317] p-3 sm:p-4">
+          <div className="relative">
+            <TextInput
+              aria-label="Search stories"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search title, summary or kicker"
+              autoFocus
+              maxLength={200}
+              className="!pr-10"
+            />
+            {searching && (
+              <div className="absolute right-3 top-3 h-4 w-4 animate-spin rounded-full border-2 border-brand-red border-t-transparent" />
+            )}
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row">
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full sm:w-auto rounded-xl border border-white/10 bg-[#1a1b20] px-3.5 py-2.5 text-xs text-zinc-200 focus:border-brand-red focus:outline-none"
+              aria-label="Category"
+              className={`${inputClass} sm:flex-1`}
             >
-              <option value="">All Editorial Sections</option>
+              <option value="">All categories</option>
               {SITE.categories.map((c) => (
                 <option key={c.slug} value={c.slug}>
                   {c.name}
                 </option>
               ))}
             </select>
-
-            {/* Sort Toggle */}
-            <div className="flex items-center rounded-xl border border-white/10 bg-[#1a1b20] p-1 text-xs shrink-0">
-              <button
-                type="button"
-                onClick={() => setSortOrder("recent")}
-                className={`rounded-lg px-3 py-1.5 font-medium transition-colors ${
-                  sortOrder === "recent"
-                    ? "bg-brand-red text-white"
-                    : "text-zinc-400 hover:text-white"
-                }`}
-              >
-                Recent
-              </button>
-              <button
-                type="button"
-                onClick={() => setSortOrder("relevance")}
-                className={`rounded-lg px-3 py-1.5 font-medium transition-colors ${
-                  sortOrder === "relevance"
-                    ? "bg-brand-red text-white"
-                    : "text-zinc-400 hover:text-white"
-                }`}
-              >
-                Relevance
-              </button>
+            <div className="grid shrink-0 grid-cols-2 gap-1 rounded-lg border border-white/10 bg-[#1a1b20] p-1 sm:w-56">
+              {(["recent", "relevance"] as const).map((o) => (
+                <button
+                  key={o}
+                  type="button"
+                  onClick={() => setSortOrder(o)}
+                  className={`h-10 whitespace-nowrap rounded-md text-xs font-medium transition-colors sm:h-8 ${
+                    sortOrder === o ? "bg-brand-red text-white" : "text-zinc-400 hover:text-white"
+                  }`}
+                >
+                  {o === "recent" ? "Recent" : "Relevance"}
+                </button>
+              ))}
             </div>
           </div>
         </div>
 
-        {/* Results List: Rich Gist View */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-3 divide-y divide-white/[0.04]">
+        {/* Results */}
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-2 sm:p-3">
           {searchResults.length === 0 ? (
-            <div className="p-12 text-center text-xs text-zinc-500">
-              {searching
-                ? "Searching publication database..."
-                : "No matching articles found in publication database."}
+            <div className="p-10 text-center text-sm text-zinc-500">
+              {error ? `Could not load stories. ${error}` : searching ? "Searching..." : "No matching stories found."}
             </div>
           ) : (
-            searchResults.map((art) => (
-              <div
-                key={art.id}
-                onClick={() => onSelect(art)}
-                className="pt-3 first:pt-0 flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-3.5 rounded-xl hover:bg-white/[0.04] cursor-pointer transition-colors group border border-transparent hover:border-white/10"
-              >
-                <div className="flex items-start gap-4 min-w-0">
-                  {/* Story Thumbnail (16:9 Gist) */}
+            <ul className="space-y-1">
+              {searchResults.map((art) => (
+                <li
+                  key={art.id}
+                  className="group relative flex min-w-0 items-start gap-3 rounded-lg border border-transparent p-2.5 transition-colors focus-within:border-white/20 hover:border-white/10 hover:bg-white/[0.05]"
+                >
                   {art.featuredImage?.url ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={art.featuredImage.url}
-                      alt={art.title}
-                      className="h-16 w-24 sm:h-20 sm:w-28 rounded-xl object-cover border border-white/10 flex-shrink-0"
+                      alt=""
+                      className="h-14 w-20 shrink-0 rounded-md border border-white/10 object-cover sm:h-16 sm:w-24"
                     />
                   ) : (
-                    <div className="h-16 w-24 sm:h-20 sm:w-28 rounded-xl bg-white/[0.05] border border-white/10 flex items-center justify-center text-[0.65rem] font-mono text-zinc-500 flex-shrink-0">
-                      NO COVER
+                    <div className="flex h-14 w-20 shrink-0 items-center justify-center rounded-md border border-white/10 bg-white/[0.05] text-xs text-zinc-500 sm:h-16 sm:w-24">
+                      No cover
                     </div>
                   )}
-
-                  {/* Story Gist Details */}
-                  <div className="min-w-0 space-y-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-mono text-[0.62rem] uppercase tracking-wider text-brand-red font-bold">
-                        {art.categoryName || art.category}
-                      </span>
-                      {art.kicker && (
-                        <>
-                          <span className="text-zinc-600">·</span>
-                          <span className="font-mono text-[0.62rem] text-zinc-400 truncate max-w-xs font-semibold">
-                            {art.kicker}
-                          </span>
-                        </>
-                      )}
-                      <span className="text-zinc-600">·</span>
-                      <span className="font-mono text-[0.62rem] text-zinc-500">
-                        {art.publishedAt ? formatDate(art.publishedAt) : "Draft"}
-                      </span>
-                    </div>
-
-                    <h4 className="text-xs sm:text-sm font-semibold text-white group-hover:text-brand-red transition-colors leading-snug line-clamp-1">
-                      {art.title}
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-xs text-zinc-500">
+                      <span className="text-brand-red">{art.categoryName || art.category}</span>
+                      <span className="mx-1">·</span>
+                      {art.publishedAt ? formatDate(art.publishedAt) : "Draft"}
+                    </p>
+                    <h4 className="mt-0.5 line-clamp-2 text-sm font-medium leading-snug text-white">
+                      <button
+                        type="button"
+                        onClick={() => pick(art)}
+                        className="text-left after:absolute after:inset-0 after:content-[''] focus:outline-none"
+                      >
+                        {art.title}
+                      </button>
                     </h4>
-
-                    {/* Gist: Deck / Subtitle */}
                     {(art.deck || art.subtitle || art.excerpt) && (
-                      <p className="text-[0.72rem] text-zinc-400 line-clamp-2 leading-relaxed">
+                      <p className="mt-0.5 line-clamp-1 text-xs text-zinc-400 sm:line-clamp-2">
                         {art.deck || art.subtitle || art.excerpt}
                       </p>
                     )}
-
-                    <div className="flex items-center gap-3 text-[0.65rem] text-zinc-500 pt-0.5">
-                      <span>By {typeof art.author === "string" ? art.author : art.author?.name || "Editorial Desk"}</span>
-                      <span>·</span>
-                      <span className="font-mono text-zinc-600 truncate max-w-[140px]">{art.slug}</span>
-                    </div>
+                    <p className="mt-0.5 truncate text-xs text-zinc-500">
+                      By {typeof art.author === "string" ? art.author : art.author?.name || "Editorial desk"}
+                    </p>
+                    {art.status === "published" && art.slug && (
+                      <Btn
+                        href={`/article/${art.slug}`}
+                        target="_blank"
+                        arrow="forward"
+                        variant="ghost"
+                        size="sm"
+                        className="relative z-10 -ml-2 mt-1 !h-10"
+                      >
+                        View story
+                      </Btn>
+                    )}
                   </div>
-                </div>
-
-                <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
-                  {picker.sectionKey === "hero_lead" ? (
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleSelectFeatured(art);
-                      }}
-                      className="rounded-lg bg-brand-red px-3.5 py-2 text-xs font-semibold text-white shadow-md hover:bg-brand-red/90 transition-all shrink-0"
-                    >
-                      ★ Set as Featured
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onSelect(art);
-                      }}
-                      className="rounded-lg bg-white/[0.06] px-3.5 py-1.5 text-xs font-semibold text-zinc-200 group-hover:bg-brand-red group-hover:text-white transition-all shrink-0"
-                    >
-                      Assign Slot
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))
+                  <Badge tone="neutral" className="hidden group-hover:border-brand-red group-hover:bg-brand-red group-hover:text-white sm:inline-flex">
+                    {isHero ? "Set as featured" : "Assign"}
+                  </Badge>
+                </li>
+              ))}
+            </ul>
           )}
         </div>
 
-        {/* Modal Footer */}
-        <div className="flex items-center justify-between border-t border-white/10 p-4 bg-[#141519] text-xs text-zinc-400">
-          <span>{searchResults.length} articles found matching criteria</span>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg border border-white/10 bg-white/[0.04] px-4 py-2 text-xs font-medium text-zinc-300 hover:text-white transition-colors"
-          >
-            Close
-          </button>
+        {/* Footer */}
+        <div className="border-t border-white/10 bg-[#141519] px-4 py-3">
+          <Pagination page={page} totalPages={paging.totalPages} total={paging.total} pageSize={paging.pageSize} onPage={setPage} busy={searching} />
         </div>
       </div>
     </div>

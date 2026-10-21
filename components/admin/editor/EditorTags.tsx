@@ -1,96 +1,97 @@
 import { useRef } from "react";
 import { useTagSearch } from "@/hooks/useTagSearch";
+import { AIChip, Btn, Label, TextInput } from "@/components/admin/ui";
+import { LIMITS } from "./limits";
+import { CloseIcon, PlusIcon } from "./icons";
 
 interface EditorTagsProps {
   tags: string[];
   onAddTag: (tag: string) => void;
   onRemoveTag: (tag: string) => void;
+  aiFilled?: boolean;
 }
 
-export default function EditorTags({ tags, onAddTag, onRemoveTag }: EditorTagsProps) {
+/** The tags field. It has no card of its own: it sits inside the Details panel. */
+export default function EditorTags({ tags, onAddTag, onRemoveTag, aiFilled }: EditorTagsProps) {
   const { tagInput, setTagInput, suggestions, isOpen, setIsOpen, addTag } = useTagSearch(tags, onAddTag);
   const containerRef = useRef<HTMLDivElement>(null);
+  const full = tags.length >= LIMITS.maxTags;
 
   return (
-    <div className="rounded-2xl border border-white/[0.08] bg-[#16181D] p-5 sm:p-7 space-y-4 shadow-sm">
-      <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
-        <span className="text-[0.68rem] font-mono uppercase tracking-wider text-brand-red font-semibold">
-          TAGS &amp; KEYWORDS
-        </span>
-        <span className="text-[0.68rem] text-zinc-500 font-mono">{tags.length} tags attached</span>
-      </div>
+    <div>
+      <Label htmlFor="story-tags" hint={`${tags.length} of ${LIMITS.maxTags}`}>
+        Tags {aiFilled && <AIChip className="ml-1" />}
+      </Label>
 
-      {/* Tag Pills */}
-      <div className="flex flex-wrap items-center gap-2">
-        {tags.map((tag) => (
-          <span
-            key={tag}
-            className="inline-flex items-center gap-1.5 rounded-full bg-zinc-800 border border-white/15 px-3 py-1 text-xs font-mono text-zinc-200"
-          >
-            <span>#{tag}</span>
-            <button
-              type="button"
-              onClick={() => onRemoveTag(tag)}
-              className="text-zinc-400 hover:text-red-400 transition-colors font-bold text-xs"
-              title={`Remove tag ${tag}`}
+      {tags.length > 0 && (
+        <div className="mb-3 flex flex-wrap gap-2">
+          {tags.map((tag) => (
+            <span
+              key={tag}
+              className="inline-flex h-10 max-w-full items-center rounded-full border border-white/15 bg-white/[0.05] pl-3 text-xs text-zinc-200"
             >
-              ✕
-            </button>
-          </span>
-        ))}
-      </div>
-
-      {/* Tag Search Input & Autocomplete Dropdown */}
-      <div className="relative" ref={containerRef}>
-        <div className="flex items-center gap-2">
-          <input
-            type="text"
-            value={tagInput}
-            onChange={(e) => setTagInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === ",") {
-                e.preventDefault();
-                if (tagInput.trim()) addTag(tagInput);
-              }
-            }}
-            placeholder="Search existing tags or type new tag and press Enter..."
-            className="h-10 flex-1 rounded-xl border border-white/10 bg-[#1A1D24] px-3.5 text-xs text-white focus:border-brand-red focus:outline-none"
-          />
-          <button
-            type="button"
-            onClick={() => {
-              if (tagInput.trim()) addTag(tagInput);
-            }}
-            className="rounded-xl border border-white/10 bg-zinc-800 hover:bg-zinc-700 px-3 py-2 text-xs text-white transition-colors"
-          >
-            + Add Tag
-          </button>
-        </div>
-
-        {/* Suggestions Dropdown */}
-        {isOpen && suggestions.length > 0 && (
-          <div className="absolute z-30 left-0 right-0 mt-1.5 rounded-xl border border-white/15 bg-[#1A1D24] p-2 shadow-2xl space-y-1 max-h-48 overflow-y-auto">
-            <div className="flex items-center justify-between px-2 py-1">
-              <span className="text-[0.65rem] font-mono uppercase text-zinc-400">
-                Matching tags in database:
-              </span>
+              <span className="truncate">{tag}</span>
               <button
                 type="button"
-                onClick={() => setIsOpen(false)}
-                className="text-[0.65rem] text-zinc-500 hover:text-white"
+                onClick={() => onRemoveTag(tag)}
+                className="ml-1 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-zinc-400 hover:text-red-400"
+                aria-label={`Remove tag ${tag}`}
               >
-                Close ✕
+                <CloseIcon />
               </button>
+            </span>
+          ))}
+        </div>
+      )}
+
+      <div className="relative" ref={containerRef}>
+        <div className="flex items-start gap-2">
+          <div className="min-w-0 flex-1">
+            <TextInput
+              id="story-tags"
+              value={tagInput}
+              maxLength={LIMITS.tag}
+              disabled={full}
+              onChange={(e) => setTagInput(e.target.value.replace(/#/g, ""))}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === ",") {
+                  e.preventDefault();
+                  if (tagInput.trim() && !full) addTag(tagInput);
+                }
+              }}
+              placeholder={full ? "Tag limit reached" : "Search or type a tag"}
+            />
+          </div>
+          <Btn
+            disabled={full}
+            onClick={() => {
+              if (tagInput.trim() && !full) addTag(tagInput);
+            }}
+          >
+            <PlusIcon />
+            Add
+          </Btn>
+        </div>
+
+        {full && <p className="mt-1.5 text-xs text-amber-300">You can add up to {LIMITS.maxTags} tags. Remove one to add another.</p>}
+
+        {isOpen && !full && suggestions.length > 0 && (
+          <div className="absolute left-0 right-0 z-30 mt-1.5 max-h-56 overflow-y-auto rounded-xl border border-white/15 bg-[#1A1D24] p-2 shadow-2xl">
+            <div className="flex items-center justify-between gap-2 px-1">
+              <span className="text-xs text-zinc-400">Matching tags</span>
+              <Btn variant="ghost" size="sm" className="!h-10" onClick={() => setIsOpen(false)}>
+                Close
+              </Btn>
             </div>
-            <div className="flex flex-wrap gap-1.5 p-1">
-              {suggestions.map((sug) => (
+            <div className="flex flex-wrap gap-2 p-1">
+              {suggestions.slice(0, 8).map((sug) => (
                 <button
                   key={sug}
                   type="button"
                   onClick={() => addTag(sug)}
-                  className="rounded-lg bg-zinc-900 hover:bg-brand-red hover:text-white border border-white/10 px-2.5 py-1 text-xs text-zinc-300 transition-colors"
+                  className="h-10 rounded-lg border border-white/10 bg-zinc-900 px-3 text-xs text-zinc-300 transition-colors hover:bg-brand-red hover:text-white"
                 >
-                  +{sug}
+                  {sug}
                 </button>
               ))}
             </div>

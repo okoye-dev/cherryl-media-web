@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { saveArticle, publishArticle } from "@/services/articles";
+import { publishArticle } from "@/services/articles";
 import type { CanonicalArticle } from "@/lib/types";
 
 export type PublishStep = "media" | "editorial" | "engine" | "done";
@@ -26,6 +26,10 @@ export function usePublishPipeline() {
       options: {
         inFlightUploads: number;
         coverUrl: string;
+        /** Stores any unsaved changes (only what changed) and returns the story's address */
+        persist: () => Promise<string>;
+        /** The story is already live: save the changes and keep it live, no publish call */
+        alreadyLive?: boolean;
       }
     ) => {
       const articleSlug = payload.slug || (payload.title || "").toLowerCase().replace(/[^a-z0-9]+/g, "-");
@@ -72,8 +76,9 @@ export function usePublishPipeline() {
 
       // Step 3: Engine sync
       try {
-        await saveArticle({ ...payload, status: "published" });
-        await publishArticle(articleSlug);
+        const savedAt = await options.persist();
+        setPublishedSlug(savedAt);
+        if (!options.alreadyLive) await publishArticle(savedAt);
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : "Failed to publish article";
         console.error("Backend engine publish error:", msg);
