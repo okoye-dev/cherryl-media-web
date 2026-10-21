@@ -1,46 +1,20 @@
 // Canonical Article Client - Connected directly to Cherryl Media Engine & PostgreSQL DB
 import type { CanonicalArticle } from "./types";
 import { BACKEND_URL } from "./backend-url";
+import { getJson } from "./fetch-retry";
 
 // Empty array for backward compatibility; all data is fetched live from the database.
 export const CANONICAL_ARTICLES: CanonicalArticle[] = [];
 
 export async function getAllArticles(): Promise<CanonicalArticle[]> {
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 15000);
-
-    const res = await fetch(`${BACKEND_URL}/api/articles?status=published&limit=50`, {
-      next: { revalidate: 30 },
-      signal: controller.signal,
-    });
-    clearTimeout(timeout);
-
-    if (res.ok) {
-      const data = await res.json();
-      if (Array.isArray(data)) {
-        return data as CanonicalArticle[];
-      }
-    }
-  } catch (err) {
-    console.warn("getAllArticles error:", err);
-  }
-  return [];
+  const res = await getJson<CanonicalArticle[]>("getAllArticles", `${BACKEND_URL}/api/articles?status=published&limit=50`);
+  return Array.isArray(res?.data) ? res.data : [];
 }
 
 export async function getLeadStory(): Promise<CanonicalArticle | null> {
-  try {
-    // 1. Query decision engine featured story
-    const res = await fetch(`${BACKEND_URL}/api/articles/featured`, {
-      next: { revalidate: 30 },
-    });
-    if (res.ok) {
-      const featured = await res.json();
-      if (featured && featured.slug) {
-        return featured as CanonicalArticle;
-      }
-    }
-  } catch {}
+  // 1. The featured story chosen by the backend. A 404 just means none is featured.
+  const featuredRes = await getJson<CanonicalArticle>("getLeadStory", `${BACKEND_URL}/api/articles/featured`);
+  if (featuredRes?.data?.slug) return featuredRes.data;
 
   // 2. Fallback to latest lead story or first published story in database
   const all = await getAllArticles();
@@ -62,28 +36,11 @@ export async function getOpinionColumns(): Promise<CanonicalArticle[]> {
 
 export async function getArticleBySlug(slug: string): Promise<CanonicalArticle | null> {
   const normalized = slug.trim().toLowerCase();
-
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 15000);
-
-    const res = await fetch(`${BACKEND_URL}/api/articles/${encodeURIComponent(normalized)}`, {
-      next: { revalidate: 30 },
-      signal: controller.signal,
-    });
-    clearTimeout(timeout);
-
-    if (res.ok) {
-      const data = await res.json();
-      if (data && data.slug) {
-        return data as CanonicalArticle;
-      }
-    }
-  } catch (err) {
-    console.warn(`getArticleBySlug(${normalized}) error:`, err);
-  }
-
-  return null;
+  const res = await getJson<CanonicalArticle>(
+    `getArticleBySlug(${normalized})`,
+    `${BACKEND_URL}/api/articles/${encodeURIComponent(normalized)}`
+  );
+  return res?.data?.slug ? res.data : null;
 }
 
 export async function getAllArticleSlugs(): Promise<string[]> {
