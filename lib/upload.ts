@@ -11,6 +11,7 @@
  */
 
 import { BACKEND_URL } from "./backend-url";
+import { authedFetch } from "./auth-gate";
 import { compressImage, validateMediaFile } from "./image-compress";
 
 export interface PresignResponse {
@@ -77,7 +78,7 @@ export async function uploadMediaWithProgress(
   try {
     // Step 2: Request presigned upload URL from Go Media Engine
     notify("requesting_url", 20, "Requesting Cloudflare R2 / S3 presigned URL...");
-    const presignRes = await fetch(`${BACKEND_URL}/api/uploads/presign`, {
+    const presignRes = await authedFetch(`${BACKEND_URL}/api/uploads/presign`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -116,7 +117,7 @@ export async function uploadMediaWithProgress(
       // Step 4: Confirm landing via S3 HeadObject check in backend
       notify("confirming", 90, "Verifying S3 / Cloudflare R2 landing...");
       try {
-        const confirmRes = await fetch(`${BACKEND_URL}/api/uploads/confirm`, {
+        const confirmRes = await authedFetch(`${BACKEND_URL}/api/uploads/confirm`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -155,7 +156,7 @@ export async function uploadMediaWithProgress(
   const formData = new FormData();
   formData.append("file", fileToUpload);
 
-  const fallbackRes = await fetch("/api/upload", {
+  const fallbackRes = await authedFetch("/api/upload", {
     method: "POST",
     body: formData,
   });

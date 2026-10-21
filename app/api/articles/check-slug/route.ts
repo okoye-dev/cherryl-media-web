@@ -14,11 +14,21 @@ export async function GET(req: Request) {
   try {
     const res = await fetch(
       `${backendUrl}/api/articles/check-slug?slug=${encodeURIComponent(slug)}&excludeId=${encodeURIComponent(excludeId)}`,
-      { cache: "no-store", signal: AbortSignal.timeout(15000) }
+      {
+        cache: "no-store",
+        signal: AbortSignal.timeout(15000),
+        // The backend only answers signed-in admins, so pass the caller's session along.
+        headers: req.headers.get("authorization") ? { Authorization: req.headers.get("authorization") as string } : {},
+      }
     );
     if (res.ok) {
       const data = await res.json();
       return NextResponse.json(data);
+    }
+    if (res.status === 401 || res.status === 403) {
+      // Pass a refusal through, so the admin screen can ask the person to sign in.
+      const body = await res.json().catch(() => ({ error: "Sign in to continue." }));
+      return NextResponse.json(body, { status: res.status });
     }
   } catch (err) {
     console.error("check-slug proxy error:", err);

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { getStoredUser, logoutUser, type AuthUser } from "@/lib/auth";
+import { SESSION_EVENT, getStoredUser, logoutUser, type AuthUser } from "@/lib/auth";
 import { Btn } from "@/components/admin/ui";
 import { cn } from "@/utils";
 
@@ -19,7 +19,10 @@ export default function AdminHeader() {
   const [user, setUser] = useState<AuthUser | null>(null);
 
   useEffect(() => {
-    setUser(getStoredUser());
+    const read = () => setUser(getStoredUser());
+    read();
+    window.addEventListener(SESSION_EVENT, read);
+    return () => window.removeEventListener(SESSION_EVENT, read);
   }, [pathname]);
 
   if (pathname === "/admin/login") return null;

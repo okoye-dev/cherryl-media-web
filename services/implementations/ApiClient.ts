@@ -1,3 +1,4 @@
+import { isAuthRefusal, isSignInPath, recoverFromRefusal } from "@/lib/auth-gate";
 import type { IApiClient, RequestOptions } from "../contracts/IApiClient";
 
 export class ApiError extends Error {
@@ -26,6 +27,17 @@ export class ApiClient implements IApiClient {
   }
 
   async request<T>(path: string, options: RequestOptions = {}): Promise<T> {
+    try {
+      return await this.send<T>(path, options);
+    } catch (err) {
+      if (err instanceof ApiError && isAuthRefusal(err.status) && !isSignInPath(path) && (await recoverFromRefusal(err.message))) {
+        return this.send<T>(path, options);
+      }
+      throw err;
+    }
+  }
+
+  private async send<T>(path: string, options: RequestOptions): Promise<T> {
     const { timeoutMs = 8000, params, headers, ...rest } = options;
 
     let url = path.startsWith("http")

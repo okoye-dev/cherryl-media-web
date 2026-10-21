@@ -5,7 +5,9 @@
 
 import { BACKEND_URL } from "./backend-url";
 
-const TOKEN_KEY = "cherryl_newsroom_token";
+export const TOKEN_KEY = "cherryl_newsroom_token";
+/** Fired on the window whenever someone signs in or out, so the header can update. */
+export const SESSION_EVENT = "cherryl:session-changed";
 const USER_KEY = "cherryl_newsroom_user";
 
 export interface AuthUser {
@@ -42,6 +44,7 @@ export function saveSession(token: string, user: AuthUser): void {
   localStorage.setItem(USER_KEY, JSON.stringify(user));
   // Also store in cookie for server-side / proxy consistency
   document.cookie = `cherryl_token=${token}; path=/; max-age=604800; SameSite=Lax`;
+  window.dispatchEvent(new Event(SESSION_EVENT));
 }
 
 export function clearSession(): void {
@@ -49,6 +52,7 @@ export function clearSession(): void {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(USER_KEY);
   document.cookie = "cherryl_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+  window.dispatchEvent(new Event(SESSION_EVENT));
 }
 
 export async function loginUser(email: string, password: string): Promise<LoginResponse> {
