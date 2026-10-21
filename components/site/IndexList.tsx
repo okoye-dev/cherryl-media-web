@@ -39,7 +39,7 @@ export default function IndexList() {
       className="mx-auto mt-14 w-full max-w-[64rem] px-5 md:mt-20 md:px-10"
     >
       <h2 id="desks-heading" className="label mb-4 w-full justify-center font-medium text-ink-soft">
-        Browse all desks
+        Browse categories
       </h2>
 
       <div className="grid auto-rows-[4.6rem] grid-cols-4 gap-2 md:grid-cols-6 md:auto-rows-[6rem] md:gap-3">

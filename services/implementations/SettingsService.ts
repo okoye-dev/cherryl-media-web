@@ -21,7 +21,6 @@ export class SettingsService implements ISettingsService {
           hero: { ...DEFAULT_EDITORIAL_COPY.hero, ...(data.editorial_copy.hero || {}) },
           ticker: { ...DEFAULT_EDITORIAL_COPY.ticker, ...(data.editorial_copy.ticker || {}) },
           dossier: { ...DEFAULT_EDITORIAL_COPY.dossier, ...(data.editorial_copy.dossier || {}) },
-          network: { ...DEFAULT_EDITORIAL_COPY.network, ...(data.editorial_copy.network || {}) },
           footer: { ...DEFAULT_EDITORIAL_COPY.footer, ...(data.editorial_copy.footer || {}) },
         };
       }
@@ -31,7 +30,33 @@ export class SettingsService implements ISettingsService {
     return DEFAULT_EDITORIAL_COPY;
   }
 
-  async updateEditorialCopy(copy: EditorialCopy): Promise<{ success: boolean }> {
-    return this.client.post<{ success: boolean }>("/api/settings", { editorial_copy: copy });
+  async patchEditorialCopy(
+    changes: Partial<{ [K in keyof EditorialCopy]: Partial<EditorialCopy[K]> }>
+  ): Promise<EditorialCopy> {
+    const res = await this.client.request<{ editorial_copy?: Partial<EditorialCopy> }>(
+      "/api/settings/editorial-copy",
+      { method: "PATCH", body: JSON.stringify(changes) }
+    );
+    const c = res.editorial_copy;
+    return {
+      hero: { ...DEFAULT_EDITORIAL_COPY.hero, ...(c?.hero || {}) },
+      ticker: { ...DEFAULT_EDITORIAL_COPY.ticker, ...(c?.ticker || {}) },
+      dossier: { ...DEFAULT_EDITORIAL_COPY.dossier, ...(c?.dossier || {}) },
+      footer: { ...DEFAULT_EDITORIAL_COPY.footer, ...(c?.footer || {}) },
+    };
+  }
+
+  async updateEditorialCopy(copy: EditorialCopy): Promise<EditorialCopy> {
+    const res = await this.client.put<{ editorial_copy?: Partial<EditorialCopy> }>(
+      "/api/settings/editorial-copy",
+      copy
+    );
+    const c = res.editorial_copy;
+    return {
+      hero: { ...DEFAULT_EDITORIAL_COPY.hero, ...(c?.hero || {}) },
+      ticker: { ...DEFAULT_EDITORIAL_COPY.ticker, ...(c?.ticker || {}) },
+      dossier: { ...DEFAULT_EDITORIAL_COPY.dossier, ...(c?.dossier || {}) },
+      footer: { ...DEFAULT_EDITORIAL_COPY.footer, ...(c?.footer || {}) },
+    };
   }
 }

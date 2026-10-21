@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { Btn } from "@/components/admin/ui";
 import { uploadMediaWithProgress, type UploadProgressInfo } from "@/lib/upload";
 
 interface ImageUploadFieldProps {
@@ -85,7 +86,7 @@ export default function ImageUploadField({
     <div className="space-y-1.5">
       <div className="flex items-baseline justify-between">
         {label && (
-          <label className="block text-[0.72rem] font-semibold uppercase tracking-wider text-zinc-300">
+          <label className="block text-[0.7rem] font-medium text-zinc-400">
             {label}
             {required && <span className="text-brand-red ml-1">*</span>}
           </label>
@@ -93,7 +94,7 @@ export default function ImageUploadField({
       </div>
 
       {description && (
-        <p className="text-[0.72rem] text-zinc-400 leading-relaxed">
+        <p className="text-xs leading-relaxed text-zinc-400">
           {description}
         </p>
       )}
@@ -107,8 +108,8 @@ export default function ImageUploadField({
       />
 
       {displayImage ? (
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 rounded-xl border border-white/10 bg-[#1A1D24] p-3.5">
-          <div className="relative h-24 w-36 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-zinc-900">
+        <div className="flex flex-col items-stretch gap-3 rounded-xl border border-white/10 bg-[#1A1D24] p-3 sm:flex-row sm:items-center sm:gap-4">
+          <div className="relative aspect-video w-full shrink-0 overflow-hidden sm:aspect-auto sm:h-24 sm:w-36 rounded-lg border border-white/10 bg-zinc-900">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={displayImage}
@@ -126,7 +127,7 @@ export default function ImageUploadField({
 
           <div className="flex-1 min-w-0 space-y-2 w-full">
             <div className="space-y-1">
-              <div className="flex items-center justify-between text-xs">
+              <div className="flex items-center justify-between gap-2 text-xs">
                 {isUploading ? (
                   <span className="font-medium text-amber-400 flex items-center gap-1.5">
                     <span className="h-2 w-2 rounded-full bg-amber-400 animate-ping" />
@@ -134,12 +135,12 @@ export default function ImageUploadField({
                   </span>
                 ) : errorMessage ? (
                   <span className="font-medium text-red-400 flex items-center gap-1">
-                    ⚠️ {errorMessage}
+                    {errorMessage}
                   </span>
                 ) : (
                   <span className="font-medium text-emerald-400 flex items-center gap-1.5">
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                    Landed &amp; confirmed in S3 storage
+                    Uploaded and confirmed
                   </span>
                 )}
                 {isUploading && (
@@ -160,23 +161,13 @@ export default function ImageUploadField({
               )}
             </div>
 
-            <div className="flex items-center gap-2 pt-1">
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isUploading}
-                className="rounded-lg border border-white/15 bg-zinc-800 px-3 py-1 text-xs font-medium text-white hover:bg-zinc-700 transition-colors disabled:opacity-50"
-              >
+            <div className="grid grid-cols-2 gap-2 pt-1 sm:flex">
+              <Btn onClick={() => fileInputRef.current?.click()} disabled={isUploading}>
                 {errorMessage ? "Retry upload" : "Change photo"}
-              </button>
-              <button
-                type="button"
-                onClick={handleRemove}
-                disabled={isUploading}
-                className="rounded-lg px-2.5 py-1 text-xs text-zinc-400 hover:text-red-400 transition-colors disabled:opacity-50"
-              >
+              </Btn>
+              <Btn variant="ghost" onClick={handleRemove} disabled={isUploading}>
                 Remove
-              </button>
+              </Btn>
             </div>
           </div>
         </div>
@@ -185,7 +176,7 @@ export default function ImageUploadField({
           type="button"
           onClick={() => fileInputRef.current?.click()}
           disabled={isUploading}
-          className={`flex w-full items-center justify-center gap-3.5 rounded-xl border-2 border-dashed p-5 transition-colors disabled:opacity-50 ${
+          className={`flex min-h-20 w-full items-center justify-center gap-3 rounded-xl border-2 border-dashed p-4 transition-colors disabled:opacity-50 ${
             hasError
               ? "border-red-500/80 bg-red-950/20 text-red-200"
               : "border-white/15 bg-[#1A1D24]/60 text-zinc-300 hover:border-brand-red hover:bg-[#1A1D24] hover:text-white"
@@ -205,11 +196,11 @@ export default function ImageUploadField({
             />
           </svg>
           <div className="text-left">
-            <span className="block text-xs font-semibold">
-              {hasError ? "⚠️ Image required — choose photo" : "Choose photo from device"}
+            <span className="block text-sm font-medium">
+              {hasError ? "Image required, choose a photo" : "Choose a photo"}
             </span>
-            <span className="block text-[0.68rem] text-zinc-400">
-              WebP compressed &amp; verified in Cloudflare R2 / S3
+            <span className="block text-xs text-zinc-400">
+              Compressed to WebP on upload
             </span>
           </div>
         </button>

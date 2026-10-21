@@ -3,7 +3,7 @@ import type {
   ISectionService,
   CuratedSectionsResponse,
 } from "../contracts/ISectionService";
-import { buildFallbackSections, DEFAULT_SECTION_KEYS } from "../sections";
+import { buildFallbackSections, DEFAULT_SECTION_KEYS, enforceSectionLimits, mergeLegacySections } from "../sections";
 
 export class SectionService implements ISectionService {
   constructor(private readonly client: IApiClient) {}
@@ -11,12 +11,13 @@ export class SectionService implements ISectionService {
   async getCuratedSections(): Promise<CuratedSectionsResponse> {
     const fallback = buildFallbackSections();
     try {
-      const data = await this.client.get<CuratedSectionsResponse>("/api/sections", undefined, {
+      let data = await this.client.get<CuratedSectionsResponse>("/api/sections", undefined, {
         next: { revalidate: 30 },
         timeoutMs: 15000,
       });
 
       if (data && data.byKey) {
+        data = mergeLegacySections(data);
         for (const key of DEFAULT_SECTION_KEYS) {
           if (
             !data.byKey[key] ||
@@ -26,7 +27,7 @@ export class SectionService implements ISectionService {
             data.byKey[key] = fallback.byKey[key];
           }
         }
-        return data;
+        return enforceSectionLimits(data);
       }
     } catch {
       // Fallback cleanly

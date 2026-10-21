@@ -22,7 +22,11 @@ export interface RequestOptions extends RequestInit {
   params?: Record<string, string | number | boolean | undefined>;
 }
 
-export async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
+/** The reply body plus the response headers. Used where the headers carry information (paging). */
+export async function requestWithMeta<T>(
+  path: string,
+  options: RequestOptions = {}
+): Promise<{ data: T; headers: Headers }> {
   const { timeoutMs = 8000, params, headers, ...rest } = options;
 
   let url = path.startsWith("http") ? path : `${getBackendUrl()}${path.startsWith("/") ? "" : "/"}${path}`;
@@ -81,10 +85,10 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
     }
 
     if (response.status === 204) {
-      return {} as T;
+      return { data: {} as T, headers: response.headers };
     }
 
-    return (await response.json()) as T;
+    return { data: (await response.json()) as T, headers: response.headers };
   } catch (error: unknown) {
     clearTimeout(timeoutId);
     if (error instanceof ApiError) {
@@ -95,4 +99,35 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
     }
     throw new ApiError(error instanceof Error ? error.message : "Network error", 0);
   }
+}
+
+export async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  return (await requestWithMeta<T>(path, options)).data;
+}
+
+/** One page of a list, with where it sits in the whole list. */
+export interface Paged<T> {
+  items: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
+/** Reads a list endpoint that is paged with ?page= and ?pageSize= and reports the totals in headers. */
+export async function requestPaged<T>(path: string, options: RequestOptions = {}): Promise<Paged<T>> {
+  const { data, headers } = await requestWithMeta<T[] | { items?: T[] }>(path, options);
+  const items = Array.isArray(data) ? data : (data as { items?: T[] }).items ?? [];
+  const num = (name: string, fallback: number) => {
+    const n = Number(headers.get(name));
+    return Number.isFinite(n) && n > 0 ? n : fallback;
+  };
+  const total = Number(headers.get("X-Total-Count"));
+  return {
+    items,
+    total: Number.isFinite(total) && headers.get("X-Total-Count") !== null ? total : items.length,
+    page: num("X-Page", 1),
+    pageSize: num("X-Page-Size", items.length || 1),
+    totalPages: Math.max(1, Number(headers.get("X-Total-Pages")) || 1),
+  };
 }

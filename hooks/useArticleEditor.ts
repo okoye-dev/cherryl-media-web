@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { fetchArticles, fetchArticleBySlug, saveArticle } from "@/services/articles";
+import { useRef, useState, useEffect, useCallback, useMemo } from "react";
+import { fetchArticleBySlug, saveArticle, patchArticle } from "@/services/articles";
+import { changedFields, isEmpty } from "@/lib/diff";
 import type {
   ContentBlock,
   PillarCategory,
@@ -8,14 +9,31 @@ import type {
   RelatedStory,
 } from "@/lib/types";
 
+/** How long the person must stop typing before a draft is saved on its own. */
+const AUTOSAVE_IDLE_MS = 20000;
+
 export interface SourceItem {
   url: string;
   publisher: string;
   claimSummary?: string;
 }
 
+export const MAX_TAGS = 12;
+export const MAX_TAG_LENGTH = 40;
+
+/** Tags never carry a "#" and stay short. */
+export function cleanTag(raw: string): string {
+  return raw.replace(/#/g, "").trim().slice(0, MAX_TAG_LENGTH);
+}
+
+/** The payload as a string, without fields that change by themselves (publish time, read time). */
+function snapshotOf(p: Partial<CanonicalArticle>): string {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { publishedAt, readTime, ...rest } = p;
+  return JSON.stringify(rest);
+}
+
 export function useArticleEditor(initialSlug?: string | null) {
-  const [articlesList, setArticlesList] = useState<CanonicalArticle[]>([]);
   const [selectedSlug, setSelectedSlug] = useState<string>(initialSlug || "__new__");
   const [currentArticleId, setCurrentArticleId] = useState<string>("");
 
@@ -27,8 +45,8 @@ export function useArticleEditor(initialSlug?: string | null) {
   const [category, setCategory] = useState<PillarCategory>("state-affairs-environs");
   const [slug, setSlug] = useState("");
   const [slugManual, setSlugManual] = useState(false);
-  const [authorName, setAuthorName] = useState("Newsroom Desk");
-  const [authorRole, setAuthorRole] = useState("Staff Reporter");
+  const [authorName, setAuthorName] = useState("");
+  const [authorRole, setAuthorRole] = useState("");
   const [status, setStatus] = useState<PublishingStatus>("draft");
   const [sendWebpushr, setSendWebpushr] = useState(false);
   const [tags, setTags] = useState<string[]>(["Nigeria"]);
@@ -68,8 +86,26 @@ export function useArticleEditor(initialSlug?: string | null) {
   const [autosaveStatus, setAutosaveStatus] = useState<"idle" | "saving" | "saved">("idle");
   const [lastAutosavedTime, setLastAutosavedTime] = useState<string | null>(null);
 
+  // Save state: one snapshot of what is stored. "Dirty" means the editor differs from it.
+  const [baseline, setBaseline] = useState<string | null>(null);
+  const rebaseNext = useRef(true);
+  // The address the story is stored under. Empty until the story has been saved once.
+  const [savedSlug, setSavedSlugState] = useState("");
+  const savedSlugRef = useRef("");
+  const storedRef = useRef<Partial<CanonicalArticle> | null>(null);
+  const savingRef = useRef(false);
+  const setSavedSlug = useCallback((v: string) => {
+    savedSlugRef.current = v;
+    setSavedSlugState(v);
+  }, []);
+  const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
+
   // Populate data when selecting a story
   const populateArticleData = useCallback((art: Partial<CanonicalArticle> & Record<string, unknown>) => {
+    rebaseNext.current = true;
+    setSaveError(null);
+    setSavedSlug(typeof art.slug === "string" ? art.slug : "");
     setCurrentArticleId(typeof art.id === "string" ? art.id : "");
     setTitle(typeof art.title === "string" ? art.title : "");
     setSubtitle(typeof art.subtitle === "string" ? art.subtitle : "");
@@ -80,8 +116,8 @@ export function useArticleEditor(initialSlug?: string | null) {
     setCategory((art.category as PillarCategory) || "state-affairs-environs");
 
     const authorObj = art.author as { name?: string; role?: string } | undefined;
-    setAuthorName(authorObj?.name || "Newsroom Desk");
-    setAuthorRole(authorObj?.role || "Staff Reporter");
+    setAuthorName(authorObj?.name || "");
+    setAuthorRole(authorObj?.role || "");
     setStatus((art.status as PublishingStatus) || "published");
 
     const featImg = art.featuredImage as { url?: string; caption?: string; credit?: string } | undefined;
@@ -90,7 +126,7 @@ export function useArticleEditor(initialSlug?: string | null) {
     setCoverCredit(featImg?.credit || "Cherryl Media");
 
     setSendWebpushr(Boolean(art.send_webpushr));
-    setTags(Array.isArray(art.tags) ? art.tags : []);
+    setTags(Array.isArray(art.tags) ? art.tags.map(cleanTag).filter(Boolean).slice(0, MAX_TAGS) : []);
 
     const rawBlocks = Array.isArray(art.body) ? (art.body as ContentBlock[]) : [];
     setBlocks(rawBlocks.map((b, i) => ({ ...b, order_id: b.order_id || i + 1 })));
@@ -121,9 +157,12 @@ export function useArticleEditor(initialSlug?: string | null) {
         claimSummary: s.claimSummary || "",
       }))
     );
-  }, []);
+  }, [setSavedSlug]);
 
   const handleCreateNewStory = useCallback(() => {
+    rebaseNext.current = true;
+    setSaveError(null);
+    setSavedSlug("");
     setSelectedSlug("__new__");
     setCurrentArticleId("");
     setTitle("");
@@ -133,8 +172,8 @@ export function useArticleEditor(initialSlug?: string | null) {
     setSlug("");
     setSlugManual(false);
     setCategory("state-affairs-environs");
-    setAuthorName("Newsroom Desk");
-    setAuthorRole("Staff Reporter");
+    setAuthorName("");
+    setAuthorRole("");
     setStatus("draft");
     setCoverUrl("");
     setCoverCaption("");
@@ -160,17 +199,55 @@ export function useArticleEditor(initialSlug?: string | null) {
     setSources([]);
     setSaveMessage("Started new story draft");
     setTimeout(() => setSaveMessage(null), 3000);
-  }, []);
+  }, [setSavedSlug]);
 
-  // Fetch articles catalogue
-  useEffect(() => {
-    fetchArticles()
-      .then((data) => {
-        if (Array.isArray(data) && data.length > 0) {
-          setArticlesList(data);
-        }
-      })
-      .catch(() => {});
+  // Load a saved snapshot (the same shape as currentPayload) back into the editor.
+  // Additive: used by the Versions panel to restore a draft.
+  const applyPayload = useCallback((p: Partial<CanonicalArticle>) => {
+    const str = (v: unknown, fallback = "") => (typeof v === "string" ? v : fallback);
+    const nextTitle = str(p.title);
+    const nextSlug = str(p.slug);
+    const nextExcerpt = str(p.excerpt) || str(p.deck);
+    setTitle(nextTitle);
+    setSubtitle(str(p.subtitle));
+    setExcerpt(nextExcerpt === str(p.subtitle) ? "" : nextExcerpt);
+    setKicker(str(p.kicker, "NEWSROOM · DESK DISPATCH"));
+    setSlug(nextSlug);
+    setSlugManual(Boolean(nextSlug));
+    setCategory((p.category as PillarCategory) || "state-affairs-environs");
+    setAuthorName(p.author?.name || "");
+    setAuthorRole(p.author?.role || "");
+    setCoverUrl(p.featuredImage?.url || "");
+    setCoverCaption(p.featuredImage?.caption || "");
+    setCoverCredit(p.featuredImage?.credit || "Cherryl Media");
+    setSendWebpushr(Boolean(p.send_webpushr));
+    setTags(Array.isArray(p.tags) ? p.tags.map(cleanTag).filter(Boolean).slice(0, MAX_TAGS) : []);
+    const rawBlocks = Array.isArray(p.body) ? p.body : [];
+    setBlocks(
+      rawBlocks.length > 0
+        ? rawBlocks.map((b, i) => ({ ...b, order_id: i + 1 }))
+        : [{ order_id: 1, type: "paragraph", text: "", isDropCap: true }]
+    );
+    const rawRelated = Array.isArray(p.related_stories) ? p.related_stories : [];
+    setRelatedStories(rawRelated.map((b, i) => ({ ...b, order_id: i + 1 })));
+    // Payload SEO fields fall back to the title, slug and excerpt, so only keep real overrides
+    setSeoTitle(p.seo_title && p.seo_title !== p.title ? p.seo_title : "");
+    setSeoSlug(p.seo_slug && p.seo_slug !== p.slug ? p.seo_slug : "");
+    setSeoDescription(
+      p.seo_description && p.seo_description !== (p.excerpt || p.subtitle) ? p.seo_description : ""
+    );
+    const social = p.socialVariants;
+    setXPost(social?.x || "");
+    setFbPost(social?.facebook || "");
+    setLiPost(social?.linkedin || "");
+    setNlPost(social?.newsletter || "");
+    setSources(
+      (p.sources || []).map((s) => ({
+        url: s.url || "",
+        publisher: s.sourceName || "",
+        claimSummary: s.claimSummary || "",
+      }))
+    );
   }, []);
 
   // Load article by selected slug
@@ -196,7 +273,9 @@ export function useArticleEditor(initialSlug?: string | null) {
         const auto = newTitle
           .toLowerCase()
           .replace(/[^a-z0-9]+/g, "-")
-          .replace(/^-+|-+$/g, "");
+          .replace(/^-+|-+$/g, "")
+          .slice(0, 90)
+          .replace(/-+$/g, "");
         setSlug(auto);
       }
     },
@@ -277,40 +356,154 @@ export function useArticleEditor(initialSlug?: string | null) {
     sources,
   ]);
 
-  // Debounced Autosave
+  // Autosave only starts once the person has typed something. Opening a story, or filling it in from
+  // an AI lead, must never write to the database by itself.
+  const touchedRef = useRef(false);
   useEffect(() => {
-    if (!title.trim()) return;
+    const mark = () => {
+      touchedRef.current = true;
+    };
+    const events = ["input", "change", "keydown"] as const;
+    events.forEach((e) => document.addEventListener(e, mark, true));
+    return () => events.forEach((e) => document.removeEventListener(e, mark, true));
+  }, []);
+
+  // Take the first snapshot after a load or a new story
+  useEffect(() => {
+    if (rebaseNext.current) {
+      rebaseNext.current = false;
+      storedRef.current = currentPayload;
+      setBaseline(snapshotOf(currentPayload));
+    }
+  }, [currentPayload]);
+
+  const isDirty = useMemo(
+    () => baseline !== null && snapshotOf(currentPayload) !== baseline,
+    [baseline, currentPayload]
+  );
+
+  const messageOf = (err: unknown) => (err instanceof Error && err.message ? err.message : "The server did not answer");
+
+  /** Remember that this payload is what the server now holds. */
+  const markStored = useCallback(
+    (payload: Partial<CanonicalArticle>, newId?: string) => {
+      if (newId && !currentArticleId) setCurrentArticleId(newId);
+      if (payload.status) setStatus(payload.status);
+      const stored = { ...payload, id: payload.id || newId || undefined };
+      storedRef.current = stored;
+      setBaseline(snapshotOf(stored));
+      setLastSavedAt(new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
+      setSaveError(null);
+    },
+    [currentArticleId]
+  );
+
+  /**
+   * Save to the server. A story never saved before is created in full. After that only the fields that
+   * changed since the last stored copy are sent. Nothing is sent when nothing changed.
+   * Throws the server's message on failure. Returns the story's address.
+   */
+  const runSave = useCallback(
+    async (wanted: PublishingStatus, verify: boolean): Promise<{ slug: string; sent: boolean }> => {
+      if (savingRef.current) throw new Error("A save is already running.");
+      savingRef.current = true;
+      try {
+        const payload = { ...currentPayload, status: wanted };
+        const titleOk = (t?: string) => (t || "").trim() === (payload.title || "").trim();
+
+        if (!savedSlugRef.current) {
+          // First save of a new story: create it. A story always starts as a draft.
+          const created = await saveArticle({ ...payload, status: wanted === "published" ? "draft" : wanted });
+          const slug = created?.slug || String(payload.slug);
+          if (verify) {
+            const fresh = created?.title ? created : await fetchArticleBySlug(slug);
+            if (!titleOk(fresh?.title)) throw new Error("The server did not return the title you saved. Your text is still here, try saving again.");
+          }
+          setSavedSlug(slug);
+          // From now on the address stays put, even if the title changes
+          setSlugManual(true);
+          if (slug !== payload.slug) setSlug(slug);
+          markStored({ ...payload, slug, status: wanted === "published" ? "draft" : wanted }, created?.id);
+          return { slug, sent: true };
+        }
+
+        const changes = changedFields(storedRef.current, payload, ["publishedAt"]) as Record<string, unknown>;
+        delete changes.id;
+        delete changes.createdAt;
+        delete changes.publishedAt;
+        if (changes.status === "published") delete changes.status; // going live is the publish step
+        if (isEmpty(changes)) return { slug: savedSlugRef.current, sent: false };
+
+        const res = await patchArticle(savedSlugRef.current, changes as Partial<CanonicalArticle>);
+        if (verify && res.article && !titleOk(res.article.title)) {
+          throw new Error("The server did not return the title you saved. Your text is still here, try saving again.");
+        }
+        const slug = res.article?.slug || (typeof changes.slug === "string" ? changes.slug : savedSlugRef.current);
+        setSavedSlug(slug);
+        markStored({ ...(storedRef.current || {}), ...changes, id: storedRef.current?.id } as Partial<CanonicalArticle>);
+        return { slug, sent: true };
+      } finally {
+        savingRef.current = false;
+      }
+    },
+    [currentPayload, markStored, setSavedSlug]
+  );
+
+  // Debounced autosave: drafts only, only when something changed, only after the person typed.
+  // It saves once the person has stopped for this long (the timer restarts with every change).
+  useEffect(() => {
+    if (!title.trim() || !touchedRef.current || !isDirty || status !== "draft" || isSubmitting) return;
 
     const timer = setTimeout(async () => {
       setAutosaveStatus("saving");
       try {
-        await saveArticle({ ...currentPayload, status: "draft" });
-        const timeStr = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-        setLastAutosavedTime(timeStr);
+        await runSave("draft", false);
         setAutosaveStatus("saved");
-      } catch {
+      } catch (err) {
+        setSaveError(messageOf(err));
         setAutosaveStatus("idle");
       }
-    }, 3000);
+    }, AUTOSAVE_IDLE_MS);
 
     return () => clearTimeout(timer);
-  }, [title, currentPayload]);
+  }, [title, status, isDirty, isSubmitting, runSave]);
 
-  // Explicit Save Draft
-  const handleSaveDraft = useCallback(async () => {
-    setIsSubmitting(true);
-    setSaveMessage(null);
-    try {
-      await saveArticle({ ...currentPayload, status: "draft" });
-      setStatus("draft");
-      setSaveMessage("✓ Saved draft to database");
-    } catch {
-      setSaveMessage("✓ Saved locally");
-    } finally {
-      setIsSubmitting(false);
-      setTimeout(() => setSaveMessage(null), 4000);
-    }
-  }, [currentPayload]);
+  // Autosave waits a while, so warn before leaving with changes that are not stored yet.
+  useEffect(() => {
+    if (!isDirty || !touchedRef.current) return;
+    const warn = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [isDirty]);
+
+  // Explicit save. A live story stays live. The server's reply is checked against what was sent.
+  const handleSaveDraft = useCallback(
+    async (opts?: { forceDraft?: boolean }): Promise<boolean> => {
+      setIsSubmitting(true);
+      setSaveError(null);
+      setSaveMessage(null);
+      const keepLive = status === "published" && opts?.forceDraft !== true;
+      try {
+        await runSave(keepLive ? "published" : "draft", true);
+        return true;
+      } catch (err) {
+        setSaveError(messageOf(err));
+        return false;
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [status, runSave]
+  );
+
+  /** Used by publishing: store any unsaved changes first and give back the story's address. */
+  const persistForPublish = useCallback(async (): Promise<string> => {
+    const { slug } = await runSave(status === "published" ? "published" : "draft", false);
+    return slug;
+  }, [status, runSave]);
 
   // Block Manipulation Handlers
   const addBlock = useCallback((block: ContentBlock, atIndex?: number) => {
@@ -368,9 +561,9 @@ export function useArticleEditor(initialSlug?: string | null) {
 
   // Tag Handlers
   const addTag = useCallback((newTag: string) => {
-    const clean = newTag.trim().replace(/^#/, "");
+    const clean = cleanTag(newTag);
     if (clean) {
-      setTags((prev) => (prev.includes(clean) ? prev : [...prev, clean]));
+      setTags((prev) => (prev.includes(clean) || prev.length >= MAX_TAGS ? prev : [...prev, clean]));
     }
   }, []);
 
@@ -413,7 +606,6 @@ ${blocks.map((b) => {
 
   return {
     // Catalogue
-    articlesList,
     selectedSlug,
     setSelectedSlug,
     currentArticleId,
@@ -459,6 +651,7 @@ ${blocks.map((b) => {
 
     // Blocks
     blocks,
+    setBlocks,
     addBlock,
     updateBlock,
     moveBlock,
@@ -495,8 +688,15 @@ ${blocks.map((b) => {
     saveMessage,
     autosaveStatus,
     lastAutosavedTime,
+    isDirty,
+    lastSavedAt,
+    saveError,
+    markStored,
+    savedSlug,
+    persistForPublish,
     handleSaveDraft,
     currentPayload,
     generateAIContext,
+    applyPayload,
   };
 }

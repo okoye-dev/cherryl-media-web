@@ -1,8 +1,11 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useEffect, useRef, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import AutoTextarea from "@/components/admin/AutoTextarea";
+import { AIChip, Btn, Label, Panel, Tabs, TextInput } from "@/components/admin/ui";
+import { LIMITS, normalizeSlug } from "@/components/admin/editor/limits";
+import EditorPublishChecklist, { type MissingItem } from "@/components/admin/editor/EditorPublishChecklist";
+import { PlusIcon, SparkIcon, TrashIcon } from "@/components/admin/editor/icons";
 import EditorTopBar from "@/components/admin/editor/EditorTopBar";
 import EditorMetadata from "@/components/admin/editor/EditorMetadata";
 import EditorTags from "@/components/admin/editor/EditorTags";
@@ -10,15 +13,71 @@ import EditorCoverImage from "@/components/admin/editor/EditorCoverImage";
 import EditorBlockList from "@/components/admin/editor/EditorBlockList";
 import EditorMoreStories from "@/components/admin/editor/EditorMoreStories";
 import EditorSeoPanel from "@/components/admin/editor/EditorSeoPanel";
+import EditorAIPanel from "@/components/admin/editor/EditorAIPanel";
+import EditorVersions from "@/components/admin/editor/EditorVersions";
 import EditorPublishModal from "@/components/admin/editor/EditorPublishModal";
 import { useArticleEditor } from "@/hooks/useArticleEditor";
 import { useSlugAvailability } from "@/hooks/useSlugAvailability";
 import { usePublishPipeline } from "@/hooks/usePublishPipeline";
+import { useAiFilled } from "@/hooks/useAiFilled";
+import { useLead } from "@/hooks/useLead";
+import { useVersions } from "@/hooks/useVersions";
+import { useAiAssist } from "@/hooks/useAiAssist";
+import { blockKey } from "@/hooks/aiFill";
+
+function SocialField({
+  ai,
+  label,
+  id,
+  value,
+  onChange,
+  placeholder,
+  max,
+}: {
+  max: number;
+  ai?: boolean;
+  label: string;
+  id: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder: string;
+}) {
+  return (
+    <div>
+      <Label htmlFor={id}>
+        {label} {ai && <AIChip className="ml-1" />}
+      </Label>
+      <TextInput
+        id={id}
+        multiline
+        alwaysCount
+        value={value}
+        maxLength={max}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="min-h-24 leading-relaxed"
+      />
+    </div>
+  );
+}
 
 function AdminEditorContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const urlSlug = searchParams.get("slug");
+
+  // Which story or lead this page was opened for. Our own address updates after a save do not change it.
+  const ownSlug = useRef<string | null>(null);
+  const [ctx, setCtx] = useState({ slug: urlSlug, cand: urlSlug ? null : searchParams.get("candidate") });
+  useEffect(() => {
+    const s = searchParams.get("slug");
+    if (s && s === ownSlug.current) return;
+    setCtx((prev) => {
+      const next = { slug: s, cand: s ? null : searchParams.get("candidate") };
+      return prev.slug === next.slug && prev.cand === next.cand ? prev : next;
+    });
+  }, [searchParams]);
+  const candidateId = ctx.cand;
 
   // Domain state and operations managed cleanly by custom hook
   const editor = useArticleEditor(urlSlug);
@@ -28,6 +87,34 @@ function AdminEditorContent() {
 
   // Publishing verification pipeline managed cleanly by custom hook
   const publish = usePublishPipeline();
+
+  // AI help: which fields AI filled, the lead we started from, and saved versions
+  const ai = useAiFilled();
+  const { lead, status: leadStatus } = useLead(candidateId);
+  const storeKey = ctx.slug
+    ? `slug:${ctx.slug}`
+    : candidateId
+    ? `lead:${candidateId}`
+    : editor.currentArticleId
+    ? `id:${editor.currentArticleId}`
+    : "new";
+  const versions = useVersions(storeKey);
+  const assist = useAiAssist(editor, ai, versions, lead);
+
+  // Editing a field counts as reviewing it, so its AI mark goes away
+  const edited = <T,>(key: string, fn: (v: T) => void) => (v: T) => {
+    ai.clear(key);
+    fn(v);
+  };
+  const setSourcesEdited: typeof editor.setSources = (action) => {
+    ai.clear("sources");
+    editor.setSources(action);
+  };
+
+  const handleSaveMine = (name: string) => {
+    const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    versions.save("mine", name || `My draft, ${time}`, editor.currentPayload);
+  };
 
   // Tab & feedback UI states
   const [activeTab, setActiveTab] = useState<"story" | "seo" | "social" | "sources">("story");
@@ -41,122 +128,157 @@ function AdminEditorContent() {
     setTimeout(() => setCopiedAI(false), 3500);
   };
 
-  const handlePublishClick = async () => {
-    if (!editor.coverUrl.trim()) {
-      setCoverImageError(true);
+  // When the story's address changes (first save, or a new slug), show it in the URL without reloading
+  useEffect(() => {
+    if (!editor.savedSlug) return;
+    const wanted = `/admin/editor?slug=${encodeURIComponent(editor.savedSlug)}`;
+    ownSlug.current = editor.savedSlug;
+    if (`${window.location.pathname}${window.location.search}` !== wanted) {
+      window.history.replaceState(window.history.state, "", wanted);
     }
-    await publish.startPublish(editor.currentPayload, {
+  }, [editor.savedSlug]);
+
+  // Publish checklist: what is missing, and a way to jump straight to it
+  const [missing, setMissing] = useState<MissingItem[] | null>(null);
+
+  const findMissing = (): MissingItem[] => {
+    const list: MissingItem[] = [];
+    if (!editor.title.trim()) list.push({ id: "title", problem: "The story has no headline.", action: "Write a headline" });
+    if (!editor.category) list.push({ id: "category", problem: "No category is chosen.", action: "Choose a category" });
+    if (!editor.coverUrl.trim()) list.push({ id: "cover", problem: "The story has no cover photo.", action: "Add a cover photo" });
+    const hasBody = editor.blocks.some(
+      (b) => b.type === "paragraph" && b.text.trim() && b.text.trim() !== "Draft your opening paragraph here...",
+    );
+    if (!hasBody) list.push({ id: "body", problem: "The body has no paragraph with text.", action: "Write a paragraph" });
+    return list;
+  };
+
+  const goToField = (item: MissingItem) => {
+    setMissing(null);
+    setActiveTab("story");
+    const targets: Record<string, string> = {
+      title: "story-title",
+      category: "story-category",
+      cover: "cover-section",
+      body: "body-section",
+    };
+    window.setTimeout(() => {
+      const el = document.getElementById(targets[item.id]);
+      if (!el) return;
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      const focusable = el.matches("input,textarea,select,button")
+        ? el
+        : el.querySelector<HTMLElement>(item.id === "body" ? "textarea" : "button");
+      window.setTimeout(() => (focusable as HTMLElement | null)?.focus({ preventScroll: true }), 350);
+    }, 120);
+  };
+
+  const handlePublishClick = async () => {
+    const problems = findMissing();
+    if (problems.length > 0) {
+      setCoverImageError(!editor.coverUrl.trim());
+      setMissing(problems);
+      return;
+    }
+    const ok = await publish.startPublish(editor.currentPayload, {
       inFlightUploads: editor.inFlightUploads,
       coverUrl: editor.coverUrl,
+      persist: editor.persistForPublish,
+      alreadyLive: editor.status === "published",
     });
+    if (ok) editor.markStored({ ...editor.currentPayload, status: "published" });
   };
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
+    <div className="mx-auto max-w-5xl space-y-4 pb-24 lg:pb-0">
       {/* Top action bar */}
       <EditorTopBar
-        articlesList={editor.articlesList}
-        selectedSlug={editor.selectedSlug}
-        onSelectStory={(newSlug) => {
-          editor.setSelectedSlug(newSlug);
-          if (newSlug === "__new__") {
-            editor.handleCreateNewStory();
-            router.push("/admin/editor");
-          } else {
-            router.push(`/admin/editor?slug=${newSlug}`);
-          }
+        savedSlug={editor.savedSlug}
+        title={editor.title}
+        onOpenStory={(slug) => {
+          editor.setSelectedSlug(slug);
+          router.push(`/admin/editor?slug=${encodeURIComponent(slug)}`);
+        }}
+        onNewStory={() => {
+          editor.handleCreateNewStory();
+          router.push("/admin/editor");
         }}
         category={editor.category}
         status={editor.status}
-        autosaveStatus={editor.autosaveStatus}
-        lastAutosavedTime={editor.lastAutosavedTime}
-        saveMessage={editor.saveMessage}
+        isDirty={editor.isDirty}
+        isSaving={editor.isSubmitting || editor.autosaveStatus === "saving"}
+        lastSavedAt={editor.lastSavedAt}
+        saveError={editor.saveError}
         copiedAI={copiedAI}
         onCopyAI={handleCopyAI}
         isSubmitting={editor.isSubmitting}
         inFlightUploads={editor.inFlightUploads}
-        onSaveDraft={editor.handleSaveDraft}
+        onSaveDraft={() => void editor.handleSaveDraft()}
         onPublishClick={handlePublishClick}
       />
 
-      {/* Primary tab switcher */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-white/[0.08] pb-2">
-        <button
-          type="button"
-          onClick={() => setActiveTab("story")}
-          className={`rounded-lg px-4 py-2 text-xs font-semibold transition-colors ${
-            activeTab === "story"
-              ? "bg-brand-red text-white"
-              : "text-zinc-400 hover:text-white hover:bg-white/[0.04]"
-          }`}
-        >
-          1. Story &amp; Content
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab("seo")}
-          className={`rounded-lg px-4 py-2 text-xs font-semibold transition-colors flex items-center gap-1.5 ${
-            activeTab === "seo"
-              ? "bg-brand-red text-white"
-              : "text-zinc-400 hover:text-white hover:bg-white/[0.04]"
-          }`}
-        >
-          <span>2. SEO &amp; Meta</span>
-          {(editor.seoTitle || editor.seoDescription) && (
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-          )}
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab("social")}
-          className={`rounded-lg px-4 py-2 text-xs font-semibold transition-colors ${
-            activeTab === "social"
-              ? "bg-brand-red text-white"
-              : "text-zinc-400 hover:text-white hover:bg-white/[0.04]"
-          }`}
-        >
-          3. Social Media Channels
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab("sources")}
-          className={`rounded-lg px-4 py-2 text-xs font-semibold transition-colors flex items-center gap-1.5 ${
-            activeTab === "sources"
-              ? "bg-brand-red text-white"
-              : "text-zinc-400 hover:text-white hover:bg-white/[0.04]"
-          }`}
-        >
-          <span>4. Sources &amp; Citations</span>
-          <span className="rounded-full bg-white/15 px-1.5 py-0.2 text-[0.65rem]">
-            {editor.sources.length}
-          </span>
-        </button>
-      </div>
+      {/* Section switcher. It scrolls sideways on narrow screens. */}
+      <Tabs
+        value={activeTab}
+        onChange={setActiveTab}
+        items={[
+          { id: "story", label: "Story" },
+          { id: "seo", label: "SEO", dot: Boolean(editor.seoTitle || editor.seoDescription) },
+          { id: "social", label: "Social" },
+          { id: "sources", label: "Sources", count: editor.sources.length },
+        ]}
+      />
 
       {/* TAB 1: Story & Content Flow */}
       {activeTab === "story" && (
-        <div className="space-y-6">
+        <div className="space-y-4">
+          <EditorAIPanel
+            lead={lead}
+            leadStatus={leadStatus}
+            leadApplied={assist.leadApplied}
+            aiCount={ai.keys.size}
+            onUseDraft={assist.applyLead}
+            onStartBlank={assist.clearAiFields}
+            onPaste={assist.applyPaste}
+            onCopyContext={handleCopyAI}
+            copiedAI={copiedAI}
+          />
+
+          <EditorVersions
+            versions={versions.versions}
+            storageFailed={versions.storageFailed}
+            onSaveMine={handleSaveMine}
+            onWriteMyOwn={assist.writeMyOwn}
+            onRestore={(v) => {
+              editor.applyPayload(v.payload);
+              ai.reset();
+            }}
+            onDelete={versions.remove}
+          />
+
           <EditorMetadata
             title={editor.title}
-            onTitleChange={editor.handleTitleChange}
+            onTitleChange={edited("title", editor.handleTitleChange)}
             subtitle={editor.subtitle}
-            onSubtitleChange={editor.setSubtitle}
+            onSubtitleChange={edited("subtitle", editor.setSubtitle)}
             excerpt={editor.excerpt}
-            onExcerptChange={editor.setExcerpt}
+            onExcerptChange={edited("excerpt", editor.setExcerpt)}
             category={editor.category}
-            onCategoryChange={editor.setCategory}
+            onCategoryChange={edited("category", editor.setCategory)}
             kicker={editor.kicker}
-            onKickerChange={editor.setKicker}
+            onKickerChange={edited("kicker", editor.setKicker)}
             slug={editor.slug}
             onSlugChange={(val) => {
               editor.setSlugManual(true);
-              editor.setSlug(val);
+              editor.setSlug(normalizeSlug(val));
             }}
             onSyncSlugFromTitle={() => {
               const auto = editor.title
                 .toLowerCase()
                 .replace(/[^a-z0-9]+/g, "-")
-                .replace(/^-+|-+$/g, "");
+                .replace(/^-+|-+$/g, "")
+                .slice(0, LIMITS.slug)
+                .replace(/-+$/g, "");
               editor.setSlug(auto);
               editor.setSlugManual(true);
             }}
@@ -168,13 +290,15 @@ function AdminEditorContent() {
             onAuthorRoleChange={editor.setAuthorRole}
             sendWebpushr={editor.sendWebpushr}
             onSendWebpushrChange={editor.setSendWebpushr}
-          />
-
-          <EditorTags
-            tags={editor.tags}
-            onAddTag={editor.addTag}
-            onRemoveTag={editor.removeTag}
-          />
+            isAi={ai.has}
+          >
+            <EditorTags
+              tags={editor.tags}
+              onAddTag={edited("tags", editor.addTag)}
+              onRemoveTag={edited("tags", editor.removeTag)}
+              aiFilled={ai.has("tags")}
+            />
+          </EditorMetadata>
 
           <EditorCoverImage
             coverUrl={editor.coverUrl}
@@ -194,9 +318,13 @@ function AdminEditorContent() {
 
           <EditorBlockList
             blocks={editor.blocks}
-            articlesList={editor.articlesList}
             onAddBlock={editor.addBlock}
-            onUpdateBlock={editor.updateBlock}
+            onUpdateBlock={(i, updated) => {
+              const b = editor.blocks[i];
+              if (b) ai.clear(blockKey(b));
+              editor.updateBlock(i, updated);
+            }}
+            isAiBlock={(b) => ai.has(blockKey(b))}
             onMoveBlock={editor.moveBlock}
             onRemoveBlock={editor.removeBlock}
             onUploadStateChange={(isUploading) =>
@@ -206,7 +334,6 @@ function AdminEditorContent() {
 
           <EditorMoreStories
             relatedStories={editor.relatedStories}
-            articlesList={editor.articlesList}
             onAddRelatedStory={editor.addRelatedStory}
             onUpdateRelatedStory={editor.updateRelatedStory}
             onRemoveRelatedStory={editor.removeRelatedStory}
@@ -218,243 +345,155 @@ function AdminEditorContent() {
       {activeTab === "seo" && (
         <EditorSeoPanel
           seoTitle={editor.seoTitle}
-          onSeoTitleChange={editor.setSeoTitle}
+          onSeoTitleChange={edited("seoTitle", editor.setSeoTitle)}
           defaultTitle={editor.title}
           seoSlug={editor.seoSlug}
           onSeoSlugChange={editor.setSeoSlug}
           defaultSlug={editor.slug}
           seoDescription={editor.seoDescription}
-          onSeoDescriptionChange={editor.setSeoDescription}
+          onSeoDescriptionChange={edited("seoDescription", editor.setSeoDescription)}
+          isAi={ai.has}
           defaultDescription={editor.excerpt || editor.subtitle}
         />
       )}
 
-      {/* TAB 3: Social Media Channels */}
+      {/* TAB 3: Social */}
       {activeTab === "social" && (
-        <div className="rounded-2xl border border-white/[0.08] bg-[#16181D] p-5 sm:p-6 space-y-6 shadow-sm">
-          <div>
-            <h2 className="font-sans text-xl font-semibold text-white tracking-tight">
-              Social Media Channels
-            </h2>
-            <p className="mt-0.5 text-xs text-zinc-400">
-              Draft channel-specific versions of this story for social platforms and subscriber newsletter.
-            </p>
+        <Panel title="Social posts" description="Write a version of this story for each channel.">
+          <div className="space-y-4">
+            <Tabs
+              value={socialTab}
+              onChange={setSocialTab}
+              items={[
+                { id: "x", label: "X" },
+                { id: "facebook", label: "Facebook" },
+                { id: "linkedin", label: "LinkedIn" },
+                { id: "newsletter", label: "Newsletter" },
+              ]}
+            />
+            {socialTab === "x" && (
+              <SocialField label="X post" id="social-x" max={LIMITS.x} ai={ai.has("x")} value={editor.xPost} onChange={edited("x", editor.setXPost)} placeholder="Key facts and the link" />
+            )}
+            {socialTab === "facebook" && (
+              <SocialField label="Facebook post" id="social-fb" max={LIMITS.facebook} ai={ai.has("facebook")} value={editor.fbPost} onChange={edited("facebook", editor.setFbPost)} placeholder="Context and headline" />
+            )}
+            {socialTab === "linkedin" && (
+              <SocialField label="LinkedIn post" id="social-li" max={LIMITS.linkedin} ai={ai.has("linkedin")} value={editor.liPost} onChange={edited("linkedin", editor.setLiPost)} placeholder="The business or policy angle" />
+            )}
+            {socialTab === "newsletter" && (
+              <SocialField label="Newsletter summary" id="social-nl" max={LIMITS.newsletter} ai={ai.has("newsletter")} value={editor.nlPost} onChange={edited("newsletter", editor.setNlPost)} placeholder="A short summary for subscribers" />
+            )}
           </div>
-
-          <div className="flex flex-wrap items-center gap-2 border-b border-white/[0.08] pb-3">
-            {[
-              { id: "x", label: "X / Twitter" },
-              { id: "facebook", label: "Facebook" },
-              { id: "linkedin", label: "LinkedIn" },
-              { id: "newsletter", label: "Newsletter" },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setSocialTab(tab.id as typeof socialTab)}
-                className={`rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-colors ${
-                  socialTab === tab.id
-                    ? "bg-zinc-800 text-white border border-white/20"
-                    : "text-zinc-400 hover:text-white"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-
-          {socialTab === "x" && (
-            <div className="space-y-3">
-              <label className="text-xs font-semibold uppercase tracking-wider text-zinc-300">
-                X / Twitter Post Copy
-              </label>
-              <AutoTextarea
-                value={editor.xPost}
-                onChange={(e) => editor.setXPost(e.target.value)}
-                placeholder="Write concise post for X with key facts and source link..."
-                className="text-sm font-normal text-white bg-[#1A1D24] border border-white/10 rounded-xl p-4 focus:border-brand-red focus:outline-none"
-              />
-            </div>
-          )}
-
-          {socialTab === "facebook" && (
-            <div className="space-y-3">
-              <label className="text-xs font-semibold uppercase tracking-wider text-zinc-300">
-                Facebook Post Copy
-              </label>
-              <AutoTextarea
-                value={editor.fbPost}
-                onChange={(e) => editor.setFbPost(e.target.value)}
-                placeholder="Write engaging Facebook post with context and headline..."
-                className="text-sm font-normal text-white bg-[#1A1D24] border border-white/10 rounded-xl p-4 focus:border-brand-red focus:outline-none"
-              />
-            </div>
-          )}
-
-          {socialTab === "linkedin" && (
-            <div className="space-y-3">
-              <label className="text-xs font-semibold uppercase tracking-wider text-zinc-300">
-                LinkedIn Post Copy
-              </label>
-              <AutoTextarea
-                value={editor.liPost}
-                onChange={(e) => editor.setLiPost(e.target.value)}
-                placeholder="Write institutional, business or policy angle for LinkedIn..."
-                className="text-sm font-normal text-white bg-[#1A1D24] border border-white/10 rounded-xl p-4 focus:border-brand-red focus:outline-none"
-              />
-            </div>
-          )}
-
-          {socialTab === "newsletter" && (
-            <div className="space-y-3">
-              <label className="text-xs font-semibold uppercase tracking-wider text-zinc-300">
-                Email Newsletter Summary
-              </label>
-              <AutoTextarea
-                value={editor.nlPost}
-                onChange={(e) => editor.setNlPost(e.target.value)}
-                placeholder="Write curated editorial summary for subscriber newsletter..."
-                className="text-sm font-normal text-white bg-[#1A1D24] border border-white/10 rounded-xl p-4 focus:border-brand-red focus:outline-none"
-              />
-            </div>
-          )}
-        </div>
+        </Panel>
       )}
 
-      {/* TAB 4: Primary Sources & Citations */}
+      {/* TAB 4: Sources */}
       {activeTab === "sources" && (
-        <div className="space-y-6">
-          <div className="rounded-2xl border border-purple-500/30 bg-purple-950/20 p-5 sm:p-6 space-y-4 shadow-sm">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <span className="text-[0.62rem] font-semibold text-purple-400 uppercase tracking-wider">
-                  AI EDITORIAL COLLABORATION
-                </span>
-                <h3 className="font-sans text-lg font-semibold text-white mt-1 tracking-tight">
-                  Export Editorial Context for AI Review
-                </h3>
-                <p className="text-xs text-zinc-300 mt-1 max-w-2xl leading-relaxed">
-                  Copy this story&apos;s full brief (headline, deck, verified sources, body text, and social drafts) into your clipboard to paste into ChatGPT, Claude, or Gemini to fact-check and refine.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={handleCopyAI}
-                className="inline-flex items-center gap-2 rounded-xl bg-purple-600 px-5 py-2.5 text-xs font-semibold text-white shadow hover:bg-purple-500 transition-colors shrink-0"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"
-                  />
-                </svg>
-                {copiedAI ? "✓ Copied to Clipboard!" : "Copy Context for AI"}
-              </button>
-            </div>
-          </div>
+        <div className="space-y-4">
+          <Panel
+            tone="ai"
+            title="Check this story with AI"
+            description="Copies the headline, sources, body and social drafts so you can paste them into an AI tool to fact-check."
+            actions={
+              <Btn onClick={handleCopyAI} block>
+                <SparkIcon />
+                {copiedAI ? "Copied" : "Copy for AI"}
+              </Btn>
+            }
+          />
 
-          <div className="rounded-2xl border border-white/[0.08] bg-[#16181D] p-5 sm:p-6 space-y-4 shadow-sm">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-white/[0.08] pb-4 gap-3">
-              <div>
-                <h2 className="font-sans text-xl font-semibold text-white tracking-tight">
-                  Primary Sources &amp; Citations
-                </h2>
-                <p className="mt-0.5 text-xs text-zinc-400">
-                  Every claim must be traceable to official gazettes, releases, or verified public records.
-                </p>
-              </div>
-              <button
-                type="button"
+          <Panel
+            title="Sources"
+            description="Every claim should trace back to an official or public record."
+            actions={
+              <>
+                {ai.has("sources") && <AIChip />}
+              <Btn
+                block
                 onClick={() =>
-                  editor.setSources((prev) => [
-                    ...prev,
-                    {
-                      url: "",
-                      publisher: "New Source / Gazette",
-                      claimSummary: "",
-                    },
-                  ])
+                  setSourcesEdited((prev) => [...prev, { url: "", publisher: "", claimSummary: "" }])
                 }
-                className="rounded-lg bg-zinc-800 hover:bg-zinc-700 px-3.5 py-1.5 text-xs font-semibold text-white transition-colors self-start sm:self-auto"
               >
-                + Add Source Link
-              </button>
-            </div>
-
-            <div className="space-y-3">
-              {editor.sources.map((s, idx) => (
-                <div key={idx} className="rounded-xl border border-white/10 bg-[#1A1D24] p-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-brand-red">Source #{idx + 1}</span>
-                    <button
-                      type="button"
-                      onClick={() => editor.setSources((prev) => prev.filter((_, i) => i !== idx))}
-                      className="text-xs text-zinc-500 hover:text-red-400 transition-colors"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                  <div className="grid gap-3 sm:grid-cols-2">
+                <PlusIcon />
+                Add source
+              </Btn>
+              </>
+            }
+          >
+            {editor.sources.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-white/10 p-6 text-center text-sm text-zinc-500">
+                No sources yet.
+              </div>
+            ) : (
+              <div className="grid gap-3 lg:grid-cols-2">
+                {editor.sources.map((s, idx) => (
+                  <div key={idx} className="space-y-3 rounded-xl border border-white/10 bg-[#1A1D24] p-3 sm:p-4">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs font-medium text-zinc-300">Source {idx + 1}</span>
+                      <button
+                        type="button"
+                        onClick={() => setSourcesEdited((prev) => prev.filter((_, i) => i !== idx))}
+                        className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-white/[0.06] hover:text-red-400 sm:h-9 sm:w-9"
+                        aria-label={`Remove source ${idx + 1}`}
+                        title="Remove source"
+                      >
+                        <TrashIcon />
+                      </button>
+                    </div>
                     <div>
-                      <label className="block text-[0.68rem] font-semibold uppercase tracking-wider text-zinc-400 mb-1">
-                        Publisher / Institution
-                      </label>
-                      <input
-                        type="text"
+                      <Label>Publisher</Label>
+                      <TextInput
+                        maxLength={LIMITS.sourcePublisher}
                         value={s.publisher}
                         onChange={(e) => {
                           const val = e.target.value;
-                          editor.setSources((prev) =>
-                            prev.map((item, i) => (i === idx ? { ...item, publisher: val } : item))
-                          );
+                          setSourcesEdited((prev) => prev.map((item, i) => (i === idx ? { ...item, publisher: val } : item)));
                         }}
-                        className="h-10 w-full rounded-lg border border-white/10 bg-[#141519] px-3 text-xs text-white focus:border-brand-red focus:outline-none"
                         placeholder="e.g. State House Official Gazette"
                       />
                     </div>
                     <div>
-                      <label className="block text-[0.68rem] font-semibold uppercase tracking-wider text-zinc-400 mb-1">
-                        Source URL
-                      </label>
-                      <input
-                        type="text"
+                      <Label>Link</Label>
+                      <TextInput
+                        maxLength={LIMITS.sourceUrl}
                         value={s.url}
                         onChange={(e) => {
                           const val = e.target.value;
-                          editor.setSources((prev) =>
-                            prev.map((item, i) => (i === idx ? { ...item, url: val } : item))
-                          );
+                          setSourcesEdited((prev) => prev.map((item, i) => (i === idx ? { ...item, url: val } : item)));
                         }}
-                        className="h-10 w-full rounded-lg border border-white/10 bg-[#141519] px-3 text-xs text-white focus:border-brand-red focus:outline-none"
+                        className="font-mono"
                         placeholder="https://..."
                       />
                     </div>
+                    <div>
+                      <Label>What it confirms</Label>
+                      <TextInput
+                        multiline
+                        maxLength={LIMITS.claimSummary}
+                        value={s.claimSummary || ""}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setSourcesEdited((prev) => prev.map((item, i) => (i === idx ? { ...item, claimSummary: val } : item)));
+                        }}
+                        placeholder="e.g. Official confirmation of the new tariff"
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-[0.68rem] font-semibold uppercase tracking-wider text-zinc-400 mb-1">
-                      Verified Fact / Claim Summary
-                    </label>
-                    <input
-                      type="text"
-                      value={s.claimSummary || ""}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        editor.setSources((prev) =>
-                          prev.map((item, i) => (i === idx ? { ...item, claimSummary: val } : item))
-                        );
-                      }}
-                      className="h-10 w-full rounded-lg border border-white/10 bg-[#141519] px-3 text-xs text-white focus:border-brand-red focus:outline-none"
-                      placeholder="e.g. Official confirmation of tariff stabilization"
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+                ))}
+              </div>
+            )}
+          </Panel>
         </div>
       )}
+
+      <EditorPublishChecklist
+        items={missing}
+        onClose={() => setMissing(null)}
+        onGo={goToField}
+        onSaveDraft={() => void editor.handleSaveDraft()}
+        canSaveDraft={editor.isDirty}
+        isSaving={editor.isSubmitting}
+      />
 
       {/* Interactive Publishing Flow Modal */}
       <EditorPublishModal
@@ -468,7 +507,10 @@ function AdminEditorContent() {
         authorName={editor.authorName}
         category={editor.category}
         blockCount={editor.blocks.length}
-        onRetry={handlePublishClick}
+        onSaveDraft={async () => {
+          if (await editor.handleSaveDraft({ forceDraft: true })) publish.close();
+        }}
+        isSaving={editor.isSubmitting}
       />
     </div>
   );
@@ -478,8 +520,8 @@ export default function AdminEditorPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex items-center justify-center min-h-[400px] text-zinc-400 font-mono text-xs">
-          Loading Editorial Desk...
+        <div className="flex items-center justify-center min-h-[400px] text-sm text-zinc-400">
+          Loading editor
         </div>
       }
     >

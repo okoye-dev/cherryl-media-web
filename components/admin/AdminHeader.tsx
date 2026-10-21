@@ -4,6 +4,14 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { getStoredUser, logoutUser, type AuthUser } from "@/lib/auth";
+import { Btn } from "@/components/admin/ui";
+import { cn } from "@/utils";
+
+const NAV = [
+  { href: "/admin", label: "Stories" },
+  { href: "/admin/sections", label: "Homepage sections" },
+  { href: "/admin/settings", label: "Site copy" },
+];
 
 export default function AdminHeader() {
   const pathname = usePathname();
@@ -14,9 +22,7 @@ export default function AdminHeader() {
     setUser(getStoredUser());
   }, [pathname]);
 
-  if (pathname === "/admin/login") {
-    return null;
-  }
+  if (pathname === "/admin/login") return null;
 
   const handleLogout = async () => {
     await logoutUser();
@@ -24,92 +30,78 @@ export default function AdminHeader() {
     router.push("/admin/login");
   };
 
+  const isActive = (href: string) => (href === "/admin" ? pathname === "/admin" : pathname.startsWith(href));
+
+  const navLinks = NAV.map((item) => (
+    <Link
+      key={item.href}
+      href={item.href}
+      className={cn(
+        "inline-flex h-10 shrink-0 items-center whitespace-nowrap rounded-lg px-3 text-[0.8rem] font-medium transition-colors",
+        isActive(item.href) ? "bg-white/[0.1] text-white" : "text-zinc-400 hover:bg-white/[0.05] hover:text-white",
+      )}
+    >
+      {item.label}
+    </Link>
+  ));
+
   return (
-    <header className="sticky top-0 z-50 flex items-center justify-between border-b border-white/[0.08] bg-[#141519]/95 px-4 sm:px-8 py-3.5 backdrop-blur-md">
-      <div className="flex items-center gap-4 sm:gap-6">
-        <Link href="/admin" className="flex items-center gap-2.5 text-base sm:text-lg font-medium tracking-tight text-white cursor-pointer">
-          <div className="relative h-7 w-7 shrink-0 overflow-hidden rounded-full">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/brand/logo-circle.webp"
-              alt="Cherryl Media"
-              width={28}
-              height={28}
-              className="h-full w-full object-cover"
-            />
-          </div>
-          <div className="flex items-baseline gap-1.5">
-            <span className="font-semibold text-white tracking-wider">CHERRYL</span>
-            <span className="text-xs font-mono uppercase tracking-widest text-brand-red font-semibold">NEWSROOM</span>
-          </div>
-        </Link>
-        <span className="hidden items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-0.5 font-mono text-[0.68rem] font-medium text-zinc-400 md:inline-flex">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          Editorial Desk Active
-        </span>
+    <header className="sticky top-0 z-50 border-b border-white/[0.08] bg-[#141519]/95 backdrop-blur-md">
+      <div className="mx-auto flex h-14 w-full max-w-[96rem] items-center justify-between gap-3 px-4 sm:px-6 md:px-10">
+        <div className="flex min-w-0 items-center gap-4">
+          <Link href="/admin" className="flex shrink-0 items-center gap-2.5" aria-label="Cherryl Newsroom home">
+            <span className="relative h-7 w-7 shrink-0 overflow-hidden rounded-full">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/brand/logo-circle.webp" alt="" width={28} height={28} className="h-full w-full object-cover" />
+            </span>
+            <span className="flex items-baseline gap-1.5 whitespace-nowrap">
+              <span className="text-sm font-semibold tracking-wider text-white">CHERRYL</span>
+              <span className="text-[0.62rem] font-semibold tracking-[0.18em] text-brand-red">NEWSROOM</span>
+            </span>
+          </Link>
+
+          {/* Navigation sits here from md up; on phones it moves to its own row below */}
+          <nav aria-label="Admin" className="ml-2 hidden items-center gap-1 md:flex">
+            {navLinks}
+          </nav>
+        </div>
+
+        <div className="flex shrink-0 items-center gap-2">
+          <Btn href="/admin/editor" variant="primary" size="sm" className="!h-9">
+            <span className="sm:hidden">Write</span>
+            <span className="hidden sm:inline">Write story</span>
+          </Btn>
+          <Btn href="/" target="_blank" size="sm" arrow="forward" className="hidden !h-9 sm:inline-flex">
+            View site
+          </Btn>
+          {user ? (
+            <div className="flex items-center gap-2 sm:border-l sm:border-white/10 sm:pl-3">
+              <span className="hidden max-w-[10rem] truncate text-[0.72rem] text-zinc-400 xl:inline">{user.email}</span>
+              <Btn variant="ghost" size="sm" onClick={handleLogout} className="!h-9" title="Sign out">
+                Sign out
+              </Btn>
+            </div>
+          ) : (
+            <Btn href="/admin/login" variant="ghost" size="sm" className="!h-9">
+              Sign in
+            </Btn>
+          )}
+        </div>
       </div>
 
-      <nav className="flex items-center gap-3 sm:gap-4 text-xs font-medium">
-        <Link
-          href="/admin"
-          className={`hidden sm:inline-block transition-colors px-2 py-1 ${
-            pathname === "/admin" ? "text-white font-semibold" : "text-zinc-400 hover:text-white"
-          }`}
-        >
-          All Stories
-        </Link>
-        <Link
-          href="/admin/sections"
-          className={`hidden sm:inline-block transition-colors px-2 py-1 ${
-            pathname === "/admin/sections" ? "text-white font-semibold" : "text-zinc-400 hover:text-white"
-          }`}
-        >
-          Curated Sections
-        </Link>
-        <Link
-          href="/admin/settings"
-          className={`hidden sm:inline-block transition-colors px-2 py-1 ${
-            pathname === "/admin/settings" ? "text-white font-semibold" : "text-zinc-400 hover:text-white"
-          }`}
-        >
-          Site Copy &amp; Config
-        </Link>
-
-        <Link
-          href="/admin/editor"
-          className="rounded-lg bg-brand-red px-3.5 py-1.5 font-medium text-white shadow-sm transition-all hover:bg-brand-red/90"
-        >
-          + Write Story
-        </Link>
+      {/* Phone and small tablet navigation: one scrolling row, never wraps */}
+      <nav
+        aria-label="Admin"
+        className="flex gap-1 overflow-x-auto border-t border-white/[0.06] px-4 py-1.5 [scrollbar-width:none] sm:px-6 md:hidden [&::-webkit-scrollbar]:hidden"
+      >
+        {navLinks}
         <Link
           href="/"
           target="_blank"
-          className="rounded-lg border border-white/10 bg-white/[0.04] px-3 py-1.5 text-zinc-300 transition-colors hover:border-white/20 hover:text-white"
+          className="inline-flex h-10 shrink-0 items-center whitespace-nowrap rounded-lg px-3 text-[0.8rem] font-medium text-zinc-400 hover:text-white sm:hidden"
         >
-          View Site ↗
+          View site
         </Link>
-        {user ? (
-          <div className="flex items-center gap-2 border-l border-white/10 pl-3">
-            <span className="hidden lg:inline text-[0.72rem] font-mono text-zinc-400 truncate max-w-[120px]">
-              {user.email}
-            </span>
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="text-xs text-zinc-400 hover:text-red-400 transition-colors"
-              title="Sign out of editorial desk"
-            >
-              Sign Out
-            </button>
-          </div>
-        ) : (
-          <Link
-            href="/admin/login"
-            className="text-xs text-zinc-400 hover:text-white transition-colors"
-          >
-            Sign In
-          </Link>
-        )}
       </nav>
     </header>
   );

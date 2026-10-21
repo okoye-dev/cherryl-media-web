@@ -1,4 +1,6 @@
 import ImageUploadField from "@/components/admin/ImageUploadField";
+import { Label, Panel, TextInput } from "@/components/admin/ui";
+import { LIMITS } from "./limits";
 
 interface EditorCoverImageProps {
   coverUrl: string;
@@ -22,51 +24,45 @@ export default function EditorCoverImage({
   hasError,
 }: EditorCoverImageProps) {
   return (
-    <div className="rounded-2xl border border-white/[0.08] bg-[#16181D] p-5 sm:p-7 space-y-4 shadow-sm">
-      <span className="text-[0.68rem] font-mono uppercase tracking-wider text-brand-red font-semibold block">
-        COVER PHOTOGRAPH (FEATURED IMAGE)
-      </span>
-      <div
-        className={`rounded-xl border p-4 space-y-3 transition-colors ${
-          hasError ? "border-red-500/80 bg-red-950/20" : "border-white/10 bg-[#1A1D24]/60"
-        }`}
-      >
+    <div id="cover-section" className="scroll-mt-24">
+    <Panel
+      title="Cover image"
+      description="Needed to publish. Used on cards, the hero and social previews."
+      className={hasError ? "!border-red-500/70" : undefined}
+    >
+      <div className="space-y-4">
         <ImageUploadField
-          label="Story Cover Photo"
+          label="Cover photo"
           value={coverUrl}
           onChange={onCoverUrlChange}
           onUploadStateChange={onUploadStateChange}
-          description="Required to publish. Displayed on homepage cards, hero banner, category archives, and social sharing cards."
           required={true}
           hasError={hasError}
         />
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-2">
           <div>
-            <label className="block text-[0.68rem] font-semibold uppercase tracking-wider text-zinc-400 mb-1">
-              Cover Photo Caption
-            </label>
-            <input
-              type="text"
+            <Label htmlFor="cover-caption">Caption</Label>
+            <TextInput
+              id="cover-caption"
+              maxLength={LIMITS.coverCaption}
               value={coverCaption}
               onChange={(e) => onCoverCaptionChange(e.target.value)}
-              placeholder="e.g. Presidential council in session, State House, Abuja."
-              className="h-10 w-full rounded-lg border border-white/10 bg-[#141519] px-3 py-1.5 text-xs text-white focus:border-brand-red focus:outline-none"
+              placeholder="What the photo shows"
             />
           </div>
           <div>
-            <label className="block text-[0.68rem] font-semibold uppercase tracking-wider text-zinc-400 mb-1">
-              Photo Credit
-            </label>
-            <input
-              type="text"
+            <Label htmlFor="cover-credit">Photo credit</Label>
+            <TextInput
+              id="cover-credit"
+              maxLength={LIMITS.coverCredit}
               value={coverCredit}
               onChange={(e) => onCoverCreditChange(e.target.value)}
-              placeholder="e.g. State House / Cherryl Media"
-              className="h-10 w-full rounded-lg border border-white/10 bg-[#141519] px-3 py-1.5 text-xs text-white focus:border-brand-red focus:outline-none"
+              placeholder="e.g. Cherryl Media"
             />
           </div>
         </div>
       </div>
+    </Panel>
     </div>
   );
 }

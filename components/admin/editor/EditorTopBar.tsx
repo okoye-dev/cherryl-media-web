@@ -1,15 +1,22 @@
-import Link from "next/link";
-import type { CanonicalArticle, PillarCategory, PublishingStatus } from "@/lib/types";
+import { useState } from "react";
+import { Badge, Btn } from "@/components/admin/ui";
+import StoryPicker from "@/components/admin/StoryPicker";
+import EditorPickerSheet from "./EditorPickerSheet";
+import { SparkIcon } from "./icons";
+import type { PillarCategory, PublishingStatus } from "@/lib/types";
 
 interface EditorTopBarProps {
-  articlesList: CanonicalArticle[];
-  selectedSlug: string;
-  onSelectStory: (slug: string) => void;
+  /** The address the story is stored under, empty for a story never saved */
+  savedSlug: string;
+  title: string;
+  isDirty: boolean;
+  onOpenStory: (slug: string) => void;
+  onNewStory: () => void;
   category: PillarCategory;
   status: PublishingStatus;
-  autosaveStatus: "idle" | "saving" | "saved";
-  lastAutosavedTime: string | null;
-  saveMessage: string | null;
+  isSaving: boolean;
+  lastSavedAt: string | null;
+  saveError: string | null;
   copiedAI: boolean;
   onCopyAI: () => void;
   isSubmitting: boolean;
@@ -19,14 +26,16 @@ interface EditorTopBarProps {
 }
 
 export default function EditorTopBar({
-  articlesList,
-  selectedSlug,
-  onSelectStory,
+  savedSlug,
+  title,
+  onOpenStory,
+  onNewStory,
   category,
   status,
-  autosaveStatus,
-  lastAutosavedTime,
-  saveMessage,
+  isDirty,
+  isSaving,
+  lastSavedAt,
+  saveError,
   copiedAI,
   onCopyAI,
   isSubmitting,
@@ -34,116 +43,120 @@ export default function EditorTopBar({
   onSaveDraft,
   onPublishClick,
 }: EditorTopBarProps) {
-  return (
-    <div className="flex flex-col gap-3 rounded-2xl border border-white/[0.08] bg-[#16181D] p-4 sm:flex-row sm:items-center sm:justify-between shadow-sm">
-      <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-        <Link href="/admin" className="text-xs font-semibold text-zinc-400 hover:text-white transition-colors">
-          ← All Stories
-        </Link>
-        <span className="text-zinc-600">/</span>
-        <div className="flex items-center gap-1.5">
-          <span className="text-[0.65rem] font-mono uppercase text-zinc-500 hidden sm:inline">Story:</span>
-          <select
-            value={selectedSlug}
-            onChange={(e) => onSelectStory(e.target.value)}
-            className="rounded-lg border border-white/10 bg-zinc-900 px-2.5 py-1 text-xs font-medium text-white focus:border-brand-red focus:outline-none max-w-[200px] sm:max-w-[260px] truncate"
-          >
-            <option value="__new__">+ Write New Story</option>
-            <optgroup label="Published Articles">
-              {articlesList.map((art) => (
-                <option key={art.slug} value={art.slug}>
-                  {art.title}
-                </option>
-              ))}
-            </optgroup>
-          </select>
-        </div>
-        <span className="text-zinc-600">/</span>
-        <span className="font-mono text-xs uppercase tracking-wider text-zinc-400 truncate max-w-[140px]">
-          {category}
-        </span>
+  const uploading = inFlightUploads > 0;
+  const live = status === "published";
+  const saveLabel = isSubmitting ? "Saving" : isDirty ? (live ? "Save changes" : "Save draft") : "Saved";
+  const saveDisabled = isSubmitting || isSaving || !isDirty;
+  const publishLabel = uploading ? "Uploading media" : live ? "Update live story" : "Publish";
+  const isExisting = savedSlug !== "";
+  const [pickerOpen, setPickerOpen] = useState(false);
 
-        <span
-          className={`rounded-full px-2.5 py-0.5 text-[0.68rem] font-semibold uppercase tracking-wider border ${
-            status === "published"
-              ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
-              : "bg-amber-500/10 border-amber-500/20 text-amber-400"
+  return (
+    <>
+      <div className="space-y-3 rounded-xl border border-white/[0.08] bg-[#16181D] p-4">
+        {/* Row 1: way back, status, autosave */}
+        <div className="flex items-center justify-between gap-3">
+          <Btn href="/admin" variant="ghost" arrow="back" className="-ml-2 !h-10 px-2">
+            All stories
+          </Btn>
+          <Badge tone={live ? "green" : "amber"}>{status}</Badge>
+        </div>
+
+        {/* The one place that says whether your work is stored */}
+        <p
+          role="status"
+          className={`flex items-start gap-2 text-xs ${
+            saveError ? "text-red-300" : isSaving || isDirty ? "text-amber-300" : "text-zinc-400"
           }`}
         >
-          {status}
-        </span>
+          <span
+            className={`mt-1 h-1.5 w-1.5 shrink-0 rounded-full ${
+              saveError ? "bg-red-400" : isSaving ? "animate-ping bg-amber-400" : isDirty ? "bg-amber-400" : "bg-emerald-400"
+            }`}
+          />
+          <span className="min-w-0 break-words">
+            {saveError
+              ? `Not saved. ${saveError}`
+              : isSaving
+              ? "Saving"
+              : isDirty
+              ? "Unsaved changes"
+              : `All changes saved${lastSavedAt ? ` at ${lastSavedAt}` : ""}`}
+          </span>
+        </p>
 
-        {/* Autosave status indicator */}
-        <div className="hidden sm:flex items-center gap-1.5 pl-2 text-[0.7rem] font-mono text-zinc-400">
-          {autosaveStatus === "saving" && (
-            <span className="flex items-center gap-1 text-amber-400">
-              <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-ping" />
-              Autosaving...
-            </span>
-          )}
-          {autosaveStatus === "saved" && lastAutosavedTime && (
-            <span className="flex items-center gap-1 text-zinc-400">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-              Autosaved {lastAutosavedTime}
-            </span>
-          )}
+        {/* Row 2: story switcher and secondary actions. Save and Publish join from lg. */}
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-end">
+          <div className="min-w-0 lg:flex-1">
+            <p className="text-[0.7rem] font-medium text-zinc-400">{category}</p>
+            <p className="truncate text-sm font-medium text-white">{title.trim() || "New story"}</p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
+            <Btn onClick={() => setPickerOpen(true)}>Open story</Btn>
+            <Btn onClick={onCopyAI} className="px-3">
+              <SparkIcon />
+              {copiedAI ? "Copied" : "Copy for AI"}
+            </Btn>
+            {isExisting ? (
+              <Btn href={`/article/${savedSlug}`} target="_blank" arrow="forward">
+                View live
+              </Btn>
+            ) : (
+              <Btn disabled>View live</Btn>
+            )}
+          </div>
+
+          <div className="hidden items-center gap-2 lg:flex">
+            <Btn variant="primary" disabled={saveDisabled} onClick={onSaveDraft}>
+              {saveLabel}
+            </Btn>
+            <Btn disabled={isSubmitting || uploading} onClick={onPublishClick}>
+              {publishLabel}
+            </Btn>
+          </div>
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2.5">
-        {saveMessage && (
-          <span className="text-xs font-semibold text-emerald-400 animate-fade">{saveMessage}</span>
-        )}
+      <EditorPickerSheet
+        open={pickerOpen}
+        title="Open a story"
+        notice={isDirty ? "You have unsaved changes. Opening another story replaces them." : undefined}
+        onClose={() => setPickerOpen(false)}
+        footer={
+          <Btn
+            variant="primary"
+            block
+            onClick={() => {
+              setPickerOpen(false);
+              onNewStory();
+            }}
+          >
+            New story
+          </Btn>
+        }
+      >
+        <StoryPicker
+          status="all"
+          excludeSlug={savedSlug || undefined}
+          onPick={(story) => {
+            setPickerOpen(false);
+            onOpenStory(story.slug);
+          }}
+        />
+      </EditorPickerSheet>
 
-        <button
-          type="button"
-          onClick={onCopyAI}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-purple-500/40 bg-purple-500/15 px-3 py-1.5 text-xs font-medium text-purple-200 hover:bg-purple-500/25 hover:text-white transition-all shadow-sm"
-          title="Copy editorial brief, verified sources, and text to paste into ChatGPT, Claude or Gemini for vetting"
-        >
-          <svg className="w-3.5 h-3.5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"
-            />
-          </svg>
-          {copiedAI ? "✓ Copied for AI!" : "Copy Context for AI"}
-        </button>
-
-        <button
-          type="button"
-          disabled={isSubmitting}
-          onClick={onSaveDraft}
-          className="rounded-lg border border-white/15 bg-zinc-800 px-3.5 py-1.5 text-xs font-medium text-zinc-200 hover:bg-zinc-700 hover:text-white transition-colors disabled:opacity-50"
-        >
-          {isSubmitting ? "Saving..." : "Save Draft"}
-        </button>
-
-        {inFlightUploads > 0 && (
-          <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[0.68rem] font-mono text-amber-300">
-            <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-ping" />
-            {inFlightUploads} uploading
-          </span>
-        )}
-
-        <button
-          type="button"
-          disabled={isSubmitting || inFlightUploads > 0}
-          onClick={onPublishClick}
-          className="rounded-lg bg-brand-red px-4 py-1.5 text-xs font-semibold text-white shadow hover:bg-brand-red/90 transition-colors disabled:opacity-50 flex items-center gap-1.5"
-        >
-          {inFlightUploads > 0 ? (
-            <>
-              <span className="h-2 w-2 rounded-full bg-white animate-spin" />
-              <span>Uploading Media...</span>
-            </>
-          ) : (
-            "Publish Now"
-          )}
-        </button>
+      {/* Phones and tablets: Save and Publish stay pinned to the bottom of the screen */}
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-[#0E0F12]/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-md sm:px-6 lg:hidden">
+        <div className="mx-auto grid max-w-5xl grid-cols-2 gap-3">
+          <Btn variant="primary" disabled={saveDisabled} onClick={onSaveDraft} className="!h-12">
+            {saveLabel}
+          </Btn>
+          <Btn disabled={isSubmitting || uploading} onClick={onPublishClick} className="!h-12">
+            {publishLabel}
+          </Btn>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

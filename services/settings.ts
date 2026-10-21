@@ -17,12 +17,6 @@ export interface EditorialCopy {
     heading: string;
     subheading: string;
   };
-  network: {
-    headline: string;
-    subheadline: string;
-    subscribers: string;
-    reachMonthly: string;
-  };
   footer: {
     tagline: string;
     locations: string;
@@ -42,21 +36,13 @@ export const DEFAULT_EDITORIAL_COPY: EditorialCopy = {
   },
   ticker: {
     label: "LIVE WIRE",
-    customNotice:
-      "BREAKING: Federal Executive Council ratifies state electricity market guidelines and sovereign payment assurance frameworks.",
+    customNotice: "",
   },
   dossier: {
     issueBadge: "WEEKEND EDITION · ISSUE #18",
     heading: "Culture, Cinema & In-Depth Features",
     subheading:
       "Features, music chronicles, food heritage, and modern narratives across Africa and the diaspora.",
-  },
-  network: {
-    headline: "Multi-Channel Media Distribution Network",
-    subheadline:
-      "Reach over 250,000+ readers and professionals daily across West Africa and the diaspora through verified news channels.",
-    subscribers: "250,000+",
-    reachMonthly: "1.8M+",
   },
   footer: {
     tagline: "New-Age Media Distribution & Independent Journalism",
@@ -77,7 +63,6 @@ export async function fetchEditorialCopy(): Promise<EditorialCopy> {
         hero: { ...DEFAULT_EDITORIAL_COPY.hero, ...(data.editorial_copy.hero || {}) },
         ticker: { ...DEFAULT_EDITORIAL_COPY.ticker, ...(data.editorial_copy.ticker || {}) },
         dossier: { ...DEFAULT_EDITORIAL_COPY.dossier, ...(data.editorial_copy.dossier || {}) },
-        network: { ...DEFAULT_EDITORIAL_COPY.network, ...(data.editorial_copy.network || {}) },
         footer: { ...DEFAULT_EDITORIAL_COPY.footer, ...(data.editorial_copy.footer || {}) },
       };
     }
@@ -87,9 +72,29 @@ export async function fetchEditorialCopy(): Promise<EditorialCopy> {
   return DEFAULT_EDITORIAL_COPY;
 }
 
-export async function updateEditorialCopy(copy: EditorialCopy): Promise<{ success: boolean }> {
-  return request<{ success: boolean }>("/api/settings", {
-    method: "POST",
-    body: JSON.stringify({ editorial_copy: copy }),
+/** Saves the site text. Resolves with the copy as stored. Rejects with an ApiError: status 400 carries `data.fields` (path to message). */
+export async function updateEditorialCopy(copy: EditorialCopy): Promise<EditorialCopy> {
+  const res = await request<{ editorial_copy?: Partial<EditorialCopy> }>("/api/settings/editorial-copy", {
+    method: "PUT",
+    body: JSON.stringify(copy),
   });
+  return mergeCopy(res.editorial_copy);
+}
+
+function mergeCopy(c?: Partial<EditorialCopy>): EditorialCopy {
+  return {
+    hero: { ...DEFAULT_EDITORIAL_COPY.hero, ...(c?.hero || {}) },
+    ticker: { ...DEFAULT_EDITORIAL_COPY.ticker, ...(c?.ticker || {}) },
+    dossier: { ...DEFAULT_EDITORIAL_COPY.dossier, ...(c?.dossier || {}) },
+    footer: { ...DEFAULT_EDITORIAL_COPY.footer, ...(c?.footer || {}) },
+  };
+}
+
+/** Saves only the changed fields, for example { footer: { tagline: "..." } }. Resolves with the whole stored copy. */
+export async function patchEditorialCopy(changes: Partial<{ [K in keyof EditorialCopy]: Partial<EditorialCopy[K]> }>): Promise<EditorialCopy> {
+  const res = await request<{ editorial_copy?: Partial<EditorialCopy> }>("/api/settings/editorial-copy", {
+    method: "PATCH",
+    body: JSON.stringify(changes),
+  });
+  return mergeCopy(res.editorial_copy);
 }

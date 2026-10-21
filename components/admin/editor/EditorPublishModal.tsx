@@ -1,4 +1,6 @@
-import Link from "next/link";
+import { Btn } from "@/components/admin/ui";
+import { formatCategoryName } from "@/lib/formatters";
+import { CloseIcon } from "./icons";
 import type { PublishStep, StepState } from "@/hooks/usePublishPipeline";
 
 interface EditorPublishModalProps {
@@ -16,7 +18,16 @@ interface EditorPublishModalProps {
   authorName: string;
   category: string;
   blockCount: number;
-  onRetry: () => void;
+  onSaveDraft: () => void;
+  isSaving: boolean;
+}
+
+function StepIcon({ state, n }: { state: StepState; n: number }) {
+  const base = "flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold";
+  if (state === "success") return <div className={`${base} border border-emerald-500/40 bg-emerald-500/20 text-emerald-400`}>&#10003;</div>;
+  if (state === "running") return <div className="h-6 w-6 animate-spin rounded-full border-2 border-amber-400 border-t-transparent" />;
+  if (state === "error") return <div className={`${base} border border-red-500/40 bg-red-500/20 text-red-400`}>!</div>;
+  return <div className={`${base} border border-white/20 text-zinc-500`}>{n}</div>;
 }
 
 export default function EditorPublishModal({
@@ -30,203 +41,128 @@ export default function EditorPublishModal({
   authorName,
   category,
   blockCount,
-  onRetry,
+  onSaveDraft,
+  isSaving,
 }: EditorPublishModalProps) {
   if (!isOpen) return null;
 
+  const steps: Array<{ state: StepState; title: string; text: string }> = [
+    {
+      state: stepStates.media,
+      title: "Check images",
+      text:
+        stepStates.media === "success"
+          ? "Cover photo and inline media are stored"
+          : stepStates.media === "running"
+          ? "Checking images and uploads"
+          : stepStates.media === "error"
+          ? "Image check failed, see the message above"
+          : "Waits for uploads to finish",
+    },
+    {
+      state: stepStates.editorial,
+      title: "Check the story",
+      text:
+        stepStates.editorial === "success"
+          ? `Headline, ${authorName.trim() ? `author (${authorName.trim()}), ` : ""}category (${formatCategoryName(category)}) and ${blockCount} ${blockCount === 1 ? "block" : "blocks"} look right`
+          : stepStates.editorial === "running"
+          ? "Checking fields and block order"
+          : "Checks the headline, category and block order",
+    },
+    {
+      state: stepStates.engine,
+      title: "Publish to the site",
+      text:
+        stepStates.engine === "success"
+          ? "Saved and live on the site and feeds"
+          : stepStates.engine === "running"
+          ? "Sending the story to the server"
+          : "Sends the story to the site and feeds",
+    },
+  ];
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade">
-      <div className="relative w-full max-w-lg rounded-2xl border border-white/10 bg-[#16181D] p-6 shadow-2xl text-left space-y-6">
-        <div className="flex items-center justify-between border-b border-white/[0.08] pb-4">
-          <div>
-            <span className="font-mono text-[0.65rem] uppercase tracking-widest text-brand-red font-semibold">
-              CHERRYL NEWSROOM
-            </span>
-            <h3 className="text-lg font-semibold text-white tracking-tight">
-              {step === "done" ? "Story Published Successfully" : "Publishing Verification Pipeline"}
+    <div className="fixed inset-0 z-[60] flex items-stretch justify-center bg-black/80 backdrop-blur-sm animate-fade sm:items-center sm:p-4">
+      <div
+        role="dialog"
+        aria-modal="true"
+        className="relative flex h-full w-full flex-col overflow-y-auto bg-[#16181D] sm:h-auto sm:max-h-[90vh] sm:max-w-lg sm:rounded-2xl sm:border sm:border-white/10 sm:shadow-2xl"
+      >
+        <div className="flex items-start justify-between gap-3 border-b border-white/[0.08] px-4 py-3 sm:px-6 sm:py-4">
+          <div className="min-w-0">
+            <p className="text-[0.7rem] font-medium text-brand-red">Cherryl Newsroom</p>
+            <h3 className="text-base font-semibold tracking-tight text-white">
+              {step === "done" ? "Story published" : "Publishing"}
             </h3>
           </div>
-          <button type="button" onClick={onClose} className="text-zinc-400 hover:text-white text-sm">
-            ✕
+          <button
+            type="button"
+            onClick={onClose}
+            className="-mr-2 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-zinc-400 hover:bg-white/[0.06] hover:text-white"
+            aria-label="Close"
+          >
+            <CloseIcon />
           </button>
         </div>
 
-        {/* Error banner */}
-        {errorMessage && (
-          <div className="rounded-xl border border-red-500/40 bg-red-950/30 p-3.5 text-xs text-red-200 space-y-2">
-            <div className="font-semibold flex items-center gap-2">
-              <span>⚠️ Upload or Verification Required</span>
+        <div className="flex-1 space-y-5 px-4 py-4 sm:px-6 sm:py-5">
+          {errorMessage && (
+            <div className="space-y-1 rounded-xl border border-red-500/40 bg-red-950/30 p-3.5">
+              <p className="text-sm font-medium text-red-200">The server did not accept this story</p>
+              <p className="text-xs leading-relaxed text-red-300">{errorMessage}</p>
             </div>
-            <p className="text-[0.78rem] text-red-300 leading-relaxed">{errorMessage}</p>
-          </div>
-        )}
+          )}
 
-        {/* 3-Step Progress Indicators */}
-        <div className="space-y-4">
-          {/* Step 1 */}
-          <div className="flex items-start gap-3.5">
-            <div className="mt-0.5">
-              {stepStates.media === "success" && (
-                <div className="h-6 w-6 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 flex items-center justify-center text-xs font-bold">
-                  ✓
+          <ol className="space-y-4">
+            {steps.map((st, i) => (
+              <li key={st.title} className="flex items-start gap-3">
+                <div className="mt-0.5 shrink-0">
+                  <StepIcon state={st.state} n={i + 1} />
                 </div>
-              )}
-              {stepStates.media === "running" && (
-                <div className="h-6 w-6 rounded-full border-2 border-amber-400 border-t-transparent animate-spin" />
-              )}
-              {stepStates.media === "error" && (
-                <div className="h-6 w-6 rounded-full bg-red-500/20 text-red-400 border border-red-500/40 flex items-center justify-center text-xs font-bold">
-                  !
+                <div className="min-w-0 flex-1">
+                  <h4 className="text-sm font-medium text-zinc-200">{st.title}</h4>
+                  <p className="text-xs text-zinc-400">{st.text}</p>
                 </div>
-              )}
-              {stepStates.media === "pending" && (
-                <div className="h-6 w-6 rounded-full border border-white/20 text-zinc-500 flex items-center justify-center text-xs font-mono">
-                  1
-                </div>
-              )}
-            </div>
-            <div className="flex-1 min-w-0">
-              <h4 className="text-xs font-semibold text-zinc-200">1. Media &amp; Storage Verification</h4>
-              <p className="text-[0.72rem] text-zinc-400">
-                {stepStates.media === "success"
-                  ? "Cover photo and inline media confirmed stored"
-                  : stepStates.media === "running"
-                  ? "Verifying image assets and uploads..."
-                  : stepStates.media === "error"
-                  ? "Storage check failed — see error above"
-                  : "Awaits image upload confirmation"}
-              </p>
-            </div>
-          </div>
+              </li>
+            ))}
+          </ol>
 
-          {/* Step 2 */}
-          <div className="flex items-start gap-3.5">
-            <div className="mt-0.5">
-              {stepStates.editorial === "success" && (
-                <div className="h-6 w-6 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 flex items-center justify-center text-xs font-bold">
-                  ✓
-                </div>
-              )}
-              {stepStates.editorial === "running" && (
-                <div className="h-6 w-6 rounded-full border-2 border-amber-400 border-t-transparent animate-spin" />
-              )}
-              {stepStates.editorial === "error" && (
-                <div className="h-6 w-6 rounded-full bg-red-500/20 text-red-400 border border-red-500/40 flex items-center justify-center text-xs font-bold">
-                  !
-                </div>
-              )}
-              {stepStates.editorial === "pending" && (
-                <div className="h-6 w-6 rounded-full border border-white/20 text-zinc-500 flex items-center justify-center text-xs font-mono">
-                  2
-                </div>
-              )}
-            </div>
-            <div className="flex-1 min-w-0">
-              <h4 className="text-xs font-semibold text-zinc-200">
-                2. Editorial Integrity &amp; Category Verification
-              </h4>
-              <p className="text-[0.72rem] text-zinc-400">
-                {stepStates.editorial === "success"
-                  ? `Verified headline, author (${authorName}), category (${category}), and ${blockCount} ordered blocks`
-                  : stepStates.editorial === "running"
-                  ? "Checking editorial fields and sequence..."
-                  : "Validates article structure, category, and sequence"}
+          {step === "done" && (
+            <div className="space-y-3 rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-4">
+              <p className="flex items-center gap-2 text-sm font-medium text-emerald-400">
+                <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                The story is live
               </p>
+              <p className="line-clamp-2 text-sm font-semibold leading-snug text-white">{title}</p>
             </div>
-          </div>
-
-          {/* Step 3 */}
-          <div className="flex items-start gap-3.5">
-            <div className="mt-0.5">
-              {stepStates.engine === "success" && (
-                <div className="h-6 w-6 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 flex items-center justify-center text-xs font-bold">
-                  ✓
-                </div>
-              )}
-              {stepStates.engine === "running" && (
-                <div className="h-6 w-6 rounded-full border-2 border-amber-400 border-t-transparent animate-spin" />
-              )}
-              {stepStates.engine === "error" && (
-                <div className="h-6 w-6 rounded-full bg-red-500/20 text-red-400 border border-red-500/40 flex items-center justify-center text-xs font-bold">
-                  !
-                </div>
-              )}
-              {stepStates.engine === "pending" && (
-                <div className="h-6 w-6 rounded-full border border-white/20 text-zinc-500 flex items-center justify-center text-xs font-mono">
-                  3
-                </div>
-              )}
-            </div>
-            <div className="flex-1 min-w-0">
-              <h4 className="text-xs font-semibold text-zinc-200">
-                3. Live Sync to Cherryl Media Backend
-              </h4>
-              <p className="text-[0.72rem] text-zinc-400">
-                {stepStates.engine === "success"
-                  ? "Dispatched to PostgreSQL database, RSS feeds, and public reader endpoints"
-                  : stepStates.engine === "running"
-                  ? "Transmitting article payload to Go backend..."
-                  : "Synchronizes published dispatch with web and feeds"}
-              </p>
-            </div>
-          </div>
+          )}
         </div>
 
-        {/* Success state */}
-        {step === "done" && (
-          <div className="rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-4 space-y-3">
-            <div className="flex items-center gap-2 text-emerald-400 text-xs font-semibold">
-              <span className="h-2 w-2 rounded-full bg-emerald-400" />
-              <span>Story is now published and active on the website</span>
-            </div>
-            <p className="font-area text-sm font-semibold text-white leading-snug line-clamp-2">{title}</p>
-            <div className="flex flex-wrap items-center gap-2 pt-2">
-              <Link
-                href={`/article/${publishedSlug}`}
-                target="_blank"
-                className="rounded-lg bg-brand-red px-3.5 py-1.5 text-xs font-semibold text-white shadow hover:bg-brand-red/90 transition-colors inline-flex items-center gap-1.5"
-              >
-                <span>View Live Story ↗</span>
-              </Link>
-              <Link
-                href="/admin"
-                className="rounded-lg border border-white/15 bg-zinc-800 px-3.5 py-1.5 text-xs font-medium text-white hover:bg-zinc-700 transition-colors"
-              >
-                Return to Newsroom Desk
-              </Link>
-              <button
-                type="button"
-                onClick={onClose}
-                className="rounded-lg px-3 py-1.5 text-xs text-zinc-400 hover:text-white transition-colors"
-              >
-                Continue Editing
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Action buttons */}
-        {step !== "done" && (
-          <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-white/[0.08]">
-            {errorMessage && (
-              <button
-                type="button"
-                onClick={onClose}
-                className="rounded-lg bg-zinc-800 hover:bg-zinc-700 px-4 py-2 text-xs font-medium text-white transition-colors"
-              >
-                Close &amp; Fix Issue
-              </button>
-            )}
-            {errorMessage && (
-              <button
-                type="button"
-                onClick={onRetry}
-                className="rounded-lg bg-brand-red hover:bg-brand-red/90 px-4 py-2 text-xs font-semibold text-white shadow transition-colors"
-              >
-                Retry Publishing
-              </button>
-            )}
-          </div>
+        {(step === "done" || errorMessage) && (
+        <div className="flex flex-col gap-2 border-t border-white/[0.08] px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:flex-row sm:justify-end sm:px-6 sm:py-4">
+          {step === "done" ? (
+            <>
+              <Btn variant="primary" href={`/article/${publishedSlug}`} target="_blank" arrow="forward" block>
+                View live story
+              </Btn>
+              <Btn href="/admin" block>
+                Back to stories
+              </Btn>
+              <Btn variant="ghost" onClick={onClose} block>
+                Keep editing
+              </Btn>
+            </>
+          ) : errorMessage ? (
+            <>
+              <Btn variant="primary" onClick={onSaveDraft} disabled={isSaving} block className="order-first sm:order-last">
+                {isSaving ? "Saving" : "Save as draft"}
+              </Btn>
+              <Btn onClick={onClose} block>
+                Close
+              </Btn>
+            </>
+          ) : null}
+        </div>
         )}
       </div>
     </div>

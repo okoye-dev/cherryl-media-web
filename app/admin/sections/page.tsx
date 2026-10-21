@@ -1,6 +1,7 @@
 "use client";
 
-import Link from "next/link";
+import { useEffect } from "react";
+import { Btn, PageTitle } from "@/components/admin/ui";
 import { DEFAULT_SECTION_KEYS } from "@/lib/sections";
 import { useCuratedSections } from "@/hooks/useCuratedSections";
 import { SectionPanel } from "@/components/admin/sections/SectionPanel";
@@ -8,8 +9,8 @@ import { ArticlePickerModal } from "@/components/admin/sections/ArticlePickerMod
 
 export default function AdminSectionsPage() {
   const {
+    dirty,
     sections,
-    catalog,
     articleMap,
     loading,
     saving,
@@ -26,76 +27,61 @@ export default function AdminSectionsPage() {
     setSaveError,
   } = useCuratedSections();
 
+  useEffect(() => {
+    if (!dirty) return;
+    const warn = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [dirty]);
+
   if (loading) {
     return (
       <div className="flex h-96 items-center justify-center text-zinc-400">
         <div className="flex flex-col items-center gap-3">
           <div className="h-6 w-6 animate-spin rounded-full border-2 border-brand-red border-t-transparent" />
-          <span className="font-mono text-xs uppercase tracking-wider">Loading curated sections...</span>
+          <span className="text-sm">Loading sections...</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8 pb-16">
-      {/* Top Banner / Actions */}
-      <div className="flex flex-col gap-4 border-b border-white/[0.08] pb-6 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-brand-red animate-pulse" />
-            <h1 className="font-sans text-xl font-bold tracking-tight text-white sm:text-2xl">
-              Curated Homepage Sections
-            </h1>
-          </div>
-          <p className="mt-1 text-xs text-zinc-400">
-            Control which database articles populate each section of the cherrylmedia website.
-            Changes persist directly to the PostgreSQL database.
-          </p>
-        </div>
+    <div className="space-y-5 pb-28">
+      <PageTitle
+        eyebrow="Homepage"
+        title="Curated sections"
+        actions={
+          <>
+            <Btn href="/" target="_blank" arrow="forward" block>
+              Preview site
+            </Btn>
+          </>
+        }
+      />
+      <p className="-mt-2 text-sm text-zinc-400">Choose which stories fill each slot on the homepage.</p>
 
-        <div className="flex items-center gap-3">
-          <Link
-            href="/"
-            target="_blank"
-            className="rounded-lg border border-white/10 bg-white/[0.04] px-3.5 py-2 text-xs font-medium text-zinc-300 transition-colors hover:border-white/20 hover:text-white"
-          >
-            Preview Site ↗
-          </Link>
-          <button
-            type="button"
-            onClick={saveAll}
-            disabled={saving}
-            className="flex items-center gap-2 rounded-lg bg-brand-red px-4 py-2 text-xs font-semibold text-white shadow-lg shadow-brand-red/20 transition-all hover:bg-brand-red/90 disabled:opacity-50"
-          >
-            {saving ? (
-              <>
-                <div className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                Saving to Database...
-              </>
-            ) : (
-              "Save Curated Layout"
-            )}
-          </button>
-        </div>
-      </div>
-
-      {/* Notifications */}
       {saveSuccess && (
-        <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4 text-xs font-medium text-emerald-400 flex items-center justify-between">
-          <span>✓ {saveSuccess}</span>
-          <button onClick={() => setSaveSuccess(null)} className="text-emerald-400/60 hover:text-emerald-400">✕</button>
+        <div className="flex items-center justify-between gap-3 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-3 text-sm text-emerald-400">
+          <span>{saveSuccess}</span>
+          <button type="button" aria-label="Dismiss" onClick={() => setSaveSuccess(null)} className="h-10 shrink-0 px-3 text-xs text-emerald-300 hover:text-white">
+            Dismiss
+          </button>
         </div>
       )}
       {saveError && (
-        <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-xs font-medium text-red-400 flex items-center justify-between">
-          <span>⚠ {saveError}</span>
-          <button onClick={() => setSaveError(null)} className="text-red-400/60 hover:text-red-400">✕</button>
+        <div className="flex items-center justify-between gap-3 rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-400">
+          <span>{saveError}</span>
+          <button type="button" aria-label="Dismiss" onClick={() => setSaveError(null)} className="h-10 shrink-0 px-3 text-xs text-red-300 hover:text-white">
+            Dismiss
+          </button>
         </div>
       )}
 
       {/* Sections Grid */}
-      <div className="space-y-6">
+      <div className="space-y-4">
         {DEFAULT_SECTION_KEYS.map((key) => (
           <SectionPanel
             key={key}
@@ -113,11 +99,22 @@ export default function AdminSectionsPage() {
       {activePicker && (
         <ArticlePickerModal
           picker={activePicker}
-          catalog={catalog}
           onSelect={selectArticleForSlot}
           onClose={closePicker}
         />
       )}
+
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-white/10 bg-[#0E0F12]/95 backdrop-blur">
+        <div className="mx-auto flex max-w-[96rem] items-center gap-3 px-4 py-3 sm:px-6 md:px-10">
+          <p className="hidden min-w-0 flex-1 truncate text-xs text-zinc-400 sm:block">
+            {dirty ? <span className="text-amber-300">Unsaved changes</span> : "All changes saved"}
+          </p>
+          <Btn variant="primary" onClick={saveAll} disabled={saving || !dirty} className="flex-1 sm:min-w-36 sm:flex-none">
+            {saving ? "Saving..." : dirty ? "Save layout" : "Saved"}
+          </Btn>
+        </div>
+        {dirty && <p className="px-4 pb-2 text-center text-xs text-amber-300 sm:hidden">Unsaved changes</p>}
+      </div>
     </div>
   );
 }

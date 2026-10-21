@@ -3,7 +3,7 @@ import Pill from "./Pill";
 import SectionArt from "./SectionArt";
 import { getLeadStory, getDispatches } from "@/lib/news";
 import { getEditorialCopy } from "@/lib/settings";
-import { getCuratedSections } from "@/lib/sections";
+import { getCuratedSections, sectionArticles } from "@/lib/sections";
 import { formatDate, formatCategoryName, formatReadTime, authorName, TEAM_BYLINE } from "@/lib/formatters";
 
 export default async function Hero() {
@@ -14,12 +14,9 @@ export default async function Hero() {
     getEditorialCopy(),
   ]);
 
-  const leadStory = curated.byKey?.hero_lead?.articles?.[0] || defaultLead;
-  const trendingStories =
-    curated.byKey?.hero_trending?.articles &&
-    curated.byKey.hero_trending.articles.length > 0
-      ? curated.byKey.hero_trending.articles
-      : defaultDispatches.slice(0, 3);
+  const leadStory = sectionArticles(curated, "hero_lead")[0] || defaultLead;
+  const curatedTrending = sectionArticles(curated, "hero_trending");
+  const trendingStories = curatedTrending.length > 0 ? curatedTrending : defaultDispatches.slice(0, 3);
 
   return (
     <section className="relative isolate mx-auto w-full max-w-[90rem] px-5 pt-8 md:px-10 md:pt-12 xl:px-16">
@@ -100,7 +97,7 @@ export default async function Hero() {
                 )}
               </div>
 
-              <Link href={`/article/${leadStory.slug}`} className="mt-4 block">
+              <Link href={`/article/${leadStory.slug}`} className="mt-4 block after:absolute after:inset-0 after:content-['']">
                 <h2 className="font-area text-[clamp(1.35rem,2.2vw,1.85rem)] font-semibold leading-snug tracking-[-0.02em] text-ink transition-all duration-200 group-hover:italic group-hover:text-brand-red">
                   {leadStory.title}
                 </h2>
@@ -148,7 +145,7 @@ export default async function Hero() {
                       {formatCategoryName(story.categoryName || story.category)}
                     </span>
 
-                    <Link href={`/article/${story.slug}`} className="mt-2 block">
+                    <Link href={`/article/${story.slug}`} className="mt-2 block after:absolute after:inset-0 after:content-['']">
                       <h4 className="font-area text-[1.12rem] md:text-[1.24rem] font-semibold leading-snug tracking-[-0.02em] text-ink transition-all duration-200 group-hover:italic group-hover:text-brand-red">
                         {story.title}
                       </h4>

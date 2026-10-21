@@ -15,12 +15,6 @@ export interface EditorialCopy {
     heading: string;
     subheading: string;
   };
-  network: {
-    headline: string;
-    subheadline: string;
-    subscribers: string;
-    reachMonthly: string;
-  };
   footer: {
     tagline: string;
     locations: string;
@@ -31,5 +25,7 @@ export interface EditorialCopy {
 
 export interface ISettingsService {
   getEditorialCopy(): Promise<EditorialCopy>;
-  updateEditorialCopy(copy: EditorialCopy): Promise<{ success: boolean }>;
+  updateEditorialCopy(copy: EditorialCopy): Promise<EditorialCopy>;
+  /** Saves only the changed fields. Resolves with the whole stored copy. */
+  patchEditorialCopy(changes: Partial<{ [K in keyof EditorialCopy]: Partial<EditorialCopy[K]> }>): Promise<EditorialCopy>;
 }
