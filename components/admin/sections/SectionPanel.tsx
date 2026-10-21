@@ -72,7 +72,7 @@ export function SectionPanel({
           </Btn>
         </div>
       ) : (
-        <ol className="space-y-2">
+        <ol className="divide-y divide-white/[0.06]">
           {articleIds.map((artId, idx) => {
             const article = articleMap.get(artId) || section?.articles?.[idx];
             return (
