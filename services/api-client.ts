@@ -15,6 +15,8 @@ export class ApiError extends Error {
 }
 
 import { getBackendUrl } from "@/lib/backend-url";
+import { getStoredToken } from "@/lib/auth";
+import { isAuthRefusal, isSignInPath, recoverFromRefusal } from "@/lib/auth-gate";
 export { getBackendUrl };
 
 export interface RequestOptions extends RequestInit {
@@ -22,10 +24,28 @@ export interface RequestOptions extends RequestInit {
   params?: Record<string, string | number | boolean | undefined>;
 }
 
-/** The reply body plus the response headers. Used where the headers carry information (paging). */
+/**
+ * The reply body plus the response headers. Used where the headers carry information (paging).
+ * If the backend says nobody is signed in, the sign-in window opens and the request is sent once more
+ * after the person signs in.
+ */
 export async function requestWithMeta<T>(
   path: string,
   options: RequestOptions = {}
+): Promise<{ data: T; headers: Headers }> {
+  try {
+    return await send<T>(path, options);
+  } catch (err) {
+    if (err instanceof ApiError && isAuthRefusal(err.status) && !isSignInPath(path) && (await recoverFromRefusal(err.message))) {
+      return send<T>(path, options);
+    }
+    throw err;
+  }
+}
+
+async function send<T>(
+  path: string,
+  options: RequestOptions
 ): Promise<{ data: T; headers: Headers }> {
   const { timeoutMs = 8000, params, headers, ...rest } = options;
 
@@ -48,11 +68,9 @@ export async function requestWithMeta<T>(
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
   const authHeaders: Record<string, string> = {};
-  if (typeof window !== "undefined") {
-    const token = localStorage.getItem("cherryl_newsroom_token");
-    if (token) {
-      authHeaders["Authorization"] = `Bearer ${token}`;
-    }
+  const token = getStoredToken();
+  if (token) {
+    authHeaders["Authorization"] = `Bearer ${token}`;
   }
 
   try {
