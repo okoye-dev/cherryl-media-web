@@ -2,20 +2,21 @@ import Link from "next/link";
 import { cn } from "@/utils";
 import Arrow from "./Arrow";
 
-/** One pill size for the whole site. Only the colours change. */
-const BASE =
-  "group inline-flex shrink-0 whitespace-nowrap items-center gap-1.5 rounded-full px-4 py-2 text-[0.76rem] font-medium leading-none transition-colors duration-500";
+/**
+ * The one button look for the whole site, and the one hover effect:
+ * the background turns a see-through red. Text and border colours never change,
+ * so the label stays readable on every background.
+ */
+export const PILL_BASE =
+  "group inline-flex shrink-0 whitespace-nowrap items-center gap-1.5 rounded-full px-4 py-2 text-[0.76rem] font-medium leading-none transition-colors duration-300 hover:bg-brand-red/30";
 
 const VARIANTS = {
-  solid: "bg-ink text-paper hover:bg-brand-red hover:text-paper",
-  ghost: "border border-ink/20 text-ink hover:border-brand-red hover:text-brand-red",
-  red: "bg-brand-red text-white hover:bg-brand-red-deep",
-  "red-ghost": "border border-brand-red text-brand-red hover:bg-brand-red hover:text-white",
-  orange:
-    "border border-orange text-orange-deep hover:bg-orange hover:text-paper",
-  /** For the dark contact block */
-  paper: "border border-paper bg-paper text-ink hover:bg-cream",
-  line: "border border-paper/25 text-paper hover:border-brand-red hover:text-brand-red",
+  /** Outlined, for normal page backgrounds */
+  outline: "border border-ink/20 text-ink",
+  /** Lightly tinted, for the one button that should stand out in a group */
+  filled: "border border-brand-red/30 bg-brand-red/10 text-ink",
+  /** Outlined, for the dark blocks (footer, newsletter) */
+  onDark: "border border-snow/25 text-snow",
 };
 
 interface IProps {
@@ -23,31 +24,23 @@ interface IProps {
   children: React.ReactNode;
   variant?: keyof typeof VARIANTS;
   className?: string;
-  arrow?: "up-right" | "left" | "none";
+  arrow?: "forward" | "back" | "none";
 }
 
 export default function Pill({
   href,
   children,
-  variant = "solid",
+  variant = "outline",
   className,
   arrow = "none",
 }: IProps) {
-  const classes = cn(BASE, VARIANTS[variant], className);
-  const forwardArrow = (
-    <Arrow className="h-[0.8em] w-[0.8em] transition-transform duration-150 ease-out group-hover:translate-x-0.5 group-hover:rotate-[15deg]" />
-  );
-  const backArrow = (
-    <span aria-hidden="true" className="text-[0.9em] transition-transform duration-150 ease-out group-hover:-translate-x-0.5">
-      ←
-    </span>
-  );
+  const classes = cn(PILL_BASE, VARIANTS[variant], className);
 
   const content = (
     <>
-      {arrow === "left" && backArrow}
+      {arrow === "back" && <Arrow className="h-[0.8em] w-[0.8em] rotate-180" />}
       {children}
-      {arrow === "up-right" && forwardArrow}
+      {arrow === "forward" && <Arrow />}
     </>
   );
 

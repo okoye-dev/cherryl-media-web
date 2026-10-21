@@ -25,10 +25,7 @@ export default async function Ticker() {
   return (
     <div className="relative z-20 flex w-full items-center overflow-hidden border-b border-ink/10 bg-paper-deep/60 py-2.5 text-xs text-ink">
       <div className="flex shrink-0 items-center gap-2 border-r border-ink/15 px-4 md:px-6">
-        <span className="flex h-2 w-2 items-center justify-center">
-          <span className="absolute h-2 w-2 animate-ping rounded-full bg-brand-red opacity-75" />
-          <span className="relative h-1.5 w-1.5 rounded-full bg-brand-red" />
-        </span>
+        <span className="h-1.5 w-1.5 rounded-full bg-brand-red" />
         <span className="font-num font-medium tracking-wider text-brand-red uppercase">
           {copy.ticker.label || "LIVE WIRE"}
         </span>

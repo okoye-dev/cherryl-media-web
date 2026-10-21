@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { SITE } from "@/config/site";
 import { cn } from "@/utils";
+import ThemeToggle from "./ThemeToggle";
 
 export default function SiteHeader() {
   const [open, setOpen] = useState(false);
@@ -60,7 +61,7 @@ export default function SiteHeader() {
           </Link>
         </div>
 
-        <div className="flex items-center gap-4 lg:gap-6 xl:gap-8 px-2 sm:px-4 shrink-0">
+        <div className="flex items-center gap-3 lg:gap-5 xl:gap-6 px-2 sm:px-4 shrink-0">
           <nav
             aria-label="Primary"
             className="hidden items-center gap-3.5 text-[0.76rem] font-medium tracking-[-0.01em] lg:flex xl:gap-5 xl:text-[0.85rem] 2xl:gap-7 2xl:text-[0.92rem] whitespace-nowrap"
@@ -76,6 +77,8 @@ export default function SiteHeader() {
             ))}
           </nav>
 
+          <ThemeToggle />
+
           <button
             ref={buttonRef}
             type="button"
@@ -83,7 +86,7 @@ export default function SiteHeader() {
             aria-expanded={open}
             aria-controls="site-menu"
             aria-label={open ? "Close menu" : "Open menu"}
-            className="group relative z-50 grid h-10 w-10 min-w-10 min-h-10 shrink-0 aspect-square place-items-center rounded-full bg-ink text-paper transition-colors duration-500 hover:bg-brand-red"
+            className="group relative z-50 grid h-10 w-10 min-w-10 min-h-10 shrink-0 aspect-square place-items-center rounded-full border border-ink/20 text-ink transition-colors duration-300 hover:bg-brand-red/30"
           >
             <span
               className={cn(
@@ -125,23 +128,19 @@ export default function SiteHeader() {
         </div>
 
         <nav aria-label="Menu" className="my-auto flex flex-col justify-center py-4 sm:py-6">
-          <ul className="flex flex-col divide-y divide-ink/10 sm:divide-y-0 sm:gap-1.5">
+          <ul className="flex flex-col sm:gap-1.5">
             {SITE.categories.map((cat, i) => {
               const active = pathname === `/category/${cat.slug}`;
               return (
                 <li
                   key={cat.slug}
-                  className="overflow-hidden"
-                  style={{ transitionDelay: `${open ? 80 + i * 25 : 0}ms` }}
+                  className="menu-item overflow-hidden"
+                  style={{ "--d": `${120 + i * 45}ms` } as React.CSSProperties}
                 >
                   <Link
                     href={`/category/${cat.slug}`}
                     onClick={close}
-                    className={cn(
-                      "group flex items-center justify-between gap-4 py-2 sm:py-2.5 transition-all duration-[700ms] ease-[cubic-bezier(0.32,0.72,0,1)]",
-                      open ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0",
-                    )}
-                    style={{ transitionDelay: `${open ? 80 + i * 25 : 0}ms` }}
+                    className="group flex items-center justify-between gap-4 py-2 sm:py-2.5"
                   >
                     <div className="flex items-baseline gap-3.5 md:gap-5 min-w-0">
                       <span className="w-5 shrink-0 font-num text-xs sm:text-sm font-medium text-ink-soft md:w-7">

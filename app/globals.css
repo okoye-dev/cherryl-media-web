@@ -32,6 +32,26 @@
 /* ---------- New site: paper, ink and a dull purple accent ---------- */
 :root {
   --ease: cubic-bezier(0.32, 0.72, 0, 1);
+  /* Light theme (space separated RGB so Tailwind opacity works) */
+  --paper: 244 243 238;
+  --paper-deep: 234 232 225;
+  --cream: 255 255 255;
+  --ink: 10 9 12;
+  --ink-soft: 86 83 78;
+  --night: 10 9 12;
+  --snow: 244 243 238;
+  color-scheme: light;
+}
+
+html.dark {
+  --paper: 19 19 23;
+  --paper-deep: 31 31 37;
+  --cream: 26 26 31;
+  --ink: 212 210 205;
+  --ink-soft: 156 153 146;
+  --night: 36 36 43;
+  --snow: 218 216 211;
+  color-scheme: dark;
 }
 
 body {
@@ -40,7 +60,7 @@ body {
 }
 
 html {
-  background: #f4f3ee;
+  background: rgb(var(--paper));
   scroll-behavior: smooth;
 }
 
@@ -51,6 +71,13 @@ html[data-menu="open"] {
 ::selection {
   background: #e01e1e;
   color: #f4f3ee;
+}
+
+/* Section titles stay readable under the fixed header while you scroll */
+.section-sticky {
+  position: sticky;
+  top: 4.1rem;
+  z-index: 20;
 }
 
 .label {
@@ -104,6 +131,22 @@ html[data-menu="open"] {
   animation-play-state: paused;
 }
 
+/* Sidebar items rise in each time the menu opens. A keyframe animation replays
+   every time, unlike a transition, which can be skipped on the very first open. */
+.menu-item > a {
+  display: flex;
+  opacity: 0;
+  transform: translateY(1.5rem);
+}
+html[data-menu="open"] .menu-item > a {
+  animation: menu-rise 0.7s var(--ease) both;
+  animation-delay: var(--d, 0ms);
+}
+@keyframes menu-rise {
+  from { opacity: 0; transform: translateY(1.5rem); }
+  to { opacity: 1; transform: none; }
+}
+
 /* Page content slides aside when the menu opens */
 #page {
   transition:
@@ -151,6 +194,11 @@ html[data-menu="open"] #page {
   }
   .reveal {
     animation: none;
+  }
+  html[data-menu="open"] .menu-item > a {
+    animation: none;
+    opacity: 1;
+    transform: none;
   }
   #page,
   html[data-menu="open"] #page {

@@ -29,11 +29,11 @@ export default function FigureCard({
             Cherryl Media
           </div>
         )}
-        <span className="absolute bottom-3 left-3 rounded-full bg-ink/80 backdrop-blur px-2.5 py-0.5 font-num text-[0.6rem] font-medium text-paper uppercase tracking-wider z-10 leading-none">
+        <span className="absolute bottom-3 left-3 rounded-full bg-night/80 backdrop-blur px-2.5 py-0.5 font-num text-[0.6rem] font-medium text-snow uppercase tracking-wider z-10 leading-none">
           {formatCategoryName(category)}
         </span>
       </div>
-      <div className="my-3">
+      <div className="mt-4 mb-2">
         <span className="block font-area text-[1.05rem] md:text-[1.15rem] font-semibold leading-snug tracking-[-0.02em] text-ink transition-all duration-200 group-hover:italic group-hover:text-brand-red">
           {name}
         </span>

@@ -3,7 +3,7 @@ import Pill from "./Pill";
 import { getLeadStory, getDispatches } from "@/lib/news";
 import { getEditorialCopy } from "@/lib/settings";
 import { getCuratedSections } from "@/lib/sections";
-import { formatDate, formatCategoryName, formatReadTime } from "@/lib/formatters";
+import { formatDate, formatCategoryName, formatReadTime, authorName, TEAM_BYLINE } from "@/lib/formatters";
 
 export default async function Hero() {
   const [curated, defaultLead, defaultDispatches, copy] = await Promise.all([
@@ -43,19 +43,19 @@ export default async function Hero() {
         </div>
 
         <div
-          className="intro flex flex-wrap items-center gap-2"
+          className="intro flex flex-wrap items-center gap-2 lg:hidden"
           style={{ animationDelay: "200ms" }}
         >
-          <Pill href="/category/state-affairs-environs" variant="red">
+          <Pill href="/category/state-affairs-environs" variant="filled">
             State Affairs
           </Pill>
-          <Pill href="/category/newsbeat" variant="ghost">
+          <Pill href="/category/newsbeat" variant="outline">
             Newsbeat
           </Pill>
-          <Pill href="/category/brands-smes" variant="ghost">
+          <Pill href="/category/brands-smes" variant="outline">
             Brands &amp; SMEs
           </Pill>
-          <Pill href="/category/opinions" variant="ghost">
+          <Pill href="/category/opinions" variant="outline">
             Opinions
           </Pill>
         </div>
@@ -64,7 +64,7 @@ export default async function Hero() {
       <div className="mt-8 grid gap-8 lg:grid-cols-[1.55fr_1fr] lg:gap-10">
         {leadStory ? (
           <article
-            className="group relative flex flex-col justify-between rounded-card border border-ink/10 bg-cream/70 p-4 transition-all duration-500 hover:border-brand-red/40 hover:bg-cream sm:p-5 md:p-8"
+            className="group relative flex flex-col justify-between rounded-card border border-ink/10 bg-cream/70 p-3 transition-all duration-500 hover:border-brand-red/40 hover:bg-cream sm:p-4 md:p-5"
             style={{ animationDelay: "300ms" }}
           >
             <div>
@@ -78,7 +78,7 @@ export default async function Hero() {
               </div>
 
               <div className="mt-4 aspect-[16/9] w-full overflow-hidden rounded-2xl bg-paper-deep/80 relative">
-                <div className="absolute inset-0 bg-gradient-to-t from-ink/30 via-transparent to-transparent z-10" />
+                <div className="absolute inset-0 bg-gradient-to-t from-night/30 via-transparent to-transparent z-10" />
                 <div className="absolute top-4 left-4 z-20">
                   <span className="rounded-full bg-brand-red px-3 py-1 font-num text-[0.68rem] font-medium uppercase tracking-wider text-white">
                     Featured Story
@@ -111,7 +111,7 @@ export default async function Hero() {
 
             <div className="mt-6 flex items-center justify-between border-t border-ink/10 pt-3.5 text-xs">
               <span className="text-ink-soft font-sans">
-                By <strong className="font-medium text-ink">{typeof leadStory.author === "string" ? leadStory.author : leadStory.author?.name || "Cherryl Media Desk"}</strong> · {formatReadTime(leadStory.readTime)}
+                By <strong className="font-medium text-ink">{authorName(leadStory) || TEAM_BYLINE}</strong> · {formatReadTime(leadStory.readTime)}
               </span>
               <Link
                 href={`/article/${leadStory.slug}`}
@@ -130,8 +130,7 @@ export default async function Hero() {
 
         <div className="flex flex-col">
           <div className="flex items-center justify-between border-b border-ink/10 pb-3">
-            <h3 className="label font-bold text-brand-red tracking-wider">TRENDING STORIES</h3>
-            <span className="text-[0.68rem] font-semibold text-ink-soft uppercase tracking-wider">Top Dispatches</span>
+            <h3 className="font-area text-[1.15rem] font-semibold tracking-[-0.02em] text-ink">Trending stories</h3>
           </div>
 
           <div className="flex flex-col">
@@ -140,23 +139,13 @@ export default async function Hero() {
                 <div key={story.slug} className="w-full">
                   {i > 0 && <div className="w-full border-t border-ink/10" />}
                   <article
-                    className={`group relative -mx-4 px-4 rounded-2xl transition-colors duration-200 hover:bg-ink/[0.05] ${
+                    className={`group relative -mx-2.5 px-2.5 rounded-xl transition-colors duration-200 hover:bg-ink/[0.05] ${
                       i === 0 ? "pt-3.5 pb-4 sm:pt-4 sm:pb-4.5" : "py-4 sm:py-4.5"
                     }`}
                   >
-                    <div className="flex items-center gap-2 text-xs">
-                      <span className="font-num text-[0.7rem] font-bold text-brand-red leading-none">
-                        0{i + 1}
-                      </span>
-                      <span className="label text-[0.62rem] font-bold uppercase tracking-wider text-ink-soft leading-none">
-                        {formatCategoryName(story.categoryName || story.category)}
-                      </span>
-                      {story.urgent && (
-                        <span className="rounded bg-brand-red/10 px-1.5 py-0.5 text-[0.58rem] font-bold text-brand-red tracking-wider leading-none">
-                          URGENT
-                        </span>
-                      )}
-                    </div>
+                    <span className="label text-[0.62rem] font-medium uppercase tracking-wider text-ink-soft/70 leading-none">
+                      {formatCategoryName(story.categoryName || story.category)}
+                    </span>
 
                     <Link href={`/article/${story.slug}`} className="mt-2 block">
                       <h4 className="font-area text-[1.12rem] md:text-[1.24rem] font-semibold leading-snug tracking-[-0.02em] text-ink transition-all duration-200 group-hover:italic group-hover:text-brand-red">
@@ -166,7 +155,7 @@ export default async function Hero() {
 
                     <div className="mt-3 text-[0.72rem] text-ink-soft">
                       <span className="font-medium text-ink-soft/90">
-                        {typeof story.author === "string" ? story.author : story.author?.name || "Staff"} · {formatReadTime(story.readTime)}
+                        {authorName(story) ? `${authorName(story)} · ` : ""}{formatReadTime(story.readTime)}
                       </span>
                     </div>
                   </article>

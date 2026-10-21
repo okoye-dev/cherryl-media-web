@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { PILL_BASE } from "./Pill";
+import { cn } from "@/utils";
 
 export default function MediaDistributionStrip() {
   const [email, setEmail] = useState("");
@@ -21,15 +23,15 @@ export default function MediaDistributionStrip() {
       id="newsletter"
       className="mx-auto mt-16 w-full max-w-[90rem] px-5 md:mt-24 md:px-10 xl:px-16"
     >
-      <div className="rounded-[2rem] bg-ink p-5 sm:p-7 text-paper md:p-14">
+      <div className="rounded-[2rem] bg-night p-5 sm:p-7 text-snow md:p-14">
         <div className="mx-auto max-w-3xl text-center">
           <span className="label text-brand-red font-medium">
             DAILY NEWSLETTER
           </span>
-          <h2 className="mt-3 font-area text-[clamp(1.75rem,3.2vw,2.75rem)] font-semibold leading-[1.05] tracking-[-0.025em] text-paper">
+          <h2 className="mt-3 font-area text-[clamp(1.75rem,3.2vw,2.75rem)] font-semibold leading-[1.05] tracking-[-0.025em] text-snow">
             Get the Cherryl Media <em className="font-display italic font-light text-brand-red">Morning Edition</em> in your inbox.
           </h2>
-          <p className="mt-4 text-sm md:text-base font-normal leading-relaxed text-paper/75">
+          <p className="mt-4 text-sm md:text-base font-normal leading-relaxed text-snow/75">
             Key policy developments, practical consumer updates, and cultural essays delivered every morning at 6:00 AM.
           </p>
 
@@ -46,11 +48,11 @@ export default function MediaDistributionStrip() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email address"
-                  className="w-full rounded-full border border-paper/20 bg-white/[0.08] px-5 py-3 text-sm text-paper placeholder-paper/40 focus:border-brand-red focus:outline-none focus:bg-white/[0.12]"
+                  className="w-full rounded-full border border-snow/20 bg-white/[0.08] px-5 py-3 text-sm text-snow placeholder-snow/40 focus:border-brand-red focus:outline-none focus:bg-white/[0.12]"
                 />
                 <button
                   type="submit"
-                  className="w-full sm:w-auto rounded-full bg-brand-red px-7 py-3 text-sm font-semibold text-white shadow transition-all hover:bg-brand-red/90 shrink-0"
+                  className={cn(PILL_BASE, "w-full justify-center border border-snow/25 px-7 py-3 text-sm text-snow sm:w-auto")}
                 >
                   Subscribe
                 </button>
@@ -58,15 +60,15 @@ export default function MediaDistributionStrip() {
             )}
           </form>
 
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-[0.72rem] text-paper/50">
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-[0.72rem] text-snow/50">
             <span>Also publishing on:</span>
-            <span className="font-medium text-paper/80">Website</span>
+            <span className="font-medium text-snow/80">Website</span>
             <span>·</span>
-            <span className="font-medium text-paper/80">X</span>
+            <span className="font-medium text-snow/80">X</span>
             <span>·</span>
-            <span className="font-medium text-paper/80">Facebook</span>
+            <span className="font-medium text-snow/80">Facebook</span>
             <span>·</span>
-            <span className="font-medium text-paper/80">LinkedIn</span>
+            <span className="font-medium text-snow/80">LinkedIn</span>
           </div>
         </div>
       </div>

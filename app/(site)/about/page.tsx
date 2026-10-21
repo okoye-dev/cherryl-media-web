@@ -43,7 +43,7 @@ export default function AboutPage() {
                     <h3 className="mt-2 font-area text-lg font-semibold tracking-[-0.015em] text-ink">{cat.name}</h3>
                     <p className="mt-2 text-xs font-light leading-relaxed text-ink-soft">{cat.summary}</p>
                     <div className="mt-4">
-                      <Pill href={`/category/${cat.slug}`} variant="ghost">View Desk</Pill>
+                      <Pill href={`/category/${cat.slug}`} variant="outline">View Desk</Pill>
                     </div>
                   </div>
                 ))}
@@ -70,13 +70,13 @@ export default function AboutPage() {
               </ul>
             </div>
 
-            <div className="rounded-[1.75rem] bg-ink p-7 text-paper">
+            <div className="rounded-[1.75rem] bg-night p-7 text-snow">
               <span className="label text-brand-red">SYNDICATION &amp; ENQUIRIES</span>
-              <p className="mt-3 text-xs font-light leading-relaxed text-paper/70">
+              <p className="mt-3 text-xs font-light leading-relaxed text-snow/70">
                 For newsroom tips, press releases, or syndication partnerships:
               </p>
               <div className="mt-5 space-y-3">
-                <Pill href={`mailto:${SITE.email}`} variant="paper">
+                <Pill href={`mailto:${SITE.email}`} variant="onDark">
                   {SITE.email}
                 </Pill>
               </div>

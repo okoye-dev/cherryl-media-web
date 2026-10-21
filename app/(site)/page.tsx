@@ -5,7 +5,7 @@ import FieldNotes from "@/components/site/FieldNotes";
 import FigureCard from "@/components/site/FigureCard";
 import MediaDistributionStrip from "@/components/site/MediaDistributionStrip";
 import EditorialDossier from "@/components/site/EditorialDossier";
-import Pill from "@/components/site/Pill";
+import SectionHeader from "@/components/site/SectionHeader";
 import { getCuratedSections } from "@/lib/sections";
 
 export const revalidate = 30; // ISR revalidation every 30 seconds
@@ -35,20 +35,15 @@ export default async function Home() {
       <IndexList />
 
       {/* Flagship Section 1: State Affairs & Environs (10,000+ post archive pillar) */}
-      <div className="mx-auto mt-16 grid w-full max-w-[90rem] gap-12 px-5 md:mt-24 md:grid-cols-[1.35fr_1fr] md:gap-14 md:px-10 xl:px-16">
-        <section aria-labelledby="state-affairs-dispatches">
-          <div className="flex items-center justify-between gap-3 pb-4 text-ink-soft">
-            <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-brand-red" />
-              <h2 id="state-affairs-dispatches" className="label text-ink-soft uppercase font-bold tracking-wider">
-                State Affairs &amp; Environs
-              </h2>
-            </div>
-            <Pill href="/category/state-affairs-environs" variant="ghost">
-              Explore All ↗
-            </Pill>
-          </div>
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:gap-6">
+      <div className="mx-auto mt-20 grid w-full max-w-[90rem] gap-14 px-5 md:mt-28 md:grid-cols-[1.35fr_1fr] md:gap-14 md:px-10 xl:px-16">
+        <section aria-labelledby="state-affairs-dispatches" className="min-w-0">
+          <SectionHeader
+            id="state-affairs-dispatches"
+            title="State Affairs & Environs"
+            href="/category/state-affairs-environs"
+            linkLabel="Explore all"
+          />
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:gap-8">
             {stateAffairsStories.map((story, i) => (
               <FigureCard
                 key={story.slug || story.id}
@@ -68,18 +63,17 @@ export default async function Home() {
       </div>
 
       {/* Flagship Section 3: Brands & SMEs Commercial Coverage */}
-      <section className="mx-auto mt-16 w-full max-w-[90rem] px-5 md:mt-24 md:px-10 xl:px-16">
-        <div className="flex items-center justify-between border-b border-ink/10 pb-4 text-ink-soft">
-          <div className="flex items-center gap-2">
-            <span className="label font-bold uppercase tracking-wider text-ink-soft">
-              Brands &amp; SMEs · Commercial Intelligence
-            </span>
-          </div>
-          <Pill href="/category/brands-smes" variant="ghost">
-            View All Brands Dispatches ↗
-          </Pill>
-        </div>
-        <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <section
+        aria-labelledby="brands-smes"
+        className="mx-auto mt-20 w-full max-w-[90rem] px-5 md:mt-28 md:px-10 xl:px-16"
+      >
+        <SectionHeader
+          id="brands-smes"
+          title="Brands & SMEs"
+          href="/category/brands-smes"
+          linkLabel="View all"
+        />
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:gap-8 lg:grid-cols-3">
           {brandsStories.map((story, i) => (
             <FigureCard
               key={story.slug || story.id}

@@ -15,11 +15,15 @@ const config: Config = {
       },
       colors: {
         bg: "#0A090C",
-        paper: "#F4F3EE",
-        "paper-deep": "#EAE8E1",
-        cream: "#FFFFFF",
-        ink: "#0A090C",
-        "ink-soft": "#56534E",
+        // Theme colours come from CSS variables so one class works in light and dark.
+        paper: "rgb(var(--paper) / <alpha-value>)",
+        "paper-deep": "rgb(var(--paper-deep) / <alpha-value>)",
+        cream: "rgb(var(--cream) / <alpha-value>)",
+        ink: "rgb(var(--ink) / <alpha-value>)",
+        "ink-soft": "rgb(var(--ink-soft) / <alpha-value>)",
+        // Blocks that stay dark (and their light text) in both themes.
+        night: "rgb(var(--night) / <alpha-value>)",
+        snow: "rgb(var(--snow) / <alpha-value>)",
         accent: "#E01E1E",
         brand: {
           red: "#E01E1E",
@@ -60,6 +64,7 @@ const config: Config = {
       },
     },
   },
+  darkMode: "class",
   plugins: [],
 };
 export default config;

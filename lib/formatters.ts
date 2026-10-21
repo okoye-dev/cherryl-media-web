@@ -69,3 +69,15 @@ export function formatReadTime(timeStr?: string): string {
   }
   return cleaned.replace(/\s+/g, "");
 }
+
+type WithAuthor = { author?: string | { name?: string } | null };
+
+/** The author's name, or an empty string. Most posts have no named author. */
+export function authorName(article: WithAuthor): string {
+  const a = article.author;
+  const name = typeof a === "string" ? a : a?.name;
+  return (name || "").trim();
+}
+
+/** For large featured spots only: the author, or the team when nobody is named. */
+export const TEAM_BYLINE = "Cherryl Media Team";

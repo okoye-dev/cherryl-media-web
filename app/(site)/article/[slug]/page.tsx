@@ -334,7 +334,7 @@ export default async function ArticlePage({ params }: { params: Params }) {
           )}
 
           <div className="mt-12 flex items-center justify-between border-t border-ink/10 pt-6">
-            <Pill href="/" variant="ghost" arrow="left">
+            <Pill href="/" arrow="back">
               Back to All Stories
             </Pill>
             <span className="font-num text-xs font-medium text-ink-soft">
