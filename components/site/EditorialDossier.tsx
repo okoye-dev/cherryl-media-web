@@ -63,7 +63,7 @@ export default async function EditorialDossier() {
         {copy.dossier.subheading}
       </p>
 
-      <div className="grid gap-10 lg:grid-cols-12 lg:gap-8 xl:gap-10">
+      <div className="grid gap-10 lg:grid-cols-12 lg:gap-4 xl:gap-5">
         {/* The feature lead: the only card here that carries a byline */}
         {leadStory && (
           <article className="group flex flex-col justify-between rounded-[1.75rem] border border-ink/10 bg-cream p-3 transition-all duration-300 hover:border-brand-red/40 sm:p-4 lg:col-span-5 lg:p-5">
@@ -104,7 +104,7 @@ export default async function EditorialDossier() {
         )}
 
         {/* Two supporting stories */}
-        <div className="flex flex-col gap-8 lg:col-span-4">
+        <div className="flex flex-col gap-5 lg:col-span-4 lg:gap-4">
           {sideCards.map((story) => (
             <article
               key={story.slug}
@@ -128,7 +128,7 @@ export default async function EditorialDossier() {
         </div>
 
         {/* Culture briefs: a plain rail, no box */}
-        <div className="lg:col-span-3 lg:border-l lg:border-ink/15 lg:pl-8">
+        <div className="lg:col-span-3 lg:border-l lg:border-ink/15 lg:pl-5">
           <h3 className="border-b border-ink/15 pb-4 font-area text-[1.15rem] font-semibold tracking-[-0.02em] text-ink">
             Culture briefs
           </h3>
@@ -153,9 +153,9 @@ export default async function EditorialDossier() {
                         {item.deck || item.excerpt}
                       </p>
                     )}
-                    <div className="mt-4 flex items-center justify-between gap-2 text-[0.7rem] text-ink-soft">
-                      <span className="min-w-0 truncate">{name}</span>
+                    <div className="mt-4 flex items-center gap-2 text-[0.7rem] text-ink-soft">
                       <span className="font-num shrink-0 text-[0.68rem]">{formatDate(item.publishedAt)}</span>
+                      {name && <span className="min-w-0 truncate">· {name}</span>}
                     </div>
                   </Link>
                 </li>
