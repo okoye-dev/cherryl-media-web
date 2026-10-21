@@ -165,7 +165,7 @@ export default function ImageUploadField({
               <Btn onClick={() => fileInputRef.current?.click()} disabled={isUploading}>
                 {errorMessage ? "Retry upload" : "Change photo"}
               </Btn>
-              <Btn variant="ghost" onClick={handleRemove} disabled={isUploading}>
+              <Btn variant="danger" onClick={handleRemove} disabled={isUploading}>
                 Remove
               </Btn>
             </div>
