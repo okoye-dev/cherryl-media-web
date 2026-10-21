@@ -1,22 +1,51 @@
 "use client";
 
 import { useState } from "react";
+import { subscriberService } from "@/services";
 import { PILL_BASE } from "./Pill";
 import SocialLinks from "./SocialLinks";
 import { cn } from "@/utils";
 import { SunriseLagos, EditionStamp, Cherries, Sparkle, CowrieRing } from "@/components/art";
 
+type FormState = "idle" | "saving" | "done" | "error";
+
+const EMAIL_SHAPE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export default function MediaDistributionStrip() {
   const [email, setEmail] = useState("");
-  const [subscribed, setSubscribed] = useState(false);
+  const [state, setState] = useState<FormState>("idle");
+  const [message, setMessage] = useState("");
+  // A box people never see. Bots fill it in; a real person leaves it empty.
+  const [trap, setTrap] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email.trim()) {
-      setSubscribed(true);
-      setTimeout(() => {
-        setEmail("");
-      }, 3000);
+    if (state === "saving") return;
+    const clean = email.trim().toLowerCase();
+    if (!EMAIL_SHAPE.test(clean)) {
+      setState("error");
+      setMessage("Enter a valid email address, like name@example.com.");
+      return;
+    }
+    if (trap) {
+      // Pretend it worked, and save nothing.
+      setState("done");
+      return;
+    }
+    setState("saving");
+    setMessage("");
+    try {
+      await subscriberService.addSubscriber(clean);
+      setState("done");
+      setEmail("");
+    } catch (err) {
+      setState("error");
+      const text = err instanceof Error ? err.message : "";
+      setMessage(
+        /valid email/i.test(text)
+          ? "That email address does not look right. Check it and try again."
+          : "We could not save your email just now. Please try again in a moment.",
+      );
     }
   };
 
@@ -58,29 +87,59 @@ export default function MediaDistributionStrip() {
           </p>
 
           {/* 4. The action */}
-          <form onSubmit={handleSubmit} className="mt-5 w-full max-w-md">
-            {subscribed ? (
-              <div className="rounded-full border border-emerald-400/40 bg-emerald-400/15 px-6 py-3.5 text-sm font-medium text-emerald-200">
-                ✓ You&apos;re subscribed to the Morning Edition
+          <form onSubmit={handleSubmit} noValidate className="mt-5 w-full max-w-md">
+            {state === "done" ? (
+              <div role="status" className="rounded-full border border-emerald-400/40 bg-emerald-400/15 px-6 py-3.5 text-sm font-medium text-emerald-200">
+                You&apos;re on the list for the Morning Edition
               </div>
             ) : (
-              <div className="flex items-center rounded-full border border-snow/25 bg-snow/[0.08] p-1.5 backdrop-blur-md focus-within:border-brand-red/70">
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Your email address"
-                  aria-label="Email address"
-                  className="min-w-0 flex-1 bg-transparent px-4 py-2.5 text-sm text-snow placeholder-snow/45 focus:outline-none"
-                />
-                <button
-                  type="submit"
-                  className={cn(PILL_BASE, "bg-brand-red/25 px-5 py-2.5 text-sm text-snow")}
+              <>
+                <div
+                  className={cn(
+                    "flex items-center rounded-full border bg-snow/[0.08] p-1.5 backdrop-blur-md focus-within:border-brand-red/70",
+                    state === "error" ? "border-red-400/60" : "border-snow/25",
+                  )}
                 >
-                  Subscribe
-                </button>
-              </div>
+                  <input
+                    type="email"
+                    inputMode="email"
+                    autoComplete="email"
+                    maxLength={120}
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      if (state === "error") setState("idle");
+                    }}
+                    placeholder="Your email address"
+                    aria-label="Email address"
+                    aria-invalid={state === "error"}
+                    aria-describedby={state === "error" ? "newsletter-error" : undefined}
+                    className="min-w-0 flex-1 bg-transparent px-4 py-2.5 text-sm text-snow placeholder-snow/45 focus:outline-none"
+                  />
+                  <button
+                    type="submit"
+                    disabled={state === "saving"}
+                    className={cn(PILL_BASE, "bg-brand-red/25 px-5 py-2.5 text-sm text-snow disabled:opacity-60")}
+                  >
+                    {state === "saving" ? "Saving..." : "Subscribe"}
+                  </button>
+                </div>
+                {/* Hidden from people and from screen readers */}
+                <input
+                  type="text"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  aria-hidden="true"
+                  value={trap}
+                  onChange={(e) => setTrap(e.target.value)}
+                  className="absolute -left-[9999px] h-0 w-0 opacity-0"
+                />
+                {state === "error" && (
+                  <p id="newsletter-error" role="alert" className="mt-2 rounded-full bg-night/60 px-4 py-1.5 text-center text-xs text-red-200 backdrop-blur-md">
+                    {message}
+                  </p>
+                )}
+              </>
             )}
           </form>
 
