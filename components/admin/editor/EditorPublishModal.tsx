@@ -1,6 +1,6 @@
-import { Btn } from "@/components/admin/ui";
+import { Btn, Sheet } from "@/components/admin/ui";
+import { SheetCloseBtn } from "@/components/admin/SheetCloseBtn";
 import { formatCategoryName } from "@/lib/formatters";
-import { CloseIcon } from "./icons";
 import type { PublishStep, StepState } from "@/hooks/usePublishPipeline";
 
 interface EditorPublishModalProps {
@@ -44,8 +44,6 @@ export default function EditorPublishModal({
   onSaveDraft,
   isSaving,
 }: EditorPublishModalProps) {
-  if (!isOpen) return null;
-
   const steps: Array<{ state: StepState; title: string; text: string }> = [
     {
       state: stepStates.media,
@@ -82,30 +80,36 @@ export default function EditorPublishModal({
   ];
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-stretch justify-center bg-black/80 backdrop-blur-sm animate-fade sm:items-center sm:p-4">
-      <div
-        role="dialog"
-        aria-modal="true"
-        className="relative flex h-full w-full flex-col overflow-y-auto bg-[#16181D] sm:h-auto sm:max-h-[90vh] sm:max-w-lg sm:rounded-2xl sm:border sm:border-white/10 sm:shadow-2xl"
-      >
-        <div className="flex items-start justify-between gap-3 border-b border-white/[0.08] px-4 py-3 sm:px-6 sm:py-4">
-          <div className="min-w-0">
-            <p className="text-[0.7rem] font-medium text-brand-red">Cherryl Newsroom</p>
-            <h3 className="text-base font-semibold tracking-tight text-white">
-              {step === "done" ? "Story published" : "Publishing"}
-            </h3>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="-mr-2 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-zinc-400 hover:bg-white/[0.06] hover:text-white"
-            aria-label="Close"
-          >
-            <CloseIcon />
-          </button>
-        </div>
-
-        <div className="flex-1 space-y-5 px-4 py-4 sm:px-6 sm:py-5">
+    <Sheet
+      open={isOpen}
+      onClose={onClose}
+      width="sm"
+      title={step === "done" ? "Story published" : "Publishing"}
+      subtitle="Cherryl Newsroom"
+      footer={
+          step === "done" ? (
+            <>
+              <Btn variant="primary" href={`/article/${publishedSlug}`} target="_blank" arrow="forward" block>
+                View live story
+              </Btn>
+              <Btn href="/admin" block>
+                Back to stories
+              </Btn>
+              <SheetCloseBtn variant="ghost" block>
+                Keep editing
+              </SheetCloseBtn>
+            </>
+          ) : errorMessage ? (
+            <>
+              <Btn variant="primary" onClick={onSaveDraft} disabled={isSaving} block className="order-first sm:order-last">
+                {isSaving ? "Saving" : "Save as draft"}
+              </Btn>
+              <SheetCloseBtn block />
+            </>
+          ) : null
+      }
+    >
+        <div className="space-y-5">
           {errorMessage && (
             <div className="space-y-1 rounded-xl border border-red-500/40 bg-red-950/30 p-3.5">
               <p className="text-sm font-medium text-red-200">The server did not accept this story</p>
@@ -137,34 +141,6 @@ export default function EditorPublishModal({
             </div>
           )}
         </div>
-
-        {(step === "done" || errorMessage) && (
-        <div className="flex flex-col gap-2 border-t border-white/[0.08] px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:flex-row sm:justify-end sm:px-6 sm:py-4">
-          {step === "done" ? (
-            <>
-              <Btn variant="primary" href={`/article/${publishedSlug}`} target="_blank" arrow="forward" block>
-                View live story
-              </Btn>
-              <Btn href="/admin" block>
-                Back to stories
-              </Btn>
-              <Btn variant="ghost" onClick={onClose} block>
-                Keep editing
-              </Btn>
-            </>
-          ) : errorMessage ? (
-            <>
-              <Btn variant="primary" onClick={onSaveDraft} disabled={isSaving} block className="order-first sm:order-last">
-                {isSaving ? "Saving" : "Save as draft"}
-              </Btn>
-              <Btn onClick={onClose} block>
-                Close
-              </Btn>
-            </>
-          ) : null}
-        </div>
-        )}
-      </div>
-    </div>
+    </Sheet>
   );
 }

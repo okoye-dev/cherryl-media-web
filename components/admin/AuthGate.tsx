@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { getStoredToken } from "@/lib/auth";
 import { registerSignInHandler } from "@/lib/auth-gate";
-import { Btn } from "@/components/admin/ui";
+import { Sheet } from "@/components/admin/ui";
 import { SignInForm } from "@/components/admin/SignInForm";
 
 /**
@@ -52,48 +52,20 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
     }
   }, [onLoginPage]);
 
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && settle(false);
-    document.addEventListener("keydown", onKey);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prev;
-    };
-  }, [open, settle]);
-
   return (
     <>
       {children}
-      {open && !onLoginPage && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="signin-title"
-          className="fixed inset-0 z-[60] flex items-end justify-center bg-black/80 p-0 backdrop-blur-sm sm:items-center sm:p-6"
-        >
-          <div className="w-full max-w-sm rounded-t-2xl border border-white/10 bg-[#16181D] p-5 shadow-2xl sm:rounded-2xl">
-            <div className="mb-4 flex items-start justify-between gap-3">
-              <div>
-                <h2 id="signin-title" className="text-lg font-semibold text-white">
-                  Sign in
-                </h2>
-                <p className="mt-0.5 text-sm text-zinc-400">Your work stays on this page while you sign in.</p>
-              </div>
-              <Btn variant="ghost" size="sm" onClick={() => settle(false)} className="-mr-2 shrink-0">
-                Close
-              </Btn>
-            </div>
+      {!onLoginPage && (
+        <Sheet open={open} onClose={() => settle(false)} width="sm" layer="z-[90]" title="Sign in" subtitle="Your work stays on this page while you sign in.">
+          <div className="space-y-4">
             <SignInForm autoFocus notice={message} onSignedIn={() => settle(true)} />
-            <div className="mt-3 flex justify-center">
+            <div className="flex justify-center">
               <Link href="/" className="text-xs text-zinc-500 hover:text-zinc-300">
                 Back to site
               </Link>
             </div>
           </div>
-        </div>
+        </Sheet>
       )}
     </>
   );
