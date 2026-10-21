@@ -1,7 +1,8 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Btn, Label, TextInput, inputClass } from "@/components/admin/ui";
+import { Btn, Label, Sheet, TextInput, inputClass } from "@/components/admin/ui";
+import { SheetCloseBtn } from "@/components/admin/SheetCloseBtn";
 import ImageUploadField from "@/components/admin/ImageUploadField";
 import { saveArticle, publishArticle } from "@/services/articles";
 import { SITE } from "@/config/site";
@@ -107,22 +108,31 @@ export default function QuickPublishSheet({
   };
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-end justify-center bg-black/70 sm:items-center sm:p-6" role="dialog" aria-modal="true" aria-label="Quick publish">
-      <div className="flex max-h-full w-full flex-col overflow-hidden rounded-t-2xl border border-white/10 bg-[#16181D] sm:max-w-lg sm:rounded-2xl">
-        <div className="flex items-start justify-between gap-3 border-b border-white/10 px-4 py-3.5 sm:px-5">
-          <div>
-            <h2 className="text-base font-semibold text-white">{doneSlug ? (doneKind === "draft" ? "Draft saved" : "Published") : "Quick publish"}</h2>
-            <p className="mt-0.5 text-xs text-zinc-400">
-              {doneSlug ? (doneKind === "draft" ? "Find it under Your stories, then edit or publish it." : "The story is live on the site.") : "Save it as a draft, or publish now."}
-            </p>
+    <Sheet
+      onClose={onClose}
+      width="sm"
+      title={doneSlug ? (doneKind === "draft" ? "Draft saved" : "Published") : "Quick publish"}
+      subtitle={
+        doneSlug ? (doneKind === "draft" ? "Find it under Your stories, then edit or publish it." : "The story is live on the site.") : "Save it as a draft, or publish now."
+      }
+      footer={
+        doneSlug ? undefined : (
+          <div className="flex w-full flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <SheetCloseBtn variant="ghost" block>
+              Cancel
+            </SheetCloseBtn>
+            <Btn onClick={publish} disabled={busy || uploading} block>
+              Publish now
+            </Btn>
+            <Btn variant="primary" onClick={saveDraft} disabled={busy || uploading} block>
+              {busy ? "Saving..." : "Save as draft"}
+            </Btn>
           </div>
-          <Btn variant="ghost" size="sm" onClick={onClose} className="-mr-2 !h-10">
-            Close
-          </Btn>
-        </div>
-
-        {doneSlug ? (
-          <div className="space-y-3 px-4 py-5 sm:px-5">
+        )
+      }
+    >
+      {doneSlug ? (
+<div className="space-y-3">
             <p className="text-sm text-zinc-200">{doneKind === "draft" ? <>&ldquo;{title}&rdquo; is saved as a draft. Nothing is live yet.</> : <>&ldquo;{title}&rdquo; is published. The homepage picks it up within a minute.</>}</p>
             <div className="flex flex-col gap-2 sm:flex-row">
               {doneKind === "published" ? (
@@ -134,14 +144,11 @@ export default function QuickPublishSheet({
                   Open in the editor
                 </Btn>
               )}
-              <Btn onClick={onClose} block>
-                Done
-              </Btn>
+              <SheetCloseBtn block>Done</SheetCloseBtn>
             </div>
           </div>
-        ) : (
-          <>
-            <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-4 sm:px-5">
+      ) : (
+            <div className="space-y-4">
               <div>
                 <Label htmlFor="qp-title">Headline</Label>
                 <TextInput id="qp-title" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={160} />
@@ -184,20 +191,7 @@ export default function QuickPublishSheet({
               </div>
               {error && <p className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">{error}</p>}
             </div>
-            <div className="flex flex-col gap-2 border-t border-white/10 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:flex-row-reverse sm:px-5">
-              <Btn variant="primary" onClick={saveDraft} disabled={busy || uploading} block>
-                {busy ? "Saving..." : "Save as draft"}
-              </Btn>
-              <Btn onClick={publish} disabled={busy || uploading} block>
-                Publish now
-              </Btn>
-              <Btn variant="ghost" onClick={onClose} block>
-                Cancel
-              </Btn>
-            </div>
-          </>
-        )}
-      </div>
-    </div>
+      )}
+    </Sheet>
   );
 }
