@@ -44,7 +44,7 @@ export function HeroSettingsPanel({ copy, setCopy }: HeroSettingsPanelProps) {
         />
         <Field label="Description" maxLength={400} value={hero.description} onChange={setField("description")} rows={3} />
       </div>
-      <div className="mt-5 min-w-0 rounded-lg border border-white/10 bg-[#0d0e12] p-4">
+      <div className="mt-5 min-w-0 rounded-lg border border-white/10 bg-[#0d0e12] p-3 sm:p-4">
         <p className="text-[0.7rem] font-medium text-zinc-500">Preview</p>
         <p className="mt-3 text-xs font-medium text-brand-red">{hero.editionBadge}</p>
         <h3 className="mt-1.5 whitespace-pre-wrap break-words text-2xl font-bold leading-tight text-white">

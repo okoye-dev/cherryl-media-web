@@ -77,7 +77,7 @@ export default function EditorSeoPanel({
       </Panel>
 
       <Panel title="Google preview">
-        <div className="space-y-1.5 rounded-xl border border-white/10 bg-[#0E1014] p-4">
+        <div className="space-y-1.5 rounded-xl border border-white/10 bg-[#0E1014] p-3 sm:p-4">
           <div className="flex items-center gap-2 text-xs text-zinc-400">
             <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-red/80 text-[0.6rem] font-bold text-white">
               C
