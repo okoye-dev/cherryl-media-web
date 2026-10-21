@@ -6,7 +6,7 @@ import { searchCurationPage } from "@/services/sections";
 import type { SlotTarget } from "@/hooks/useCuratedSections";
 import { SITE } from "@/config/site";
 import { formatDate } from "@/lib/formatters";
-import { Badge, Btn, Pagination, TextInput, inputClass } from "@/components/admin/ui";
+import { Badge, Btn, Pagination, Sheet, TextInput, inputClass } from "@/components/admin/ui";
 
 const PAGE_SIZE = 8;
 
@@ -63,27 +63,14 @@ export function ArticlePickerModal({ picker, onSelect, onClose }: ArticlePickerM
   const pick = (art: CanonicalArticle) => (isHero ? handleSelectFeatured(art) : onSelect(art));
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      className="fixed inset-0 z-50 flex items-stretch justify-center bg-black/85 backdrop-blur-md sm:items-center sm:p-6"
-    >
-      <div className="flex h-dvh w-full flex-col overflow-hidden border-white/15 bg-[#16181D] shadow-2xl sm:h-auto sm:max-h-[90vh] sm:max-w-3xl sm:rounded-xl sm:border">
-        {/* Header */}
-        <div className="flex items-start justify-between gap-3 border-b border-white/10 bg-[#141519] px-4 py-3 sm:px-5">
-          <div className="min-w-0">
-            <h3 className="truncate text-base font-semibold text-white">
-              Pick a story for {meta?.title || picker.sectionKey}
-            </h3>
-            <p className="mt-0.5 text-xs text-zinc-400">Search by headline or filter by category.</p>
-          </div>
-          <Btn variant="ghost" onClick={onClose} className="-mr-2 shrink-0">
-            Close
-          </Btn>
-        </div>
-
-        {/* Search and filters (stays at the top while results scroll) */}
-        <div className="space-y-2 border-b border-white/10 bg-[#121317] p-3 sm:p-4">
+    <Sheet
+      onClose={onClose}
+      size="tall"
+      width="lg"
+      title={<>Pick a story for {meta?.title || picker.sectionKey}</>}
+      subtitle="Search by headline or filter by category."
+      toolbar={
+<div className="space-y-2">
           <div className="relative">
             <TextInput
               aria-label="Search stories"
@@ -128,9 +115,15 @@ export function ArticlePickerModal({ picker, onSelect, onClose }: ArticlePickerM
             </div>
           </div>
         </div>
-
+      }
+      footer={
+        <div className="w-full">
+          <Pagination page={page} totalPages={paging.totalPages} total={paging.total} pageSize={paging.pageSize} onPage={setPage} busy={searching} />
+        </div>
+      }
+    >
         {/* Results */}
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-2 sm:p-3">
+        <div className="-mx-2">
           {searchResults.length === 0 ? (
             <div className="p-10 text-center text-sm text-zinc-500">
               {error ? `Could not load stories. ${error}` : searching ? "Searching..." : "No matching stories found."}
@@ -198,12 +191,6 @@ export function ArticlePickerModal({ picker, onSelect, onClose }: ArticlePickerM
             </ul>
           )}
         </div>
-
-        {/* Footer */}
-        <div className="border-t border-white/10 bg-[#141519] px-4 py-3">
-          <Pagination page={page} totalPages={paging.totalPages} total={paging.total} pageSize={paging.pageSize} onPage={setPage} busy={searching} />
-        </div>
-      </div>
-    </div>
+    </Sheet>
   );
 }

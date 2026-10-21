@@ -436,3 +436,5 @@ export function Pagination({
     </nav>
   );
 }
+
+export { Sheet, useSheetClose } from "./Sheet";
