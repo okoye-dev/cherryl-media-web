@@ -1,10 +1,6 @@
 import { cn } from "@/lib/cn";
 import { Btn } from "./Btn";
 
-/**
- * Page controls for a list that is paged by the server: "Showing 11 to 20 of 45", Previous and Next.
- * Lists are never endless: the person always sees where they are and can only go one page at a time.
- */
 export function Pagination({
   page,
   totalPages,

@@ -6,7 +6,6 @@ import { SparkIcon } from "./icons";
 import type { PillarCategory, PublishingStatus } from "@/lib/types";
 
 interface EditorTopBarProps {
-  /** The address the story is stored under, empty for a story never saved */
   savedSlug: string;
   title: string;
   isDirty: boolean;
@@ -54,7 +53,6 @@ export default function EditorTopBar({
   return (
     <>
       <div className="space-y-3 rounded-xl border border-white/[0.08] bg-[#16181D] p-4">
-        {/* Top row: whether your work is stored on the left, Open story on the right */}
         <div className="flex items-center justify-between gap-3">
           <p
             role="status"
@@ -82,7 +80,6 @@ export default function EditorTopBar({
           </Btn>
         </div>
 
-        {/* Way back, and the story's status */}
         <div className="flex items-center justify-between gap-3">
           <Btn href="/admin" variant="ghost" arrow="back" className="-ml-2 !h-10 px-2">
             All stories
@@ -90,7 +87,6 @@ export default function EditorTopBar({
           <Badge tone={live ? "green" : "amber"}>{status}</Badge>
         </div>
 
-        {/* Row 2: story switcher and secondary actions. Save and Publish join from lg. */}
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end">
           <div className="min-w-0 lg:flex-1">
             <p className="text-[0.7rem] font-medium text-zinc-400">{category}</p>
@@ -150,7 +146,6 @@ export default function EditorTopBar({
         />
       </EditorPickerSheet>
 
-      {/* Phones and tablets: Save and Publish stay pinned to the bottom of the screen */}
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-[#0E0F12]/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-md sm:px-6 lg:hidden">
         <div className="mx-auto grid max-w-5xl grid-cols-2 gap-3">
           <Btn variant="primary" disabled={saveDisabled} onClick={onSaveDraft} className="!h-12">

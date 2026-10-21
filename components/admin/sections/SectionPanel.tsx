@@ -37,7 +37,6 @@ export function SectionPanel({
 
   return (
     <section className="rounded-xl border border-white/[0.08] bg-[#16181D]">
-      {/* The title row is one big button: tap it to open or close the section. Closed by default. */}
       <button
         type="button"
         aria-expanded={open}

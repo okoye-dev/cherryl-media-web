@@ -10,7 +10,6 @@ export function toIds(byKey: Sections | undefined): IdMap {
   return out;
 }
 
-/** True when both layouts hold the same ids in the same order. A missing section counts as empty. */
 export function sameIds(a: IdMap, b: IdMap) {
   const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
   for (const k of keys) {

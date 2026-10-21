@@ -60,7 +60,6 @@ function AdminEditorContent() {
     flagCoverError: setCoverImageError,
   });
 
-  // Editing a field counts as reviewing it, so its AI mark goes away.
   const edited = <T,>(key: string, fn: (v: T) => void) => (v: T) => {
     ai.clear(key);
     fn(v);

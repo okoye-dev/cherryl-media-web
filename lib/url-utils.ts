@@ -46,25 +46,18 @@ export function getYouTubeEmbedUrl(input: string): string | null {
 
 const CDN_URL = process.env.NEXT_PUBLIC_CDN_URL || "";
 
-/**
- * Resolves a location-independent storage key (e.g. "media/uuid.webp")
- * to the currently configured public CDN / bucket URL.
- */
 export function resolveMediaUrl(urlOrKey?: string): string {
   if (!urlOrKey) return "";
   const trimmed = urlOrKey.trim();
 
-  // If already absolute http(s) URL
   if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
     return trimmed;
   }
 
-  // If local static asset
   if (trimmed.startsWith("/assets/") || trimmed.startsWith("/uploads/")) {
     return trimmed;
   }
 
-  // If relative storage key (e.g. media/uuid.webp or uuid.webp)
   const cleanKey = trimmed.replace(/^\/+/, "");
   if (CDN_URL) {
     return `${CDN_URL.replace(/\/+$/, "")}/${cleanKey}`;
@@ -72,5 +65,4 @@ export function resolveMediaUrl(urlOrKey?: string): string {
 
   return `/${cleanKey}`;
 }
-
 

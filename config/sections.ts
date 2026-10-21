@@ -13,8 +13,6 @@ export interface CuratedSectionsResponse {
   byKey: Record<string, CuratedSection>;
 }
 
-
-/** Homepage spots, in page order. Shared by the homepage and the admin. maxSlots caps what is shown and saved; showsImage says if the page draws the cover there. */
 export const SECTION_METADATA: Record<
   string,
   { title: string; subtitle: string; maxSlots: number; showsImage: boolean; categoryHint?: string }

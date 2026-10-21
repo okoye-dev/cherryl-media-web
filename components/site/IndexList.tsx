@@ -4,12 +4,6 @@ import { cn } from "@/lib/cn";
 
 type Cat = (typeof SITE.categories)[number];
 
-/**
- * Bento layout. Wide screens: a 6-column grid with the four main desks in the middle.
- * Phones: a 4-column grid with two big 2x2 tiles (State Affairs, Entertainment), wide tiles and small squares.
- * The "order" classes set the reading order for each layout. Each tile has its own faint tint,
- * and hovering deepens that same colour.
- */
 const LAYOUT: Record<string, { span: string; text: string; tint: string; big?: boolean }> = {
   "youth-corner": { span: "col-span-2 order-[8] md:order-[1] md:col-span-1", text: "text-[0.9rem] md:text-[1.02rem]", tint: "bg-violet-500/10 border-violet-500/25 hover:bg-violet-500/25 dark:bg-violet-400/15 dark:border-violet-400/30 dark:hover:bg-violet-400/30" },
   newsbeat: { span: "col-span-2 order-[2] md:order-[2] md:col-span-2", text: "text-[1.1rem] md:text-[1.35rem]", tint: "bg-sky-500/15 border-sky-500/25 hover:bg-sky-500/30 dark:bg-sky-400/20 dark:border-sky-400/30 dark:hover:bg-sky-400/35", big: true },
@@ -23,7 +17,6 @@ const LAYOUT: Record<string, { span: string; text: string; tint: string; big?: b
   "entertainment-lifestyle": { span: "col-span-2 row-span-2 order-[7] md:order-[10] md:row-span-1 md:col-span-2", text: "text-[1.25rem] md:text-[1.02rem]", tint: "bg-rose-500/10 border-rose-500/25 hover:bg-rose-500/25 dark:bg-rose-400/15 dark:border-rose-400/30 dark:hover:bg-rose-400/30" },
 };
 
-/** Order matters on the grid: this is the reading order of the rows above. */
 const ORDER = [
   "youth-corner", "newsbeat", "brands-smes", "tour-hotels",
   "thrills-tricks", "state-affairs-environs", "education",

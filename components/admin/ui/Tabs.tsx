@@ -1,6 +1,5 @@
 import { cn } from "@/lib/cn";
 
-/** Tabs that scroll sideways on narrow screens instead of wrapping onto several lines. */
 export function Tabs<T extends string>({
   value,
   onChange,

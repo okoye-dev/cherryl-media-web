@@ -16,7 +16,6 @@ type Story = NonNullable<
   Awaited<ReturnType<typeof fetchCuratedSections>>["byKey"][string]
 >["articles"][number];
 
-/** A small label above a title. Quiet on purpose, so the title leads. */
 function Kicker({ story }: { story: Story }) {
   return (
     <span className="label text-[0.62rem] font-semibold leading-none text-brand-red/85">
@@ -25,7 +24,6 @@ function Kicker({ story }: { story: Story }) {
   );
 }
 
-/** Name (only when there is one) on the left, date on the right. */
 function Meta({ story }: { story: Story }) {
   const name = authorName(story);
   return (
@@ -65,7 +63,6 @@ export default async function EditorialDossier() {
       </p>
 
       <div className="grid gap-10 lg:grid-cols-12 lg:items-start lg:gap-4 xl:gap-5">
-        {/* The feature lead: the only card here that carries a byline */}
         {leadStory && (
           <article className="group relative flex flex-col rounded-[1.75rem] border border-ink/10 bg-cream p-3 transition-all duration-300 hover:border-brand-red/40 sm:p-4 lg:col-span-5 lg:p-5">
             <div>
@@ -104,7 +101,6 @@ export default async function EditorialDossier() {
           </article>
         )}
 
-        {/* Two supporting stories */}
         <div className="flex flex-col gap-5 lg:col-span-4 lg:gap-4">
           {sideCards.map((story) => (
             <article
@@ -128,7 +124,6 @@ export default async function EditorialDossier() {
           ))}
         </div>
 
-        {/* Culture briefs: a plain rail, no box */}
         <div className="lg:col-span-3 lg:border-l lg:border-ink/15 lg:pl-5">
           <h3 className="border-b border-ink/15 pb-4 font-area text-[1.15rem] font-semibold tracking-[-0.02em] text-ink">
             Culture briefs

@@ -1,6 +1,5 @@
 import { cn } from "@/lib/cn";
 
-/** A custom tick box. Replaces the browser checkbox. The label is part of the tap target. */
 export function Checkbox({
   checked,
   onChange,

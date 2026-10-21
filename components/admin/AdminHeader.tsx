@@ -64,7 +64,6 @@ export default function AdminHeader() {
             </span>
           </Link>
 
-          {/* Navigation sits here from md up; on phones it moves to its own row below */}
           <nav aria-label="Admin" className="ml-2 hidden items-center gap-1 md:flex">
             {navLinks}
           </nav>
@@ -93,7 +92,6 @@ export default function AdminHeader() {
         </div>
       </div>
 
-      {/* Phone and small tablet navigation: one scrolling row, never wraps */}
       <nav
         aria-label="Admin"
         className="flex gap-1 overflow-x-auto border-t border-white/[0.06] px-4 py-1.5 [scrollbar-width:none] sm:px-6 md:hidden [&::-webkit-scrollbar]:hidden"

@@ -1,12 +1,3 @@
-/**
- * Client-Side Image Compression & Media Validation
- *
- * Compresses images before presigned S3/R2 upload to:
- * - Reduce upload bandwidth and mobile latency
- * - Normalize dimensions to editorial standards (max width 2048px)
- * - Output modern WebP format with high visual fidelity (quality 0.82)
- * - Enforce reasonable size limits on images and video
- */
 
 export interface CompressionOptions {
   maxWidth?: number;
@@ -55,18 +46,12 @@ export function validateMediaFile(file: File): { valid: boolean; error?: string 
   return { valid: true };
 }
 
-/**
- * Compresses a single image File using the browser Canvas API.
- * Keeps aspect ratio, clamps maximum dimension, and converts to WebP.
- * For animated GIFs or SVGs, preserves the original file untouched.
- */
 export async function compressImage(
   file: File,
   options: CompressionOptions = {}
 ): Promise<File> {
   const { maxWidth = 2048, maxHeight = 2048, quality = 0.82 } = options;
 
-  // Don't compress non-image files, animated GIFs, or SVGs
   if (
     !file.type.startsWith("image/") ||
     file.type === "image/gif" ||
@@ -90,14 +75,12 @@ export async function compressImage(
           return;
         }
 
-        // Calculate proportional scale down
         if (width > maxWidth || height > maxHeight) {
           const ratio = Math.min(maxWidth / width, maxHeight / height);
           width = Math.round(width * ratio);
           height = Math.round(height * ratio);
         }
 
-        // Draw onto offscreen canvas
         const canvas = document.createElement("canvas");
         canvas.width = width;
         canvas.height = height;
@@ -108,12 +91,10 @@ export async function compressImage(
           return;
         }
 
-        // High quality bicubic image smoothing
         ctx.imageSmoothingEnabled = true;
         ctx.imageSmoothingQuality = "high";
         ctx.drawImage(img, 0, 0, width, height);
 
-        // Export as modern WebP
         canvas.toBlob(
           (blob) => {
             if (!blob) {
@@ -121,7 +102,6 @@ export async function compressImage(
               return;
             }
 
-            // Only use compressed if it actually saved bytes
             if (blob.size >= file.size && file.type === "image/webp") {
               resolve(file);
               return;

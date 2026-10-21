@@ -11,7 +11,6 @@ interface EditorTagsProps {
   aiFilled?: boolean;
 }
 
-/** The tags field. It has no card of its own: it sits inside the Details panel. */
 export default function EditorTags({ tags, onAddTag, onRemoveTag, aiFilled }: EditorTagsProps) {
   const { tagInput, setTagInput, suggestions, isOpen, setIsOpen, addTag } = useTagSearch(tags, onAddTag);
   const containerRef = useRef<HTMLDivElement>(null);

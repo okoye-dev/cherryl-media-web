@@ -20,9 +20,7 @@ const BTN_SIZE = {
 type BtnProps = {
   variant?: keyof typeof BTN_VARIANT;
   size?: keyof typeof BTN_SIZE;
-  /** Arrowhead after the label ("forward") or before it ("back") */
   arrow?: "forward" | "back";
-  /** Make the button fill its row (use on phones for the main action) */
   block?: boolean;
   className?: string;
   children: React.ReactNode;

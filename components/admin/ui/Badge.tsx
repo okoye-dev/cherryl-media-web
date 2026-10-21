@@ -16,7 +16,6 @@ export function Badge({ tone = "neutral", children, className }: { tone?: keyof 
   );
 }
 
-/** Marks a field or block as filled in by AI and not yet reviewed by a person. */
 export function AIChip({ className }: { className?: string }) {
   return (
     <Badge tone="ai" className={className}>

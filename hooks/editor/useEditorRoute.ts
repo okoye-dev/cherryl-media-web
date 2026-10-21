@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
-/** Which story or lead the editor page was opened for, and keeps the address bar in step with the saved slug. */
 export function useEditorRoute(savedSlug: string) {
   const searchParams = useSearchParams();
   const urlSlug = searchParams.get("slug");

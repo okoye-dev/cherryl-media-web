@@ -15,7 +15,6 @@ export function formatSavedAt(iso: string): string {
   return d.toLocaleString([], { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 }
 
-/** Read-only look at a saved version. Full-screen on phones, a dialog from sm. */
 export default function EditorVersionPreview({ version, onClose, onRestore }: EditorVersionPreviewProps) {
   const [armed, setArmed] = useState(false);
   if (!version) return null;

@@ -6,7 +6,6 @@ import { cn } from "@/lib/cn";
 
 const KEY = "cherryl-theme";
 
-/** Switches between light and dark. The choice is remembered in the browser. */
 export default function ThemeToggle() {
   const [dark, setDark] = useState(false);
 

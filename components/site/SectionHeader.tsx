@@ -1,12 +1,6 @@
 import Pill from "./Pill";
 import { withStop } from "@/lib/formatters";
 
-/**
- * The big title that opens each homepage section.
- * It sticks under the site header, so you always know which section you are reading.
- * The bar is a see-through, blurred panel: text stays readable over whatever scrolls beneath it,
- * and the section artwork still shows faintly through it.
- */
 export default function SectionHeader({
   id,
   title,
@@ -20,7 +14,6 @@ export default function SectionHeader({
   eyebrow?: string;
   href?: string;
   linkLabel?: string;
-  /** Used when the bar is narrow, so the title keeps more of the room */
   shortLabel?: string;
 }) {
   return (

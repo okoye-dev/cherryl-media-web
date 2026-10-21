@@ -14,13 +14,11 @@ export interface SlotTarget {
 
 export function useCuratedSections() {
   const [sections, setSections] = useState<Sections>({});
-  /** Only the stories that sit in a slot (plus any just picked), looked up by id */
   const [lookup, setLookup] = useState<Record<string, CanonicalArticle>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
-  /** The slots as last loaded from, or confirmed by, the backend */
   const [savedIds, setSavedIds] = useState<IdMap | null>(null);
 
   const [activePicker, setActivePicker] = useState<SlotTarget | null>(null);
@@ -99,7 +97,6 @@ export function useCuratedSections() {
     setSaveSuccess(null);
     setSaveError(null);
 
-    // Send only the sections whose stories changed since the last load or save.
     const payload = Object.entries(sections)
       .filter(([key, sec]) => !sameIds({ [key]: sec.articleIds || [] }, { [key]: savedIds?.[key] || [] }))
       .map(([key, sec]) => ({

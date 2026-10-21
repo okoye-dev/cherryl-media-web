@@ -9,11 +9,6 @@ import { SITE } from "@/config/site";
 import { slugify } from "@/lib/leadToArticle";
 import type { CanonicalArticle } from "@/lib/types";
 
-/**
- * A short confirmation for publishing without opening the editor.
- * It asks for the two things the site needs (title, cover photo), shows what will go live,
- * and links to the editor for anyone who wants to change more first.
- */
 export default function QuickPublishSheet({
   draft,
   editHref,
@@ -23,7 +18,6 @@ export default function QuickPublishSheet({
 }: {
   draft: Partial<CanonicalArticle>;
   editHref: string;
-  /** "lead" for an AI lead, "draft" for a saved draft story. Only changes the warning wording. */
   from: "lead" | "draft";
   onClose: () => void;
   onPublished: (slug: string) => void;
@@ -80,7 +74,6 @@ export default function QuickPublishSheet({
   };
 
   const publish = async () => {
-    // Tell the person what to do, instead of failing and asking them to try again.
     if (!title.trim()) {
       setError("Add a headline before you publish.");
       return;

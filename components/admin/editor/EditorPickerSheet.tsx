@@ -1,7 +1,6 @@
 import { Sheet } from "@/components/admin/ui";
 import { SheetCloseBtn } from "@/components/admin/SheetCloseBtn";
 
-/** A sheet for choosing something. Slides up on phones, a dialog from sm. */
 export default function EditorPickerSheet({
   open,
   title,

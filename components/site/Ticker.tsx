@@ -31,7 +31,6 @@ export default async function Ticker() {
         </span>
       </div>
 
-
       <div className="flex-1 overflow-hidden">
         <div className="animate-ticker flex items-center gap-8 pl-4">
           {[...items, ...items].map((item, idx) => (

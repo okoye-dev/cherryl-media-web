@@ -34,7 +34,6 @@ export async function updateCuratedSections(
   });
 }
 
-/** One page of stories for the slot picker. The server filters, sorts and pages. Page numbers start at 1. */
 export async function searchCurationPage(params: {
   q?: string;
   category?: string;

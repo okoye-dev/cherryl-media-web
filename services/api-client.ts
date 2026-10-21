@@ -115,7 +115,6 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
   return (await requestWithMeta<T>(path, options)).data;
 }
 
-/** One page of a list, with where it sits in the whole list. */
 export interface Paged<T> {
   items: T[];
   total: number;
@@ -124,7 +123,6 @@ export interface Paged<T> {
   totalPages: number;
 }
 
-/** Reads a list endpoint that is paged with ?page= and ?pageSize= and reports the totals in headers. */
 export async function requestPaged<T>(path: string, options: RequestOptions = {}): Promise<Paged<T>> {
   const { data, headers } = await requestWithMeta<T[] | { items?: T[] }>(path, options);
   const items = Array.isArray(data) ? data : (data as { items?: T[] }).items ?? [];

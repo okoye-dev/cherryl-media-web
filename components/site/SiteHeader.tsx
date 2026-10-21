@@ -120,7 +120,6 @@ export default function SiteHeader() {
           open ? "visible translate-x-0" : "invisible translate-x-full",
         )}
       >
-        {/* Faint artwork behind the menu */}
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
           <Ripples className="absolute -right-32 -top-24 h-[34rem] w-[34rem] opacity-[0.07] fade-dl" />
           <Contours className="absolute -bottom-28 -left-24 h-[30rem] w-[30rem] opacity-[0.06] fade-dr" />

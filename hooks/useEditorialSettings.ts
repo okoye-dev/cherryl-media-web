@@ -5,7 +5,6 @@ import { DEFAULT_EDITORIAL_COPY, type EditorialCopy } from "@/config/editorial-c
 
 export type SettingsTab = "hero" | "ticker" | "dossier" | "footer" | "subscribers";
 
-/** Plain names for the field paths the backend reports problems against. */
 const FIELD_LABELS: Record<string, string> = {
   "hero.editionBadge": "Homepage badge",
   "hero.titleLead": "Headline",
@@ -26,13 +25,11 @@ const FIELD_LABELS: Record<string, string> = {
 export interface SettingsStatus {
   text: string;
   type: "success" | "error";
-  /** Problems with specific fields, when the backend rejected the save */
   problems?: string[];
 }
 
 export function useEditorialSettings() {
   const [copy, setCopy] = useState<EditorialCopy>(DEFAULT_EDITORIAL_COPY);
-  /** The copy as last stored by the backend. Used to tell whether anything has changed. */
   const [savedCopy, setSavedCopy] = useState<EditorialCopy | null>(null);
   const [activeTab, setActiveTab] = useState<SettingsTab>("hero");
   const [isSaving, setIsSaving] = useState(false);

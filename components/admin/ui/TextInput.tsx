@@ -2,7 +2,6 @@ import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import { cn } from "@/lib/cn";
 import { growClass } from "./styles";
 
-/** Grows with the text. One line unless `multiline`. With `maxLength` it blocks typing past the limit and shows a counter near it. */
 type TextInputProps = Omit<
   React.TextareaHTMLAttributes<HTMLTextAreaElement>,
   "rows" | "onChange" | "value" | "defaultValue"
@@ -10,7 +9,6 @@ type TextInputProps = Omit<
   value: string;
   onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   multiline?: boolean;
-  /** Show the counter even when far from the limit */
   alwaysCount?: boolean;
 };
 
@@ -38,7 +36,6 @@ export function TextInput({ value, onChange, multiline = false, maxLength, alway
     }
   }, []);
 
-  // Fit on every value change, including changes made from outside (a restored draft, AI fill).
   useLayoutEffect(fit, [value, fit]);
   useEffect(() => {
     window.addEventListener("resize", fit);

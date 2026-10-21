@@ -5,7 +5,6 @@ import type { RawLead } from "@/lib/leadToArticle";
 
 const PAGE_SIZE = 8;
 
-/** One server page of AI story leads at a time. */
 export function useLeads(reload: number) {
   const [leads, setLeads] = useState<StoryLead[]>([]);
   const [page, setPage] = useState(1);

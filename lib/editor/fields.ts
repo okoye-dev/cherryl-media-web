@@ -86,7 +86,6 @@ export function slugFromTitle(title: string, max = 90): string {
     .replace(/-+$/g, "");
 }
 
-/** Fields for a story fetched from the backend. */
 export function fieldsFromArticle(art: Partial<CanonicalArticle> & Record<string, unknown>): EditorFields {
   const author = art.author as { name?: string; role?: string } | undefined;
   const cover = art.featuredImage as { url?: string; caption?: string; credit?: string } | undefined;
@@ -134,7 +133,6 @@ export function fieldsFromArticle(art: Partial<CanonicalArticle> & Record<string
   };
 }
 
-/** Fields for a saved version. Keeps the current id, and drops SEO values that only repeat the title, slug or excerpt. */
 export function fieldsFromPayload(p: Partial<CanonicalArticle>, currentId: string, currentStatus: PublishingStatus): EditorFields {
   const excerpt = str(p.excerpt) || str(p.deck);
   const rawBlocks = Array.isArray(p.body) ? p.body : [];
@@ -204,7 +202,6 @@ export function buildPayload(f: EditorFields): Partial<CanonicalArticle> {
   };
 }
 
-/** The payload as a string, without fields that change by themselves. */
 export function snapshotOf(p: Partial<CanonicalArticle>): string {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { publishedAt, readTime, ...rest } = p;

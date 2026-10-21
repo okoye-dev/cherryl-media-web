@@ -7,11 +7,6 @@ import { formatCategoryName } from "@/lib/formatters";
 import type { Paged } from "@/services/api-client";
 import type { CanonicalArticle } from "@/lib/types";
 
-/**
- * Find a story by typing, then pick it. Results come from the server one page at a time
- * (8 per page), so it works the same with 25 stories or 25,000. Use it wherever a long dropdown
- * of every story would otherwise be needed.
- */
 export default function StoryPicker({
   onPick,
   status = "all",
@@ -32,7 +27,6 @@ export default function StoryPicker({
   const [error, setError] = useState<string | null>(null);
   const seq = useRef(0);
 
-  // Typing starts again from page 1.
   useEffect(() => setPage(1), [query]);
 
   useEffect(() => {

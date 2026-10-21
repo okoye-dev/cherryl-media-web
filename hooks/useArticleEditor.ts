@@ -54,7 +54,6 @@ export function useArticleEditor(initialSlug?: string | null) {
     setTimeout(() => setSaveMessage(null), 3000);
   }, [resetForLoad, setFields, setSlugManual]);
 
-  /** Restores a saved version into the editor. */
   const applyPayload = useCallback(
     (p: Partial<CanonicalArticle>) => {
       setFields((prev) => fieldsFromPayload(p, prev.id, prev.status));

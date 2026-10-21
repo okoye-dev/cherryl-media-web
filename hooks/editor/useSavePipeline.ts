@@ -24,7 +24,6 @@ export function useSavePipeline({ payload: currentPayload, status, storyId, set,
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
 
-  // The address the story is stored under. Empty until it has been saved once.
   const [savedSlug, setSavedSlugState] = useState("");
   const savedSlugRef = useRef("");
   const storedRef = useRef<Partial<CanonicalArticle> | null>(null);
@@ -37,7 +36,6 @@ export function useSavePipeline({ payload: currentPayload, status, storyId, set,
     setSavedSlugState(v);
   }, []);
 
-  /** Call when a different story (or a blank one) is loaded: the next payload becomes the new baseline. */
   const resetForLoad = useCallback(
     (loadedSlug: string) => {
       rebaseNext.current = true;
@@ -153,7 +151,6 @@ export function useSavePipeline({ payload: currentPayload, status, storyId, set,
     return () => window.removeEventListener("beforeunload", warn);
   }, [isDirty]);
 
-  /** A live story stays live unless `forceDraft`. The server's reply is checked against what was sent. */
   const handleSaveDraft = useCallback(
     async (opts?: { forceDraft?: boolean }): Promise<boolean> => {
       setIsSubmitting(true);

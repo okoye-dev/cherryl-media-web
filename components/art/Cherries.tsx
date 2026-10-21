@@ -1,4 +1,3 @@
-/** A pair of cherries on a stem with one leaf. The brand mark, drawn flat. */
 export default function Cherries({ className, title = "Cherries" }: { className?: string; title?: string }) {
   return (
     <svg viewBox="0 0 100 100" className={className} role="img" aria-label={title}>

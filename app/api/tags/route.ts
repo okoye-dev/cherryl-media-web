@@ -19,7 +19,6 @@ export async function GET(req: Request) {
     console.error("tags proxy error:", err);
   }
 
-  // Common default tags for newsroom if backend offline
   const defaultSeeds = [
     "Nigeria",
     "Abuja",

@@ -1,4 +1,3 @@
-/** A sound wave drawn as rounded bars. For Culture: music, film, broadcast. */
 export default function Waveform({ className }: { className?: string }) {
   const bars = Array.from({ length: 64 }, (_, i) => {
     const t = i / 63;

@@ -157,7 +157,6 @@ export function SubscribersSettingsPanel() {
             </div>
           ) : (
             <>
-              {/* Card list below lg */}
               <ul className="space-y-2 lg:hidden">
                 {subscribers.map((sub) => (
                   <li key={sub.id} className="rounded-lg border border-white/10 bg-[#121317] p-3">
@@ -175,7 +174,6 @@ export function SubscribersSettingsPanel() {
                   </li>
                 ))}
               </ul>
-              {/* Table from lg */}
               <div className="hidden overflow-hidden rounded-lg border border-white/10 bg-[#121317] lg:block">
                 <table className="w-full text-left text-sm">
                   <thead className="border-b border-white/10 text-xs text-zinc-500">

@@ -4,20 +4,8 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState } f
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/cn";
 
-/**
- * The one panel every admin screen uses when something opens on top of the page
- * (picking a story, quick publish, a checklist, signing in).
- *
- * - The page behind is dimmed and blurred, so it is obvious a panel is open.
- * - On a phone it slides up from the bottom and leaves a strip of the page showing at the top,
- *   with a grab handle. It is not a new page. On larger screens it fades in as a dialog in the middle.
- * - It closes with the X, by tapping the dimmed area, with Escape, or by swiping the top down.
- * - The page behind does not scroll while it is open, and focus goes into the panel and comes back after.
- */
-
 const CloseContext = createContext<() => void>(() => {});
 
-/** Inside a Sheet: closes it with the slide-down animation. */
 export function useSheetClose(): () => void {
   return useContext(CloseContext);
 }
@@ -26,23 +14,16 @@ const EXIT_MS = 200;
 const SWIPE_CLOSE_PX = 90;
 
 interface SheetProps {
-  /** Pass false to close with an animation. Parents that remove the sheet outright just skip the animation. */
   open?: boolean;
   onClose: () => void;
   title: React.ReactNode;
   subtitle?: React.ReactNode;
-  /** A strip under the header that does not scroll (search boxes, notices). */
   toolbar?: React.ReactNode;
-  /** A bar at the bottom that does not scroll (the main buttons). */
   footer?: React.ReactNode;
   children: React.ReactNode;
-  /** "md" fits its content. "tall" always fills most of a phone screen, for long lists, so it does not jump as the list changes. */
   size?: "md" | "tall";
-  /** "sm" is a narrower dialog on large screens. */
   width?: "sm" | "md" | "lg";
-  /** Stacking layer. The sign-in sheet uses a higher one so it can sit over other sheets. */
   layer?: string;
-  /** If false the sheet can only be closed by its own buttons. */
   dismissible?: boolean;
 }
 
@@ -86,7 +67,6 @@ export function Sheet({
     return () => clearTimeout(t);
   }, [open]);
 
-  // Close with the exit animation, then tell the parent.
   const close = useCallback(() => {
     if (exiting.current) return;
     exiting.current = true;
@@ -99,7 +79,6 @@ export function Sheet({
     if (dismissible) close();
   }, [dismissible, close]);
 
-  // Keep the page behind still.
   useEffect(() => {
     if (!mounted) return;
     const prev = document.body.style.overflow;
@@ -109,7 +88,6 @@ export function Sheet({
     };
   }, [mounted]);
 
-  // Focus goes into the panel, and back to what had it when the panel closes.
   useEffect(() => {
     if (!mounted) return;
     const before = document.activeElement as HTMLElement | null;
@@ -132,7 +110,6 @@ export function Sheet({
       return;
     }
     if (e.key !== "Tab" || !panelRef.current) return;
-    // Keep Tab inside the panel.
     const items = Array.from(
       panelRef.current.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'),
     ).filter((el) => el.offsetParent !== null);
@@ -148,7 +125,6 @@ export function Sheet({
     }
   };
 
-  // Swipe the top of the panel down to close (phones).
   const onPointerDown = (e: React.PointerEvent) => {
     if (e.pointerType === "mouse" || !dismissible) return;
     startY.current = e.clientY;
@@ -172,7 +148,6 @@ export function Sheet({
   return createPortal(
     <CloseContext.Provider value={close}>
       <div className={cn("fixed inset-0 flex items-end justify-center sm:items-center sm:p-6", layer)} onKeyDown={onKeyDown}>
-        {/* The dimmed, blurred page behind. Tapping it closes the sheet. */}
         <div
           aria-hidden
           onClick={requestDismiss}
@@ -198,7 +173,6 @@ export function Sheet({
             shown ? "translate-y-0 opacity-100 sm:scale-100" : "translate-y-full opacity-100 sm:translate-y-2 sm:scale-95 sm:opacity-0",
           )}
         >
-          {/* Header. On a phone this is also the swipe-down handle. */}
           <div
             onPointerDown={onPointerDown}
             onPointerMove={onPointerMove}

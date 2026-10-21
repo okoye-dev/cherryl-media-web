@@ -1,4 +1,3 @@
-/** Overlapping speech bubbles, outlined: a conversation. For Opinions. */
 export default function Bubbles({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 700 460" className={className} aria-hidden="true">

@@ -16,13 +16,12 @@ export async function fetchEditorialCopy(): Promise<EditorialCopy> {
     try {
       data = await read();
     } catch {
-      // fall back to the default copy
+      data = null;
     }
   }
   return mergeCopy(data?.editorial_copy);
 }
 
-/** Saves only the changed fields, for example { footer: { tagline: "..." } }. */
 export async function patchEditorialCopy(
   changes: Partial<{ [K in keyof EditorialCopy]: Partial<EditorialCopy[K]> }>
 ): Promise<EditorialCopy> {

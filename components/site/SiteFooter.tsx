@@ -13,7 +13,6 @@ export default async function SiteFooter() {
       id="contact"
       className="relative mx-auto w-full max-w-[90rem] px-5 pb-6 pt-28 md:px-10 md:pb-10 md:pt-56 xl:px-16"
     >
-      {/* The skyline stands behind the card; only its tops show above the card edge */}
       <LagosSkyline className="pointer-events-none absolute inset-x-0 top-0 h-[12rem] w-full opacity-[0.2] md:h-[18rem]" />
       <div className="relative z-10 overflow-hidden rounded-[1.75rem] bg-night px-6 pb-52 pt-8 text-snow md:rounded-[2rem] md:px-12 md:pb-64 md:pt-12">
         <AdirePattern scale={1.7} className="pointer-events-none absolute inset-x-0 bottom-0 block opacity-80" />
@@ -39,7 +38,6 @@ export default async function SiteFooter() {
             <SocialLinks className="md:justify-end" />
           </div>
         </div>
-
 
         <div className="relative mt-12 grid grid-cols-2 gap-8 border-t border-snow/15 pt-8 sm:grid-cols-3 md:gap-10">
           <div>

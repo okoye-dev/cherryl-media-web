@@ -38,9 +38,7 @@ interface EditorMetadataProps {
   onAuthorRoleChange: (val: string) => void;
   sendWebpushr: boolean;
   onSendWebpushrChange: (val: boolean) => void;
-  /** Rendered at the end of the Details panel (the tags field) */
   children?: React.ReactNode;
-  /** True when a field (by key) was filled by AI and not yet edited */
   isAi?: (key: string) => boolean;
 }
 

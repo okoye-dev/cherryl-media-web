@@ -1,6 +1,5 @@
 import { cn } from "@/lib/cn";
 
-/** An honest empty state: a soft rounded block that says what will live here. */
 export default function Placeholder({
   children,
   className,

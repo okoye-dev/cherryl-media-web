@@ -80,7 +80,6 @@ export default function AdminSectionsPage() {
         </div>
       )}
 
-      {/* Sections Grid */}
       <div className="space-y-4">
         {DEFAULT_SECTION_KEYS.map((key) => (
           <SectionPanel
@@ -95,7 +94,6 @@ export default function AdminSectionsPage() {
         ))}
       </div>
 
-      {/* Interactive Article Picker Modal */}
       {activePicker && (
         <ArticlePickerModal
           picker={activePicker}

@@ -1,6 +1,5 @@
 import { cn } from "@/lib/cn";
 
-/** A titled card. Header text and actions stack on phones and sit side by side from sm. */
 export function Panel({
   title,
   description,
@@ -38,7 +37,6 @@ export function Panel({
   );
 }
 
-/** Page title block used at the top of each admin page. */
 export function PageTitle({
   eyebrow,
   title,

@@ -69,7 +69,6 @@ export default function InternalLinkBlock({ block, index, onUpdate }: BlockField
           />
         </div>
 
-        {/* Internal Post Card Preview */}
         <div className="mt-2 flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-zinc-900/80 p-3">
           <div className="min-w-0 pr-3">
             <span className="text-xs font-medium text-brand-red">

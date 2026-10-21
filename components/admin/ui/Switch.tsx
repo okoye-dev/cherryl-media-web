@@ -1,6 +1,5 @@
 import { cn } from "@/lib/cn";
 
-/** A custom on/off switch. Replaces a checkbox that turns something on or off. */
 export function Switch({
   checked,
   onChange,

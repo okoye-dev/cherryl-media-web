@@ -8,7 +8,6 @@ interface HeroSettingsPanelProps {
   setCopy: React.Dispatch<React.SetStateAction<EditorialCopy>>;
 }
 
-/** Stored as three parts. Shown as one line with the accent word between asterisks. */
 function joinHeadline(h: { titleLead: string; titleAccent: string; titleTrail: string }) {
   if (!h.titleAccent) return h.titleLead + h.titleTrail;
   return `${h.titleLead}*${h.titleAccent}*${h.titleTrail}`;

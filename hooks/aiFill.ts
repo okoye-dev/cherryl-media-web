@@ -4,7 +4,6 @@ import type { ContentBlock, PillarCategory } from "@/lib/types";
 import type { LeadCandidate } from "@/services/articles";
 import { cleanTag, type SourceItem } from "@/hooks/useArticleEditor";
 
-/** Everything AI can fill in. Every key is optional. */
 export interface AiPatch {
   title?: string;
   subtitle?: string;
@@ -42,7 +41,6 @@ function paragraphs(texts: string[]): ContentBlock[] {
     .map((text, i) => ({ id: aiId(), type: "paragraph" as const, text, isDropCap: i === 0 }));
 }
 
-/** Turn whatever the lead or the AI sent into a current category slug. Falls back to the first category. */
 export function mapCategory(raw?: string): PillarCategory {
   const fallback = SITE.categories[0].slug as PillarCategory;
   if (!raw) return fallback;
@@ -102,7 +100,6 @@ const str = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : unde
 
 export type ParseResult = { ok: true; patch: AiPatch } | { ok: false; error: string };
 
-/** Parse pasted AI output. Accepts plain JSON or JSON inside a fenced block. Never throws. */
 export function parsePastedJson(text: string): ParseResult {
   const raw = text.trim();
   if (!raw) return { ok: false, error: "Paste the JSON from your AI first." };

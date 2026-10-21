@@ -8,12 +8,6 @@ import { registerSignInHandler } from "@/lib/auth-gate";
 import { Sheet } from "@/components/admin/ui";
 import { SignInForm } from "@/components/admin/SignInForm";
 
-/**
- * Wraps the admin screens. Whenever the backend refuses a request because nobody is signed in,
- * this opens a sign-in window. When the person signs in, the refused request is sent again, so
- * whatever they were doing carries on. If they close the window, the request fails as usual.
- * It also opens the window straight away when the page loads with no session.
- */
 export default function AuthGate({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const onLoginPage = pathname === "/admin/login";
@@ -37,14 +31,12 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
     });
     return () => {
       registerSignInHandler(null);
-      // Nothing is left waiting on a window that no longer exists.
       const list = waiting.current;
       waiting.current = [];
       list.forEach((resolve) => resolve(false));
     };
   }, [onLoginPage]);
 
-  // Opening the admin with no session at all: ask straight away.
   useEffect(() => {
     if (!onLoginPage && !getStoredToken()) {
       setMessage("Sign in to use the newsroom.");

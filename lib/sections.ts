@@ -6,13 +6,11 @@ import {
   type CuratedSectionsResponse,
 } from "@/config/sections";
 
-/** The stories for one homepage spot, never more than the spot has room for. */
 export function sectionArticles(curated: CuratedSectionsResponse, key: string): CanonicalArticle[] {
   const max = SECTION_METADATA[key]?.maxSlots ?? Infinity;
   return (curated.byKey?.[key]?.articles || []).slice(0, max);
 }
 
-/** The two Culture side cards used to be two sections. If the combined one is empty, build it from the old two. */
 export function mergeLegacySections<T extends CuratedSectionsResponse>(data: T): T {
   const side = data.byKey?.dossier_side;
   if (side && (side.articleIds?.length || 0) > 0) return data;
@@ -31,7 +29,6 @@ export function mergeLegacySections<T extends CuratedSectionsResponse>(data: T):
   };
 }
 
-/** Cuts every known section down to its slot count, so the data can never exceed what the page has room for. */
 export function enforceSectionLimits<T extends CuratedSectionsResponse>(data: T): T {
   const trim = (sec: CuratedSection) => {
     const max = SECTION_METADATA[sec.sectionKey]?.maxSlots;

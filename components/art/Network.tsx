@@ -1,4 +1,3 @@
-/** Nodes joined by fine lines: small businesses linked into a market. For Brands and SMEs. */
 const NODES: Array<[number, number, number]> = [
   [60, 120, 7], [150, 60, 5], [250, 150, 9], [340, 70, 5], [450, 130, 7], [560, 60, 5], [640, 150, 8], [740, 90, 5],
   [100, 250, 5], [210, 300, 7], [330, 240, 6], [430, 310, 10], [540, 250, 6], [650, 320, 6], [760, 240, 7],

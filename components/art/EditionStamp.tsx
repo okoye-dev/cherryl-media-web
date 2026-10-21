@@ -1,4 +1,3 @@
-/** Round "Morning Edition" stamp: text running round a ring, with a small sun in the middle. */
 export default function EditionStamp({ className, title = "Morning Edition, every day at 6 AM" }: { className?: string; title?: string }) {
   return (
     <svg viewBox="0 0 120 120" className={className} role="img" aria-label={title}>

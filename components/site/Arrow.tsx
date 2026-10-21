@@ -1,4 +1,3 @@
-/** A plain arrowhead (no tail). Points right; pass a class to rotate it. */
 export default function Arrow({ className }: { className?: string }) {
   return (
     <svg

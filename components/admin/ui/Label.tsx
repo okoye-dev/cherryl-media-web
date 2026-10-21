@@ -1,4 +1,3 @@
-/** Small label above a field. Sentence case, quiet. */
 export function Label({ children, htmlFor, hint }: { children: React.ReactNode; htmlFor?: string; hint?: string }) {
   return (
     <label htmlFor={htmlFor} className="mb-1.5 flex items-baseline justify-between gap-2 text-[0.7rem] font-medium text-zinc-400">

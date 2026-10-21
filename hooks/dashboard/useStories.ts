@@ -6,7 +6,6 @@ export type StoryFilter = "all" | "published" | "draft";
 
 const PAGE_SIZE = 10;
 
-/** One server page of stories at a time, filtered by status on the server, plus the three tab counts. */
 export function useStories(reload: number) {
   const [articles, setArticles] = useState<CanonicalArticle[]>([]);
   const [filter, setFilterState] = useState<StoryFilter>("all");

@@ -100,7 +100,6 @@ async function uploadViaLocalRoute(file: File, notify: (stage: UploadStage, perc
   return data.url || "";
 }
 
-/** Validates, compresses images to WebP, uploads via a presigned URL, and falls back to the local upload route. */
 export async function uploadMediaWithProgress(rawFile: File, onProgress?: (info: UploadProgressInfo) => void): Promise<string> {
   const notify = (stage: UploadStage, percent: number, message: string) => onProgress?.({ stage, percent, message });
 

@@ -1,10 +1,6 @@
 import Link from "next/link";
 import { formatCategoryName, formatReadTime } from "@/lib/formatters";
 
-/**
- * A story card where the title sits on the picture, over a soft dark fade at the bottom.
- * Used where a section should feel more visual than the plain FigureCard.
- */
 export default function OverlayCard({
   name,
   category = "Dispatch",
@@ -19,9 +15,7 @@ export default function OverlayCard({
   href: string;
   imageUrl?: string;
   readTime?: string;
-  /** Shown top left, only when the story has a named author */
   author?: string;
-  /** Turn off the category tag where the section already names the category */
   showCategory?: boolean;
 }) {
   return (
@@ -38,7 +32,6 @@ export default function OverlayCard({
         />
       )}
 
-      {/* Fade: clear at the top, deep at the bottom, in small steps so there is no hard edge */}
       <div
         aria-hidden="true"
         className="absolute inset-0"
@@ -48,7 +41,6 @@ export default function OverlayCard({
         }}
       />
 
-      {/* Top corners: author on the left (not on every story), read time on the right */}
       <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-3 p-4 md:p-5">
         <span className="min-w-0 truncate rounded-full border border-snow/25 bg-night/40 px-2.5 py-1 text-[0.68rem] font-medium leading-none text-snow backdrop-blur-md empty:hidden">
           {author}

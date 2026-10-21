@@ -29,7 +29,6 @@ export function ArticlePickerModal({ picker, onSelect, onClose }: ArticlePickerM
   const [error, setError] = useState<string | null>(null);
   const seq = useRef(0);
 
-  // Changing the search, category or sort starts again from page 1.
   useEffect(() => setPage(1), [searchQuery, selectedCategory, sortOrder]);
 
   useEffect(() => {
@@ -122,7 +121,6 @@ export function ArticlePickerModal({ picker, onSelect, onClose }: ArticlePickerM
         </div>
       }
     >
-        {/* Results */}
         <div className="-mx-2">
           {searchResults.length === 0 ? (
             <div className="p-10 text-center text-sm text-zinc-500">
