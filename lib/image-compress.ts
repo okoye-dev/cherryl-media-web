@@ -1,11 +1,11 @@
 
-export interface CompressionOptions {
+interface CompressionOptions {
   maxWidth?: number;
   maxHeight?: number;
   quality?: number;
 }
 
-export const MEDIA_LIMITS = {
+const MEDIA_LIMITS = {
   maxImageSizeBytes: 20 * 1024 * 1024, // 20 MB max before compression
   maxVideoSizeBytes: 100 * 1024 * 1024, // 100 MB max for direct video
   allowedImageTypes: ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif"],

@@ -18,7 +18,7 @@ export interface AiPatch {
   social?: { x?: string; facebook?: string; linkedin?: string; newsletter?: string };
 }
 
-export const AI_BLOCK_PREFIX = "ai-";
+const AI_BLOCK_PREFIX = "ai-";
 
 export function isAiBlock(b: ContentBlock): boolean {
   return typeof b.id === "string" && b.id.startsWith(AI_BLOCK_PREFIX);
@@ -41,7 +41,7 @@ function paragraphs(texts: string[]): ContentBlock[] {
     .map((text, i) => ({ id: aiId(), type: "paragraph" as const, text, isDropCap: i === 0 }));
 }
 
-export function mapCategory(raw?: string): PillarCategory {
+function mapCategory(raw?: string): PillarCategory {
   const fallback = SITE.categories[0].slug as PillarCategory;
   if (!raw) return fallback;
   const lower = raw.toLowerCase().trim();
@@ -98,7 +98,7 @@ export function expectedFormatPrompt(): string {
 
 const str = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : undefined);
 
-export type ParseResult = { ok: true; patch: AiPatch } | { ok: false; error: string };
+type ParseResult = { ok: true; patch: AiPatch } | { ok: false; error: string };
 
 export function parsePastedJson(text: string): ParseResult {
   const raw = text.trim();

@@ -5,7 +5,7 @@ const TRIES = 3;
 const TIMEOUT_MS = 25000;
 const WAIT_MS = [2000, 4000];
 
-export function isBuilding(): boolean {
+function isBuilding(): boolean {
   return process.env.NEXT_PHASE === "phase-production-build";
 }
 

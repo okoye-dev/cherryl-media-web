@@ -9,7 +9,7 @@ export interface Subscriber {
   createdAt: string;
 }
 
-export interface SubscribersPage {
+interface SubscribersPage {
   subscribers: Subscriber[];
   count: number;
   total: number;

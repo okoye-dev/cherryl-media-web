@@ -22,7 +22,7 @@ const FIELD_LABELS: Record<string, string> = {
   "footer.copyrightNotice": "Copyright line",
 };
 
-export interface SettingsStatus {
+interface SettingsStatus {
   text: string;
   type: "success" | "error";
   problems?: string[];

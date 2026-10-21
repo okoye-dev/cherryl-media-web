@@ -13,13 +13,13 @@ import { getBackendUrl } from "@/lib/backend-url";
 import { getStoredToken } from "@/lib/session";
 import { isAuthRefusal, isSignInPath, recoverFromRefusal } from "@/lib/auth-gate";
 
-export interface RequestOptions extends RequestInit {
+interface RequestOptions extends RequestInit {
   timeoutMs?: number;
   params?: Record<string, string | number | boolean | undefined>;
 }
 
 /** Reply body plus headers. If nobody is signed in, the sign-in window opens and the request is retried once after sign-in. */
-export async function requestWithMeta<T>(
+async function requestWithMeta<T>(
   path: string,
   options: RequestOptions = {}
 ): Promise<{ data: T; headers: Headers }> {

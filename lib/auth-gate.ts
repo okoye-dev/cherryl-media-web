@@ -12,7 +12,7 @@ export function registerSignInHandler(h: AskToSignIn | null): void {
   handler = h;
 }
 
-export function askToSignIn(message: string): Promise<boolean> {
+function askToSignIn(message: string): Promise<boolean> {
   if (!handler) return Promise.resolve(false);
   if (!waiting) {
     waiting = handler(message).finally(() => {

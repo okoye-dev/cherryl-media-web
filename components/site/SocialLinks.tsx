@@ -26,7 +26,7 @@ const ICONS: Record<string, React.ReactNode> = {
   ),
 };
 
-export type SocialKey = "instagram" | "facebook" | "x" | "linkedin";
+type SocialKey = "instagram" | "facebook" | "x" | "linkedin";
 
 export function SocialIcon({ name, className }: { name: SocialKey; className?: string }) {
   return (
