@@ -38,8 +38,12 @@ function formatDate(a: CanonicalArticle) {
   return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 }
 
-function StatusBadge({ status }: { status: string }) {
-  return <Badge tone={status === "published" ? "green" : "amber"}>{status === "published" ? "Published" : "Draft"}</Badge>;
+function StatusBadge({ status, small }: { status: string; small?: boolean }) {
+  return (
+    <Badge tone={status === "published" ? "green" : "amber"} className={small ? "!px-1.5 !py-[3px] !text-[0.6rem]" : undefined}>
+      {status === "published" ? "Published" : "Draft"}
+    </Badge>
+  );
 }
 
 const STORY_PAGE = 10;
@@ -248,10 +252,10 @@ export default function AdminDashboardPage() {
                 >
                   {/* The status sits right beside the category, not at the far edge, so it reads with the title below */}
                   <div className="flex items-center gap-2">
-                    <StatusBadge status={a.status} />
-                    <p className="min-w-0 truncate text-xs font-medium text-brand-red">{niceCategory(a.categoryName)}</p>
+                    <StatusBadge status={a.status} small />
+                    <p className="min-w-0 truncate text-xs font-medium leading-none text-brand-red">{niceCategory(a.categoryName)}</p>
                   </div>
-                  <h3 className="mt-1.5 text-sm font-semibold leading-snug text-zinc-100">
+                  <h3 className="mt-[9px] text-sm font-semibold leading-snug text-zinc-100">
                     <Link href={`/admin/editor?slug=${encodeURIComponent(a.slug)}`} className="after:absolute after:inset-0 after:rounded-xl">
                       {a.title}
                     </Link>

@@ -1,4 +1,5 @@
 import { request } from "./api-client";
+import { readWithRetry } from "@/lib/fetch-retry";
 
 export interface EditorialCopy {
   hero: {
@@ -53,21 +54,29 @@ export const DEFAULT_EDITORIAL_COPY: EditorialCopy = {
 };
 
 export async function fetchEditorialCopy(): Promise<EditorialCopy> {
-  try {
-    const data = await request<{ editorial_copy?: Partial<EditorialCopy> }>("/api/settings", {
-      next: { revalidate: 60 },
-      timeoutMs: 15000,
+  type Reply = { editorial_copy?: Partial<EditorialCopy> };
+  const read = () => request<Reply>("/api/settings", { next: { revalidate: 60 }, timeoutMs: 25000 });
+  let data: Reply | null = null;
+  if (typeof window === "undefined") {
+    // Public pages: retry, and keep the last good page if the backend stays silent.
+    data = await readWithRetry<Reply>("fetchEditorialCopy", async () => {
+      const res = await read();
+      return res && res.editorial_copy ? res : null;
     });
-    if (data && data.editorial_copy) {
-      return {
-        hero: { ...DEFAULT_EDITORIAL_COPY.hero, ...(data.editorial_copy.hero || {}) },
-        ticker: { ...DEFAULT_EDITORIAL_COPY.ticker, ...(data.editorial_copy.ticker || {}) },
-        dossier: { ...DEFAULT_EDITORIAL_COPY.dossier, ...(data.editorial_copy.dossier || {}) },
-        footer: { ...DEFAULT_EDITORIAL_COPY.footer, ...(data.editorial_copy.footer || {}) },
-      };
+  } else {
+    try {
+      data = await read();
+    } catch {
+      // Return fallback copy cleanly
     }
-  } catch {
-    // Return fallback copy cleanly
+  }
+  if (data && data.editorial_copy) {
+    return {
+      hero: { ...DEFAULT_EDITORIAL_COPY.hero, ...(data.editorial_copy.hero || {}) },
+      ticker: { ...DEFAULT_EDITORIAL_COPY.ticker, ...(data.editorial_copy.ticker || {}) },
+      dossier: { ...DEFAULT_EDITORIAL_COPY.dossier, ...(data.editorial_copy.dossier || {}) },
+      footer: { ...DEFAULT_EDITORIAL_COPY.footer, ...(data.editorial_copy.footer || {}) },
+    };
   }
   return DEFAULT_EDITORIAL_COPY;
 }

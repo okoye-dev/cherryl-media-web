@@ -1,4 +1,5 @@
 import { request } from "./api-client";
+import { readWithRetry } from "@/lib/fetch-retry";
 import type { CanonicalArticle } from "@/lib/types";
 
 export interface CuratedSection {
@@ -138,11 +139,17 @@ export function buildFallbackSections(): CuratedSectionsResponse {
 }
 
 export async function fetchCuratedSections(): Promise<CuratedSectionsResponse> {
-  try {
-    const data = await request<CuratedSectionsResponse>("/api/sections", {
-      next: { revalidate: 30 },
-      timeoutMs: 15000,
+  // On the server (public pages) a failed read is retried, and if it keeps failing it throws, so the
+  // last good page stays up instead of an empty one being saved. In the browser it falls back to empty.
+  if (typeof window === "undefined") {
+    const data = await readWithRetry<CuratedSectionsResponse>("fetchCuratedSections", async () => {
+      const res = await request<CuratedSectionsResponse>("/api/sections", { next: { revalidate: 30 }, timeoutMs: 25000 });
+      return res && res.byKey && Array.isArray(res.sections) ? res : null;
     });
+    return data ? enforceSectionLimits(mergeLegacySections(data)) : buildFallbackSections();
+  }
+  try {
+    const data = await request<CuratedSectionsResponse>("/api/sections", { timeoutMs: 15000 });
     if (data && data.byKey && Array.isArray(data.sections)) {
       return enforceSectionLimits(mergeLegacySections(data));
     }

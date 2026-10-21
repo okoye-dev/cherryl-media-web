@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import type { CanonicalArticle } from "@/lib/types";
 import Arrow from "@/components/site/Arrow";
 import { Btn } from "@/components/admin/ui";
@@ -44,24 +44,34 @@ export function SectionSlotCard({
   const title = article?.title || `Article ${artId}`;
   const image = showImage ? article?.featuredImage?.url : undefined;
 
+  // The four buttons stay out of the way until someone wants to edit this story.
+  const [showOptions, setShowOptions] = useState(false);
+
   const actions = (
-    <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
-      {slug && (
-        <Btn href={`/article/${slug}`} target="_blank" arrow="forward" size="sm" className="!h-10">
-          View
-        </Btn>
-      )}
-      {slug && (
-        <Btn href={`/admin/editor?slug=${slug}`} size="sm" className="!h-10">
-          Edit
-        </Btn>
-      )}
-      <Btn size="sm" className="!h-10" onClick={() => onOpenPicker(sectionKey, slotIndex)}>
-        Change
+    <div className="flex flex-col gap-2 sm:items-start">
+      <Btn variant="ghost" size="sm" className="!h-10 -ml-2 self-start" aria-expanded={showOptions} onClick={() => setShowOptions((o) => !o)}>
+        {showOptions ? "Hide options" : "Show options"}
       </Btn>
-      <Btn variant="danger" size="sm" className="!h-10" onClick={() => onRemoveSlot(sectionKey, slotIndex)}>
-        Clear
-      </Btn>
+      {showOptions && (
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+          {slug && (
+            <Btn href={`/article/${slug}`} target="_blank" arrow="forward" size="sm" className="!h-10">
+              View
+            </Btn>
+          )}
+          {slug && (
+            <Btn href={`/admin/editor?slug=${slug}`} size="sm" className="!h-10">
+              Edit
+            </Btn>
+          )}
+          <Btn size="sm" className="!h-10" onClick={() => onOpenPicker(sectionKey, slotIndex)}>
+            Change
+          </Btn>
+          <Btn variant="danger" size="sm" className="!h-10" onClick={() => onRemoveSlot(sectionKey, slotIndex)}>
+            Clear
+          </Btn>
+        </div>
+      )}
     </div>
   );
 

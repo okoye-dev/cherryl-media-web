@@ -203,7 +203,7 @@ export function Tabs<T extends string>({
         >
           {it.label}
           {typeof it.count === "number" && (
-            <span className="rounded-full bg-white/10 px-1.5 py-0.5 text-[0.62rem] leading-none text-zinc-300">{it.count}</span>
+            <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-white/10 px-1.5 text-[0.65rem] font-medium leading-none tabular-nums text-zinc-300">{it.count}</span>
           )}
           {it.dot && <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />}
         </button>

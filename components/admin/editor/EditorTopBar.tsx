@@ -54,36 +54,41 @@ export default function EditorTopBar({
   return (
     <>
       <div className="space-y-3 rounded-xl border border-white/[0.08] bg-[#16181D] p-4">
-        {/* Row 1: way back, status, autosave */}
+        {/* Top row: whether your work is stored on the left, Open story on the right */}
+        <div className="flex items-center justify-between gap-3">
+          <p
+            role="status"
+            className={`flex min-w-0 items-start gap-2 text-xs ${
+              saveError ? "text-red-300" : isSaving || isDirty ? "text-amber-300" : "text-zinc-400"
+            }`}
+          >
+            <span
+              className={`mt-1 h-1.5 w-1.5 shrink-0 rounded-full ${
+                saveError ? "bg-red-400" : isSaving ? "animate-ping bg-amber-400" : isDirty ? "bg-amber-400" : "bg-emerald-400"
+              }`}
+            />
+            <span className="min-w-0 break-words">
+              {saveError
+                ? `Not saved. ${saveError}`
+                : isSaving
+                ? "Saving"
+                : isDirty
+                ? "Unsaved changes"
+                : `All changes saved${lastSavedAt ? ` at ${lastSavedAt}` : ""}`}
+            </span>
+          </p>
+          <Btn onClick={() => setPickerOpen(true)} className="shrink-0">
+            Open story
+          </Btn>
+        </div>
+
+        {/* Way back, and the story's status */}
         <div className="flex items-center justify-between gap-3">
           <Btn href="/admin" variant="ghost" arrow="back" className="-ml-2 !h-10 px-2">
             All stories
           </Btn>
           <Badge tone={live ? "green" : "amber"}>{status}</Badge>
         </div>
-
-        {/* The one place that says whether your work is stored */}
-        <p
-          role="status"
-          className={`flex items-start gap-2 text-xs ${
-            saveError ? "text-red-300" : isSaving || isDirty ? "text-amber-300" : "text-zinc-400"
-          }`}
-        >
-          <span
-            className={`mt-1 h-1.5 w-1.5 shrink-0 rounded-full ${
-              saveError ? "bg-red-400" : isSaving ? "animate-ping bg-amber-400" : isDirty ? "bg-amber-400" : "bg-emerald-400"
-            }`}
-          />
-          <span className="min-w-0 break-words">
-            {saveError
-              ? `Not saved. ${saveError}`
-              : isSaving
-              ? "Saving"
-              : isDirty
-              ? "Unsaved changes"
-              : `All changes saved${lastSavedAt ? ` at ${lastSavedAt}` : ""}`}
-          </span>
-        </p>
 
         {/* Row 2: story switcher and secondary actions. Save and Publish join from lg. */}
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end">
@@ -93,7 +98,6 @@ export default function EditorTopBar({
           </div>
 
           <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
-            <Btn onClick={() => setPickerOpen(true)}>Open story</Btn>
             <Btn onClick={onCopyAI} className="px-3">
               <SparkIcon />
               {copiedAI ? "Copied" : "Copy for AI"}
