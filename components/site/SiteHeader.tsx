@@ -160,7 +160,7 @@ export default function SiteHeader() {
                       </span>
                       <span
                         className={cn(
-                          "font-area text-[clamp(1.05rem,min(2.8vw,3.9vh),1.9rem)] font-light leading-[1.2] tracking-[-0.02em] transition-all duration-300 group-hover:italic group-hover:text-brand-red group-active:text-brand-red",
+                          "font-area text-[clamp(1.05rem,min(6.2vw,3.4vh),2.1rem)] lg:text-[clamp(1.05rem,min(2.8vw,3.9vh),1.9rem)] font-light leading-[1.2] tracking-[-0.02em] transition-all duration-300 group-hover:italic group-hover:text-brand-red group-active:text-brand-red",
                           active ? "italic text-brand-red font-normal" : "text-ink",
                         )}
                       >
