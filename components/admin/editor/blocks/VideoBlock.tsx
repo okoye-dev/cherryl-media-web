@@ -1,5 +1,5 @@
 import { Label, TextInput } from "@/components/admin/ui";
-import { uploadMediaFile } from "@/lib/upload";
+import { uploadMediaFile } from "@/services/media";
 import { LIMITS } from "../limits";
 import type { BlockFieldsProps } from "./types";
 

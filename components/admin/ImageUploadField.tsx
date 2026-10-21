@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { Btn } from "@/components/admin/ui";
-import { uploadMediaWithProgress, type UploadProgressInfo } from "@/lib/upload";
+import { uploadMediaWithProgress, type UploadProgressInfo } from "@/services/media";
 
 interface ImageUploadFieldProps {
   value?: string;
@@ -40,14 +40,12 @@ export default function ImageUploadField({
 
     setErrorMessage(null);
 
-    // Create temporary local thumbnail for instant visual feedback
     const objectUrl = URL.createObjectURL(file);
     setLocalPreview(objectUrl);
 
     onUploadStateChange?.(true);
 
     try {
-      // Execute compression -> presign -> S3 PUT -> HeadObject landing confirmation
       const confirmedUrl = await uploadMediaWithProgress(file, (info) => {
         setUploadInfo(info);
       });
@@ -61,7 +59,6 @@ export default function ImageUploadField({
       setUploadInfo({ stage: "error", percent: 0, message: msg });
     } finally {
       onUploadStateChange?.(false);
-      // Clean up object URL after a delay
       setTimeout(() => {
         try {
           URL.revokeObjectURL(objectUrl);
@@ -150,7 +147,6 @@ export default function ImageUploadField({
                 )}
               </div>
 
-              {/* Upload progress bar */}
               {isUploading && (
                 <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/10">
                   <div
