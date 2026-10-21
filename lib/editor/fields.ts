@@ -77,12 +77,12 @@ const numbered = <T extends { order_id?: number }>(items: T[]) => items.map((b, 
 const cleanTags = (tags: unknown) =>
   Array.isArray(tags) ? tags.map(cleanTag).filter(Boolean).slice(0, MAX_TAGS) : [];
 
-export function slugFromTitle(title: string): string {
+export function slugFromTitle(title: string, max = 90): string {
   return title
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
-    .slice(0, 90)
+    .slice(0, max)
     .replace(/-+$/g, "");
 }
 
