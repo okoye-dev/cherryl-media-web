@@ -1,8 +1,3 @@
-/**
- * Centralized API Client for Cherryl Media
- * Handles base URLs, timeout, JSON serialization, and error normalization.
- */
-
 export class ApiError extends Error {
   constructor(
     message: string,
@@ -15,21 +10,16 @@ export class ApiError extends Error {
 }
 
 import { getBackendUrl } from "@/lib/backend-url";
-import { getStoredToken } from "@/lib/auth";
+import { getStoredToken } from "@/lib/session";
 import { isAuthRefusal, isSignInPath, recoverFromRefusal } from "@/lib/auth-gate";
-export { getBackendUrl };
 
-export interface RequestOptions extends RequestInit {
+interface RequestOptions extends RequestInit {
   timeoutMs?: number;
   params?: Record<string, string | number | boolean | undefined>;
 }
 
-/**
- * The reply body plus the response headers. Used where the headers carry information (paging).
- * If the backend says nobody is signed in, the sign-in window opens and the request is sent once more
- * after the person signs in.
- */
-export async function requestWithMeta<T>(
+/** Reply body plus headers. If nobody is signed in, the sign-in window opens and the request is retried once after sign-in. */
+async function requestWithMeta<T>(
   path: string,
   options: RequestOptions = {}
 ): Promise<{ data: T; headers: Headers }> {
@@ -97,7 +87,9 @@ async function send<T>(
       }
       const message =
         typeof errorData === "object" && errorData !== null && "error" in errorData
-          ? String((errorData as { error: unknown }).error)
+          ? typeof (errorData as { error: unknown }).error === "object"
+            ? (errorData as { error: { message?: string } }).error?.message || "API Error"
+            : String((errorData as { error: unknown }).error)
           : `HTTP ${response.status}: ${response.statusText}`;
       throw new ApiError(message, response.status, errorData);
     }
@@ -123,7 +115,6 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
   return (await requestWithMeta<T>(path, options)).data;
 }
 
-/** One page of a list, with where it sits in the whole list. */
 export interface Paged<T> {
   items: T[];
   total: number;
@@ -132,7 +123,6 @@ export interface Paged<T> {
   totalPages: number;
 }
 
-/** Reads a list endpoint that is paged with ?page= and ?pageSize= and reports the totals in headers. */
 export async function requestPaged<T>(path: string, options: RequestOptions = {}): Promise<Paged<T>> {
   const { data, headers } = await requestWithMeta<T[] | { items?: T[] }>(path, options);
   const items = Array.isArray(data) ? data : (data as { items?: T[] }).items ?? [];

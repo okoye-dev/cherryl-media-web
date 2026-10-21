@@ -1,4 +1,3 @@
-/** Longest text each field accepts. The field stops the person typing past it. */
 export const LIMITS = {
   title: 160,
   subtitle: 200,
@@ -27,7 +26,6 @@ export const LIMITS = {
   relatedTitle: 160,
 } as const;
 
-/** Lowercase letters, numbers and hyphens only, applied as the person types. */
 export function normalizeSlug(raw: string): string {
   return raw
     .toLowerCase()

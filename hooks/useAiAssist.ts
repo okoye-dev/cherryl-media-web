@@ -24,10 +24,6 @@ export interface ApplyResult {
   skipped: number;
 }
 
-/**
- * Puts AI content into the editor without overwriting what a person typed,
- * remembers which fields are AI filled, and saves the first AI draft as a version.
- */
 export function useAiAssist(editor: Editor, ai: AiFilled, versions: Versions, lead: LeadCandidate | null) {
   const [leadApplied, setLeadApplied] = useState(false);
   const [needsSnapshot, setNeedsSnapshot] = useState(false);
@@ -110,7 +106,6 @@ export function useAiAssist(editor: Editor, ai: AiFilled, versions: Versions, le
     if (res.filled > 0) setLeadApplied(true);
   }, [lead, editor.title, applyPatch]);
 
-  // Fill the story once when the lead arrives
   const applyLeadRef = useRef(applyLead);
   applyLeadRef.current = applyLead;
   useEffect(() => {
@@ -128,14 +123,12 @@ export function useAiAssist(editor: Editor, ai: AiFilled, versions: Versions, le
     [applyPatch]
   );
 
-  // Save the first AI draft as a version, after the new text is in the editor
   useEffect(() => {
     if (!needsSnapshot) return;
     setNeedsSnapshot(false);
     if (!versions.hasAiNow()) versions.save("ai", "AI draft", editor.currentPayload);
   }, [needsSnapshot, versions, editor.currentPayload]);
 
-  /** Remove only what AI filled. Anything the person has edited stays. */
   const clearAiFields = useCallback(() => {
     if (ai.has("title")) editor.handleTitleChange("");
     if (ai.has("subtitle")) editor.setSubtitle("");
@@ -159,7 +152,6 @@ export function useAiAssist(editor: Editor, ai: AiFilled, versions: Versions, le
     setLeadApplied(false);
   }, [ai, editor]);
 
-  /** Keep the AI draft safe as a version, then empty the editable fields for a fresh start. */
   const writeMyOwn = useCallback(() => {
     if (ai.keys.size > 0 && !versions.hasAiNow()) versions.save("ai", "AI draft", editor.currentPayload);
     editor.applyPayload({

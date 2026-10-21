@@ -1,33 +1,4 @@
-export function isInternalUrl(url: string): boolean {
-  if (!url) return false;
-  const trimmed = url.trim();
-  if (trimmed.startsWith("/") || trimmed.startsWith("#") || trimmed.startsWith("./")) {
-    return true;
-  }
-  try {
-    const parsed = new URL(trimmed);
-    const hostname = parsed.hostname.toLowerCase();
-    return (
-      hostname === "localhost" ||
-      hostname === "127.0.0.1" ||
-      hostname.includes("cherryl") ||
-      hostname.endsWith(".local")
-    );
-  } catch {
-    return !trimmed.includes("://");
-  }
-}
 
-export function normalizeStoryPath(url: string): string {
-  if (!url) return "/";
-  try {
-    if (url.startsWith("http://") || url.startsWith("https://")) {
-      const parsed = new URL(url);
-      return parsed.pathname;
-    }
-  } catch {}
-  return url.startsWith("/") ? url : `/${url}`;
-}
 
 export function getYouTubeEmbedUrl(input: string): string | null {
   if (!input) return null;
@@ -46,25 +17,18 @@ export function getYouTubeEmbedUrl(input: string): string | null {
 
 const CDN_URL = process.env.NEXT_PUBLIC_CDN_URL || "";
 
-/**
- * Resolves a location-independent storage key (e.g. "media/uuid.webp")
- * to the currently configured public CDN / bucket URL.
- */
 export function resolveMediaUrl(urlOrKey?: string): string {
   if (!urlOrKey) return "";
   const trimmed = urlOrKey.trim();
 
-  // If already absolute http(s) URL
   if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
     return trimmed;
   }
 
-  // If local static asset
   if (trimmed.startsWith("/assets/") || trimmed.startsWith("/uploads/")) {
     return trimmed;
   }
 
-  // If relative storage key (e.g. media/uuid.webp or uuid.webp)
   const cleanKey = trimmed.replace(/^\/+/, "");
   if (CDN_URL) {
     return `${CDN_URL.replace(/\/+$/, "")}/${cleanKey}`;
@@ -72,5 +36,4 @@ export function resolveMediaUrl(urlOrKey?: string): string {
 
   return `/${cleanKey}`;
 }
-
 

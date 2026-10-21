@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { subscriberService } from "@/services";
-import type { PostSubscriber } from "@/services/contracts/ISubscriberService";
+import { fetchSubscribers, addSubscriber, removeSubscriber } from "@/services/subscribers";
+import type { Subscriber } from "@/services/subscribers";
 import { SITE } from "@/config/site";
 import { Btn, Panel, Label, Badge, TextInput, inputClass, Pagination } from "@/components/admin/ui";
 
 const PAGE_SIZE = 10;
 
 export function SubscribersSettingsPanel() {
-  const [subscribers, setSubscribers] = useState<PostSubscriber[]>([]);
+  const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [loading, setLoading] = useState(true);
   const [newEmail, setNewEmail] = useState("");
   const [newName, setNewName] = useState("");
@@ -26,7 +26,7 @@ export function SubscribersSettingsPanel() {
 
   const loadSubscribers = async (target = page) => {
     try {
-      const data = await subscriberService.getSubscribers(false, target, PAGE_SIZE);
+      const data = await fetchSubscribers(false, target, PAGE_SIZE);
       // If the page we asked for is past the end (the last row was removed), step back.
       if (data.subscribers.length === 0 && data.total > 0 && target > 1) {
         setPage(target - 1);
@@ -61,7 +61,7 @@ export function SubscribersSettingsPanel() {
 
     try {
       const cats = selectedCategory ? [selectedCategory] : [];
-      await subscriberService.addSubscriber(newEmail, newName, cats);
+      await addSubscriber(newEmail, newName, cats);
       setNewEmail("");
       setNewName("");
       setSelectedCategory("");
@@ -80,7 +80,7 @@ export function SubscribersSettingsPanel() {
     setError(null);
     setSuccess(null);
     try {
-      await subscriberService.removeSubscriber(email);
+      await removeSubscriber(email);
       await loadSubscribers();
       setSuccess(`Removed ${email}.`);
       setTimeout(() => setSuccess(null), 4000);
@@ -157,7 +157,6 @@ export function SubscribersSettingsPanel() {
             </div>
           ) : (
             <>
-              {/* Card list below lg */}
               <ul className="space-y-2 lg:hidden">
                 {subscribers.map((sub) => (
                   <li key={sub.id} className="rounded-lg border border-white/10 bg-[#121317] p-3">
@@ -175,7 +174,6 @@ export function SubscribersSettingsPanel() {
                   </li>
                 ))}
               </ul>
-              {/* Table from lg */}
               <div className="hidden overflow-hidden rounded-lg border border-white/10 bg-[#121317] lg:block">
                 <table className="w-full text-left text-sm">
                   <thead className="border-b border-white/10 text-xs text-zinc-500">

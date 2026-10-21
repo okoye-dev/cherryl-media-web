@@ -8,16 +8,15 @@ import MediaDistributionStrip from "@/components/site/MediaDistributionStrip";
 import EditorialDossier from "@/components/site/EditorialDossier";
 import SectionHeader from "@/components/site/SectionHeader";
 import SectionArt from "@/components/site/SectionArt";
-import { getCuratedSections, sectionArticles } from "@/lib/sections";
+import { fetchCuratedSections } from "@/services/sections";
+import { sectionArticles } from "@/lib/sections";
 import { authorName } from "@/lib/formatters";
 
 export const revalidate = 30; // ISR revalidation every 30 seconds
 
 export default async function Home() {
-  const curated = await getCuratedSections();
+  const curated = await fetchCuratedSections();
 
-  // Exactly what is curated for each spot, never more than the spot has room for.
-  // These limits come from the same list the admin uses (services/sections.ts).
   const stateAffairsStories = sectionArticles(curated, "state_affairs");
   const brandsStories = sectionArticles(curated, "brands_smes");
 
@@ -27,7 +26,6 @@ export default async function Home() {
       <Hero />
       <IndexList />
 
-      {/* Flagship Section 1: State Affairs & Environs (10,000+ post archive pillar) */}
       <div className="relative isolate mx-auto mt-20 grid w-full max-w-[90rem] gap-14 px-5 md:mt-28 md:grid-cols-[1.35fr_1fr] md:grid-rows-[auto_1fr] md:gap-x-14 md:gap-y-0 md:px-10 xl:px-16">
         <SectionArt name="contours" />
         <SectionArt name="bubbles" />
@@ -53,11 +51,9 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* Flagship Section 2: Opinions & Perspectives */}
         <FieldNotes />
       </div>
 
-      {/* Flagship Section 3: Brands & SMEs Commercial Coverage */}
       {brandsStories.length > 0 && (
       <section
         aria-labelledby="brands-smes"
@@ -87,10 +83,8 @@ export default async function Home() {
       </section>
       )}
 
-      {/* Multi-channel Media Distribution Network Strip */}
       <MediaDistributionStrip />
 
-      {/* Cultural Dossier & Longform In-Depth */}
       <EditorialDossier />
     </>
   );

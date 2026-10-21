@@ -1,4 +1,3 @@
-/** Topographic contour lines: nested, slightly wobbly rings, like a map of the land. For State Affairs. */
 export default function Contours({ className }: { className?: string }) {
   const rings = Array.from({ length: 11 }, (_, k) => {
     const base = 26 + k * 25;

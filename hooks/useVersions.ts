@@ -31,7 +31,6 @@ function write(key: string, list: StoryVersion[]): boolean {
   }
 }
 
-/** Keep the newest versions. Oldest "mine" go first. The AI draft is never dropped. */
 function trim(list: StoryVersion[]): StoryVersion[] {
   const next = [...list];
   while (next.length > MAX_VERSIONS) {
@@ -50,7 +49,6 @@ function trim(list: StoryVersion[]): StoryVersion[] {
   return next;
 }
 
-/** Snapshots of the whole story, kept in this browser only. Newest first. */
 export function useVersions(storeKey: string) {
   const [versions, setVersions] = useState<StoryVersion[]>([]);
   const [storageFailed, setStorageFailed] = useState(false);

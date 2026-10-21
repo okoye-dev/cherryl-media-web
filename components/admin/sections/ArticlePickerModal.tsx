@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import type { CanonicalArticle } from "@/lib/types";
-import { SECTION_METADATA } from "@/lib/sections";
-import { articleService } from "@/services";
+import { SECTION_METADATA } from "@/config/sections";
+import { setFeatured } from "@/services/articles";
 import { searchCurationPage } from "@/services/sections";
 import type { SlotTarget } from "@/hooks/useCuratedSections";
 import { SITE } from "@/config/site";
@@ -29,7 +29,6 @@ export function ArticlePickerModal({ picker, onSelect, onClose }: ArticlePickerM
   const [error, setError] = useState<string | null>(null);
   const seq = useRef(0);
 
-  // Changing the search, category or sort starts again from page 1.
   useEffect(() => setPage(1), [searchQuery, selectedCategory, sortOrder]);
 
   useEffect(() => {
@@ -54,7 +53,7 @@ export function ArticlePickerModal({ picker, onSelect, onClose }: ArticlePickerM
 
   const handleSelectFeatured = async (art: CanonicalArticle) => {
     try {
-      await articleService.setFeatured(art.id, true).catch(() => {});
+      await setFeatured(art.id, true).catch(() => {});
     } catch {}
     onSelect(art);
   };
@@ -122,7 +121,6 @@ export function ArticlePickerModal({ picker, onSelect, onClose }: ArticlePickerM
         </div>
       }
     >
-        {/* Results */}
         <div className="-mx-2">
           {searchResults.length === 0 ? (
             <div className="p-10 text-center text-sm text-zinc-500">

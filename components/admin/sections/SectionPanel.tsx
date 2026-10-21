@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import type { CuratedSection } from "@/services/contracts/ISectionService";
+import type { CuratedSection } from "@/config/sections";
 import type { CanonicalArticle } from "@/lib/types";
-import { SECTION_METADATA } from "@/lib/sections";
+import { SECTION_METADATA } from "@/config/sections";
 import Arrow from "@/components/site/Arrow";
 import { Badge, Btn } from "@/components/admin/ui";
 import { SectionSlotCard } from "./SectionSlotCard";
@@ -37,7 +37,6 @@ export function SectionPanel({
 
   return (
     <section className="rounded-xl border border-white/[0.08] bg-[#16181D]">
-      {/* The title row is one big button: tap it to open or close the section. Closed by default. */}
       <button
         type="button"
         aria-expanded={open}

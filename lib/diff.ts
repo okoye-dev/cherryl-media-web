@@ -1,7 +1,3 @@
-/**
- * Works out what changed between the last saved version of something and the current one,
- * so a save can send just the changes instead of the whole object.
- */
 
 function same(a: unknown, b: unknown): boolean {
   if (a === b) return true;
@@ -17,10 +13,6 @@ function same(a: unknown, b: unknown): boolean {
   return true;
 }
 
-/**
- * Top level changes: every key whose value differs, with the whole new value (so a changed list is sent whole).
- * Keys named in `ignore` are never compared (for example a timestamp that changes on every render).
- */
 export function changedFields<T extends object>(prev: T | null | undefined, next: T, ignore: string[] = []): Partial<T> {
   const out: Record<string, unknown> = {};
   const p = (prev ?? {}) as Record<string, unknown>;
@@ -31,7 +23,6 @@ export function changedFields<T extends object>(prev: T | null | undefined, next
   return out as Partial<T>;
 }
 
-/** Nested changes: for objects of objects (like the site text), only the leaf fields that differ. */
 export function changedNested<T extends Record<string, Record<string, unknown>>>(
   prev: T | null | undefined,
   next: T

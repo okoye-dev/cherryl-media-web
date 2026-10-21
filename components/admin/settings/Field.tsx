@@ -9,12 +9,10 @@ interface FieldProps {
   rows?: number;
   hint?: string;
   maxLength?: number;
-  /** Quiet helper line under the field */
   note?: string;
   className?: string;
 }
 
-/** A labelled text input, or a textarea when rows is given. */
 export function Field({ label, value, onChange, type = "text", rows, hint, note, maxLength, className }: FieldProps) {
   const id = React.useId();
   return (

@@ -21,7 +21,6 @@ export default function AdminSettingsPage() {
   const { copy, setCopy, savedCopy, activeTab, setActiveTab, isSaving, statusMessage, saveCopy, resetDefaults } =
     useEditorialSettings();
 
-  // Changed means: different from what the backend last stored.
   const current = JSON.stringify(copy);
   const baseline = savedCopy ? JSON.stringify(savedCopy) : null;
   const dirty = baseline !== null && baseline !== current;

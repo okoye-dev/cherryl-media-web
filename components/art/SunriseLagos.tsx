@@ -1,11 +1,4 @@
-/**
- * Flat illustration for the newsletter block: sunrise behind the Lekki-Ikoyi
- * cable-stayed bridge, with the Lagos skyline either side. Drawn by hand as SVG,
- * so it is crisp at any size. Crops to the centre (sun and bridge) on phones.
- * Pass fade to let the top dissolve, so the scene can sit behind text.
- */
 
-// Same pseudo-random numbers every render, so server and browser agree.
 function rng(seed: number) {
   let s = seed;
   return () => {
@@ -85,7 +78,6 @@ function Towers({ towers, seed }: { towers: Tower[]; seed: number }) {
 }
 
 export default function SunriseLagos({ className, fade = false }: { className?: string; fade?: boolean }) {
-  // Bridge cables: eight on each side, fanning from the tower down to the deck.
   const cables = Array.from({ length: 8 }, (_, i) => ({
     topY: 168 + i * 8,
     reach: 46 + i * 30,
@@ -110,27 +102,22 @@ export default function SunriseLagos({ className, fade = false }: { className?: 
       role="img"
       aria-label="Sunrise over the Lagos skyline and the Lekki-Ikoyi bridge"
     >
-      {/* sky dots */}
       {stars.map(([x, y], i) => (
         <circle key={i} cx={x} cy={y} r={i % 3 === 0 ? 2 : 1.4} fill="#F3E3D3" opacity={0.6} />
       ))}
 
-      {/* ripples out of the sun */}
       {[326, 294, 262].map((r, i) => (
         <circle key={r} cx={600} cy={GROUND} r={r} fill="none" stroke="#E01E1E" strokeWidth={2} opacity={0.2 + i * 0.12} />
       ))}
 
-      {/* the sun */}
       <circle cx={600} cy={GROUND} r={230} fill="#E01E1E" />
       <circle cx={600} cy={GROUND} r={178} fill="none" stroke="#0c0608" strokeWidth={2} opacity={0.22} />
       <circle cx={600} cy={GROUND} r={126} fill="none" stroke="#0c0608" strokeWidth={2} opacity={0.22} />
       <circle cx={600} cy={GROUND} r={74} fill="#F08A24" />
 
-      {/* skyline */}
       <Towers towers={LEFT} seed={7} />
       <Towers towers={RIGHT} seed={21} />
 
-      {/* the bridge: tower, deck, cables */}
       <rect x={330} y={338} width={540} height={8} fill={DARK} />
       <polygon points="584,338 593,146 607,146 616,338" fill={DARK} />
       <rect x={576} y={146} width={48} height={5} fill={DARK} />
@@ -141,7 +128,6 @@ export default function SunriseLagos({ className, fade = false }: { className?: 
         </g>
       ))}
 
-      {/* water */}
       <rect x={0} y={346} width={1200} height={54} fill={DARK} opacity={0.5} />
       {[
         [470, 730, 358], [510, 690, 368], [545, 655, 378], [575, 625, 388], [440, 760, 396],
@@ -149,7 +135,6 @@ export default function SunriseLagos({ className, fade = false }: { className?: 
         <line key={y} x1={a} y1={y} x2={b} y2={y} stroke="#FF8A5C" strokeWidth={2} strokeLinecap="round" opacity={0.7} />
       ))}
 
-      {/* birds (left out when the scene sits behind text) */}
       {!fade && [[286, 84], [330, 62], [892, 104]].map(([x, y], i) => (
         <path
           key={i}

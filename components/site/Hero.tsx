@@ -1,17 +1,18 @@
 import Link from "next/link";
 import Pill from "./Pill";
 import SectionArt from "./SectionArt";
-import { getLeadStory, getDispatches } from "@/lib/news";
-import { getEditorialCopy } from "@/lib/settings";
-import { getCuratedSections, sectionArticles } from "@/lib/sections";
+import { getLeadStory, getDispatches } from "@/services/public-articles";
+import { fetchEditorialCopy } from "@/services/settings";
+import { fetchCuratedSections } from "@/services/sections";
+import { sectionArticles } from "@/lib/sections";
 import { formatDate, formatCategoryName, formatReadTime, authorName, TEAM_BYLINE } from "@/lib/formatters";
 
 export default async function Hero() {
   const [curated, defaultLead, defaultDispatches, copy] = await Promise.all([
-    getCuratedSections(),
+    fetchCuratedSections(),
     getLeadStory(),
     getDispatches(),
-    getEditorialCopy(),
+    fetchEditorialCopy(),
   ]);
 
   const leadStory = sectionArticles(curated, "hero_lead")[0] || defaultLead;

@@ -9,7 +9,6 @@ export type PillarCategory =
   | "thrills-tricks"
   | "youth-corner"
   | "tour-hotels"
-  // Legacy aliases for backward compatibility
   | "nigerian-current-affairs"
   | "entertainment-internet-culture"
   | "practical-nigerian-updates"
@@ -108,5 +107,4 @@ export interface CanonicalArticle {
   };
   [key: string]: unknown;
 }
-
 

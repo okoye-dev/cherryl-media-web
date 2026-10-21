@@ -1,4 +1,3 @@
-/** Concentric rings with a dotted heart, taken from the adire pattern. */
 export default function CowrieRing({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 64 64" className={className} aria-hidden="true">

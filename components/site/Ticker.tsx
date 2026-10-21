@@ -1,13 +1,13 @@
 import Link from "next/link";
-import { getLeadStory, getDispatches } from "@/lib/news";
-import { getEditorialCopy } from "@/lib/settings";
+import { getLeadStory, getDispatches } from "@/services/public-articles";
+import { fetchEditorialCopy } from "@/services/settings";
 import { formatDate, formatCategoryName } from "@/lib/formatters";
 
 export default async function Ticker() {
   const [lead, dispatches, copy] = await Promise.all([
     getLeadStory(),
     getDispatches(),
-    getEditorialCopy(),
+    fetchEditorialCopy(),
   ]);
 
   const items = [
@@ -30,7 +30,6 @@ export default async function Ticker() {
           {copy.ticker.label || "LIVE WIRE"}
         </span>
       </div>
-
 
       <div className="flex-1 overflow-hidden">
         <div className="animate-ticker flex items-center gap-8 pl-4">

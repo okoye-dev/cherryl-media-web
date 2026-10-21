@@ -1,11 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
-import { settingsService } from "@/services";
+import { fetchEditorialCopy, patchEditorialCopy } from "@/services/settings";
 import { changedNested, isEmpty } from "@/lib/diff";
-import { DEFAULT_EDITORIAL_COPY, type EditorialCopy } from "@/lib/settings";
+import { DEFAULT_EDITORIAL_COPY, type EditorialCopy } from "@/config/editorial-copy";
 
 export type SettingsTab = "hero" | "ticker" | "dossier" | "footer" | "subscribers";
 
-/** Plain names for the field paths the backend reports problems against. */
 const FIELD_LABELS: Record<string, string> = {
   "hero.editionBadge": "Homepage badge",
   "hero.titleLead": "Headline",
@@ -23,16 +22,14 @@ const FIELD_LABELS: Record<string, string> = {
   "footer.copyrightNotice": "Copyright line",
 };
 
-export interface SettingsStatus {
+interface SettingsStatus {
   text: string;
   type: "success" | "error";
-  /** Problems with specific fields, when the backend rejected the save */
   problems?: string[];
 }
 
 export function useEditorialSettings() {
   const [copy, setCopy] = useState<EditorialCopy>(DEFAULT_EDITORIAL_COPY);
-  /** The copy as last stored by the backend. Used to tell whether anything has changed. */
   const [savedCopy, setSavedCopy] = useState<EditorialCopy | null>(null);
   const [activeTab, setActiveTab] = useState<SettingsTab>("hero");
   const [isSaving, setIsSaving] = useState(false);
@@ -40,8 +37,7 @@ export function useEditorialSettings() {
 
   useEffect(() => {
     let alive = true;
-    settingsService
-      .getEditorialCopy()
+    fetchEditorialCopy()
       .then((data) => {
         if (!alive) return;
         setCopy(data);
@@ -65,7 +61,7 @@ export function useEditorialSettings() {
         setTimeout(() => setStatusMessage(null), 3000);
         return;
       }
-      const saved = await settingsService.patchEditorialCopy(changes as Parameters<typeof settingsService.patchEditorialCopy>[0]);
+      const saved = await patchEditorialCopy(changes as Parameters<typeof patchEditorialCopy>[0]);
       setCopy(saved);
       setSavedCopy(saved);
       setStatusMessage({ text: "Saved. The site picks up the new text within a minute.", type: "success" });

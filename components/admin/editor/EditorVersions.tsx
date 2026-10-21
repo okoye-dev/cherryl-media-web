@@ -22,7 +22,6 @@ export default function EditorVersions({
   onRestore,
   onDelete,
 }: EditorVersionsProps) {
-  // Folded on phones, always open from sm
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [preview, setPreview] = useState<StoryVersion | null>(null);

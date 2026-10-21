@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import type { CanonicalArticle } from "@/lib/types";
 import Arrow from "@/components/site/Arrow";
 import { Btn } from "@/components/admin/ui";
-import { cn } from "@/utils";
+import { cn } from "@/lib/cn";
 import { formatCategoryName, formatReadTime, authorName, TEAM_BYLINE } from "@/lib/formatters";
 
 interface SectionSlotCardProps {
@@ -10,9 +10,7 @@ interface SectionSlotCardProps {
   artId: string;
   slotIndex: number;
   totalSlots: number;
-  /** "feature": a section with one slot, shown wide with a big picture. "row": one line in an ordered list. */
   layout: "feature" | "row";
-  /** Whether the homepage draws this story's picture in this spot. If not, the admin shows none either. */
   showImage: boolean;
   article?: CanonicalArticle;
   onMoveSlot: (sectionKey: string, fromIndex: number, toIndex: number) => void;
@@ -20,7 +18,6 @@ interface SectionSlotCardProps {
   onRemoveSlot: (sectionKey: string, slotIndex: number) => void;
 }
 
-/** The pencil on the right of a row. It looks like the View / Edit / Change buttons and opens the options tray. */
 function PencilButton({ open }: { open: boolean }) {
   return (
     <span
@@ -61,7 +58,6 @@ export function SectionSlotCard({
   const first = slotIndex === 0;
   const last = slotIndex === totalSlots - 1;
 
-  // Every row is collapsed to a number (or picture) and a headline. Tap it to get the options.
   const [open, setOpen] = useState(false);
   const trayId = `slot-${sectionKey}-${slotIndex}`;
 

@@ -2,7 +2,6 @@
 
 import { Btn, useSheetClose } from "@/components/admin/ui";
 
-/** A button for a sheet's footer that closes the sheet with its slide-down animation. */
 export function SheetCloseBtn({
   children = "Close",
   variant,

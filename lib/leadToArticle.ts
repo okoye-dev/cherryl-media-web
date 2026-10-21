@@ -2,7 +2,6 @@ import type { CanonicalArticle, ContentBlock } from "@/lib/types";
 import { SITE } from "@/config/site";
 import { formatCategoryName } from "@/lib/formatters";
 
-/** The fields the backend sends for an AI lead. */
 export interface RawLead {
   id?: string;
   headline?: string;
@@ -22,15 +21,13 @@ export function slugify(text: string): string {
     .slice(0, 90);
 }
 
-/** Maps a lead's category (current or older slug) onto one of the site's current category slugs. */
-export function categorySlugFor(raw?: string): string {
+function categorySlugFor(raw?: string): string {
   const name = formatCategoryName(raw);
   const match = SITE.categories.find((c) => c.name === name || c.slug === (raw || "").toLowerCase());
   return (match ?? SITE.categories[0]).slug;
 }
 
-/** The article body for a lead: the AI draft when there is one, otherwise one paragraph per extracted fact. */
-export function leadBody(lead: RawLead): ContentBlock[] {
+function leadBody(lead: RawLead): ContentBlock[] {
   const draft = Array.isArray(lead.suggestedDraft) ? lead.suggestedDraft : [];
   const blocks: ContentBlock[] =
     draft.length > 0
@@ -43,7 +40,6 @@ export function leadBody(lead: RawLead): ContentBlock[] {
   })) as ContentBlock[];
 }
 
-/** An article payload built from an AI lead. Nothing the person has not seen is invented: it is the lead's own text. */
 export function leadToArticle(lead: RawLead): Partial<CanonicalArticle> {
   const title = (lead.headline || "").trim();
   const category = categorySlugFor(lead.category);

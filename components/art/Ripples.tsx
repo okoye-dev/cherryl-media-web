@@ -1,4 +1,3 @@
-/** Thin rings spreading from one point, like a broadcast. No fill, so it stays quiet. For the hero. */
 export default function Ripples({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 600 600" className={className} aria-hidden="true">

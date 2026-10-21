@@ -5,7 +5,7 @@ import FigureCard from "@/components/site/FigureCard";
 import Pill from "@/components/site/Pill";
 import { SITE } from "@/config/site";
 
-import { getArticlesByCategory } from "@/lib/articles";
+import { getArticlesByCategory } from "@/services/public-articles";
 
 export function generateStaticParams() {
   return SITE.categories.map((c) => ({ slug: c.slug }));

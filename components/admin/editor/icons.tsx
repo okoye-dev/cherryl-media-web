@@ -9,7 +9,6 @@ const base = {
   className: "h-4 w-4",
 };
 
-/** Arrowhead pointing up (no tail). */
 export function ChevronUp() {
   return (
     <svg {...base}>
@@ -18,7 +17,6 @@ export function ChevronUp() {
   );
 }
 
-/** Arrowhead pointing down (no tail). */
 export function ChevronDown() {
   return (
     <svg {...base}>

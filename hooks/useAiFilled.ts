@@ -1,9 +1,5 @@
 import { useCallback, useState } from "react";
 
-/**
- * Remembers which fields were filled in by AI and not yet looked at by a person.
- * A field key is added when AI fills it and removed when the person edits it.
- */
 export function useAiFilled() {
   const [keys, setKeys] = useState<ReadonlySet<string>>(() => new Set());
 

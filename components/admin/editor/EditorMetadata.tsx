@@ -1,6 +1,6 @@
 import { AIChip, Btn, Label, Panel, Switch, TextInput, inputClass } from "@/components/admin/ui";
 import { LIMITS, normalizeSlug } from "./limits";
-import { cn } from "@/utils";
+import { cn } from "@/lib/cn";
 import type { PillarCategory } from "@/lib/types";
 
 const CATEGORIES: { slug: PillarCategory; label: string }[] = [
@@ -38,9 +38,7 @@ interface EditorMetadataProps {
   onAuthorRoleChange: (val: string) => void;
   sendWebpushr: boolean;
   onSendWebpushrChange: (val: boolean) => void;
-  /** Rendered at the end of the Details panel (the tags field) */
   children?: React.ReactNode;
-  /** True when a field (by key) was filled by AI and not yet edited */
   isAi?: (key: string) => boolean;
 }
 

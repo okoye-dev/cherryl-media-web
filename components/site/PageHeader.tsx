@@ -11,10 +11,8 @@ export default function PageHeader({
   label: string;
   title: React.ReactNode;
   intro?: string;
-  /** Smaller title, for long titles such as a field note */
   compact?: boolean;
   byline?: React.ReactNode;
-  /** Add a full stop after a plain-text title (desk and section pages) */
   stop?: boolean;
 }) {
   return (

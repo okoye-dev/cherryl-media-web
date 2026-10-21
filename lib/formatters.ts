@@ -9,7 +9,6 @@ const CATEGORY_MAP: Record<string, string> = {
   "thrills-tricks": "Thrills & Tricks",
   "youth-corner": "Youth Corner",
   "tour-hotels": "Tour & Hotels",
-  // Legacy aliases
   "nigerian-current-affairs": "State Affairs & Environs",
   "practical-nigerian-updates": "Newsbeat",
   "business-institutions": "Brands & SMEs",
@@ -17,20 +16,17 @@ const CATEGORY_MAP: Record<string, string> = {
   "entertainment-internet-culture": "Entertainment & Lifestyle",
 };
 
-/** Formats a category slug or raw title into clean editorial display text */
 export function formatCategoryName(cat?: string): string {
   if (!cat) return "Dispatch";
   const normalized = cat.toLowerCase().trim();
   if (CATEGORY_MAP[normalized]) return CATEGORY_MAP[normalized];
 
-  // Capitalize hyphenated words if not in map
   return cat
     .split("-")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
 }
 
-/** Formats ISO dates into clean editorial format: "14 Oct 2026" */
 export function formatDate(dateStr?: string): string {
   if (!dateStr) return "14 Oct 2026";
   try {
@@ -59,7 +55,6 @@ export function formatDate(dateStr?: string): string {
   }
 }
 
-/** Formats read time to compact format without 'read' (e.g. "4 min read" -> "4min") */
 export function formatReadTime(timeStr?: string): string {
   if (!timeStr) return "4min";
   const cleaned = timeStr.replace(/\s*read\.?$/i, "").trim();
@@ -72,17 +67,14 @@ export function formatReadTime(timeStr?: string): string {
 
 type WithAuthor = { author?: string | { name?: string } | null };
 
-/** The author's name, or an empty string. Most posts have no named author. */
 export function authorName(article: WithAuthor): string {
   const a = article.author;
   const name = typeof a === "string" ? a : a?.name;
   return (name || "").trim();
 }
 
-/** For large featured spots only: the author, or the team when nobody is named. */
 export const TEAM_BYLINE = "Cherryl Media Team";
 
-/** Adds a full stop to a section or page title, unless it already ends with punctuation. */
 export function withStop(title: string): string {
   return /[.!?…]$/.test(title.trim()) ? title : `${title}.`;
 }

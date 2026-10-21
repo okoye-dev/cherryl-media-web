@@ -1,6 +1,6 @@
 import { SITE } from "@/config/site";
 import { PILL_BASE } from "./Pill";
-import { cn } from "@/utils";
+import { cn } from "@/lib/cn";
 
 // Outline icons from Tabler Icons (MIT licence).
 const ICONS: Record<string, React.ReactNode> = {
@@ -26,9 +26,8 @@ const ICONS: Record<string, React.ReactNode> = {
   ),
 };
 
-export type SocialKey = "instagram" | "facebook" | "x" | "linkedin";
+type SocialKey = "instagram" | "facebook" | "x" | "linkedin";
 
-/** One network's icon, drawn in the current text colour. */
 export function SocialIcon({ name, className }: { name: SocialKey; className?: string }) {
   return (
     <svg
@@ -55,15 +54,12 @@ function keyFor(label: string): string | null {
   return null;
 }
 
-/** Round icon links for the social accounts in the site config. Same hover as every other button. */
 export default function SocialLinks({
   only,
   tone = "dark",
   className,
 }: {
-  /** Icon keys to show, in order. Leave out to show every account. */
   only?: SocialKey[];
-  /** "dark" for the dark blocks, "page" for normal page backgrounds */
   tone?: "dark" | "page";
   className?: string;
 }) {

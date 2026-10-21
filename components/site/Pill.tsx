@@ -1,21 +1,13 @@
 import Link from "next/link";
-import { cn } from "@/utils";
+import { cn } from "@/lib/cn";
 import Arrow from "./Arrow";
 
-/**
- * The one button look for the whole site, and the one hover effect:
- * the background turns a see-through red. Text and border colours never change,
- * so the label stays readable on every background.
- */
 export const PILL_BASE =
   "group inline-flex shrink-0 whitespace-nowrap items-center gap-1.5 rounded-full px-4 py-2 text-[0.76rem] font-medium leading-none transition-colors duration-300 hover:bg-brand-red/30";
 
 const VARIANTS = {
-  /** Outlined, for normal page backgrounds */
   outline: "border border-ink/20 text-ink",
-  /** Lightly tinted, for the one button that should stand out in a group */
   filled: "border border-brand-red/30 bg-brand-red/10 text-ink",
-  /** Outlined, for the dark blocks (footer, newsletter) */
   onDark: "border border-snow/25 text-snow",
 };
 

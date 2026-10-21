@@ -1,29 +1,11 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { sectionService } from "@/services";
 import { fetchArticlesByIds } from "@/services/articles";
-import type { CuratedSection } from "@/services/contracts/ISectionService";
+import type { CuratedSectionsResponse } from "@/config/sections";
 import type { CanonicalArticle } from "@/lib/types";
 import { request } from "@/services/api-client";
-import { enforceSectionLimits, mergeLegacySections, type CuratedSectionsResponse } from "@/services/sections";
-
-type IdMap = Record<string, string[]>;
-
-function toIds(byKey: Record<string, CuratedSection> | undefined): IdMap {
-  const out: IdMap = {};
-  for (const [k, v] of Object.entries(byKey || {})) out[k] = v.articleIds || [];
-  return out;
-}
-
-/** True when both layouts hold the same ids in the same order. A missing section counts as empty. */
-function sameIds(a: IdMap, b: IdMap) {
-  const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
-  for (const k of keys) {
-    const x = a[k] || [];
-    const y = b[k] || [];
-    if (x.length !== y.length || x.some((id, i) => id !== y[i])) return false;
-  }
-  return true;
-}
+import { fetchCuratedSections, updateCuratedSections } from "@/services/sections";
+import { enforceSectionLimits, mergeLegacySections } from "@/lib/sections";
+import { moveInSlot, placeInSlot, removeFromSlot, sameIds, toIds, type IdMap, type Sections } from "@/lib/curated-layout";
 
 export interface SlotTarget {
   sectionKey: string;
@@ -31,26 +13,22 @@ export interface SlotTarget {
 }
 
 export function useCuratedSections() {
-  const [sections, setSections] = useState<Record<string, CuratedSection>>({});
-  /** Only the stories that sit in a slot (plus any just picked), looked up by id */
+  const [sections, setSections] = useState<Sections>({});
   const [lookup, setLookup] = useState<Record<string, CanonicalArticle>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
-  /** The slots as last loaded from, or confirmed by, the backend */
   const [savedIds, setSavedIds] = useState<IdMap | null>(null);
 
-  // Active slot picker modal state
   const [activePicker, setActivePicker] = useState<SlotTarget | null>(null);
 
-  // Load initial sections and catalog
   useEffect(() => {
     let isMounted = true;
 
     async function loadData() {
       try {
-        const secData = await sectionService.getCuratedSections();
+        const secData = await fetchCuratedSections();
         const byKey = secData.byKey || {};
         const ids = [...new Set(Object.values(byKey).flatMap((s) => s.articleIds || []))];
         const known: Record<string, CanonicalArticle> = {};
@@ -78,7 +56,6 @@ export function useCuratedSections() {
     };
   }, []);
 
-  // Quick lookup map for catalog articles by ID or slug
   const articleMap = useMemo(() => {
     const map = new Map<string, CanonicalArticle>();
     for (const a of Object.values(lookup)) {
@@ -101,87 +78,18 @@ export function useCuratedSections() {
       if (!activePicker) return;
       const { sectionKey, slotIndex } = activePicker;
       setLookup((prev) => ({ ...prev, [article.id]: article }));
-
-      setSections((prev) => {
-        const currentSec = prev[sectionKey] || {
-          sectionKey,
-          articleIds: [],
-          articles: [],
-        };
-
-        const newIds = [...(currentSec.articleIds || [])];
-        if (slotIndex >= newIds.length) {
-          newIds.push(article.id);
-        } else {
-          newIds[slotIndex] = article.id;
-        }
-
-        const newArticles = newIds
-          .map((id) => articleMap.get(id) || article)
-          .filter(Boolean);
-
-        return {
-          ...prev,
-          [sectionKey]: {
-            ...currentSec,
-            articleIds: newIds,
-            articles: newArticles,
-            updatedAt: new Date().toISOString(),
-          },
-        };
-      });
-
+      setSections((prev) => placeInSlot(prev, sectionKey, slotIndex, article, articleMap));
       closePicker();
     },
     [activePicker, articleMap, closePicker]
   );
 
   const removeArticleFromSlot = useCallback((sectionKey: string, slotIndex: number) => {
-    setSections((prev) => {
-      const currentSec = prev[sectionKey];
-      if (!currentSec) return prev;
-
-      const newIds = currentSec.articleIds.filter((_, i) => i !== slotIndex);
-      const newArticles = currentSec.articles.filter((_, i) => i !== slotIndex);
-
-      return {
-        ...prev,
-        [sectionKey]: {
-          ...currentSec,
-          articleIds: newIds,
-          articles: newArticles,
-          updatedAt: new Date().toISOString(),
-        },
-      };
-    });
+    setSections((prev) => removeFromSlot(prev, sectionKey, slotIndex));
   }, []);
 
   const moveSlot = useCallback((sectionKey: string, fromIndex: number, toIndex: number) => {
-    setSections((prev) => {
-      const currentSec = prev[sectionKey];
-      if (!currentSec) return prev;
-
-      const newIds = [...currentSec.articleIds];
-      const newArticles = [...currentSec.articles];
-
-      if (toIndex < 0 || toIndex >= newIds.length) return prev;
-
-      const [movedId] = newIds.splice(fromIndex, 1);
-      newIds.splice(toIndex, 0, movedId);
-
-      const [movedArt] = newArticles.splice(fromIndex, 1);
-      newArticles.splice(toIndex, 0, movedArt);
-
-      return {
-        ...prev,
-        [sectionKey]: {
-          ...currentSec,
-          articleIds: newIds,
-          articles: newArticles,
-          updatedAt: new Date().toISOString(),
-        },
-      };
-    });
+    setSections((prev) => moveInSlot(prev, sectionKey, fromIndex, toIndex));
   }, []);
 
   const saveAll = useCallback(async () => {
@@ -189,7 +97,6 @@ export function useCuratedSections() {
     setSaveSuccess(null);
     setSaveError(null);
 
-    // Send only the sections whose stories changed since the last load or save.
     const payload = Object.entries(sections)
       .filter(([key, sec]) => !sameIds({ [key]: sec.articleIds || [] }, { [key]: savedIds?.[key] || [] }))
       .map(([key, sec]) => ({
@@ -203,7 +110,7 @@ export function useCuratedSections() {
     }
 
     try {
-      const res = await sectionService.updateCuratedSections(payload);
+      const res = await updateCuratedSections(payload);
       if (!res.success) {
         setSaveError("The server did not accept the layout. Nothing was saved.");
       } else {

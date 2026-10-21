@@ -3,9 +3,7 @@ import { SheetCloseBtn } from "@/components/admin/SheetCloseBtn";
 
 export interface MissingItem {
   id: string;
-  /** What is wrong, in plain words */
   problem: string;
-  /** The button text: what to do about it */
   action: string;
 }
 
@@ -18,7 +16,6 @@ interface EditorPublishChecklistProps {
   isSaving: boolean;
 }
 
-/** Shown when Publish is pressed and something is missing. Each row takes the person to the field. */
 export default function EditorPublishChecklist({ items, onClose, onGo, onSaveDraft, canSaveDraft, isSaving }: EditorPublishChecklistProps) {
   if (!items || items.length === 0) return null;
   return (

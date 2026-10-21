@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { Btn, PageTitle } from "@/components/admin/ui";
-import { DEFAULT_SECTION_KEYS } from "@/lib/sections";
+import { DEFAULT_SECTION_KEYS } from "@/config/sections";
 import { useCuratedSections } from "@/hooks/useCuratedSections";
 import { SectionPanel } from "@/components/admin/sections/SectionPanel";
 import { ArticlePickerModal } from "@/components/admin/sections/ArticlePickerModal";
@@ -80,7 +80,6 @@ export default function AdminSectionsPage() {
         </div>
       )}
 
-      {/* Sections Grid */}
       <div className="space-y-4">
         {DEFAULT_SECTION_KEYS.map((key) => (
           <SectionPanel
@@ -95,7 +94,6 @@ export default function AdminSectionsPage() {
         ))}
       </div>
 
-      {/* Interactive Article Picker Modal */}
       {activePicker && (
         <ArticlePickerModal
           picker={activePicker}

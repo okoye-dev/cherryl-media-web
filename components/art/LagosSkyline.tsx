@@ -1,13 +1,6 @@
-/**
- * The Lagos skyline as filled silhouettes, left to right: low blocks, the National Theatre
- * (the wide dome), a mid-rise cluster, the Lekki-Ikoyi cable-stayed bridge, and the Eko Atlantic towers.
- * Meant to sit behind a card, with only the tops showing above its edge.
- * The ground line is the bottom edge of the picture.
- */
 
 type Block = { x: number; y: number; w: number; mast?: number };
 
-// Rectangular towers: x, top y, width, optional antenna height. The ground is y = 300.
 const BLOCKS: Block[] = [
   { x: 0, y: 232, w: 60 }, { x: 64, y: 198, w: 44 },
   { x: 330, y: 190, w: 38, mast: 34 }, { x: 372, y: 150, w: 34 }, { x: 410, y: 214, w: 50 },
@@ -17,7 +10,6 @@ const BLOCKS: Block[] = [
 
 const GROUND = 300;
 
-// Lit windows, placed the same way every render.
 function windows(b: Block, seed: number) {
   let s = seed;
   const rnd = () => ((s = (s * 9301 + 49297) % 233280) / 233280);
@@ -34,7 +26,6 @@ export default function LagosSkyline({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 1200 300" preserveAspectRatio="xMidYMax meet" className={className} aria-hidden="true">
       <g fill="#E01E1E">
-        {/* plain towers, with masts and a few lit windows */}
         {BLOCKS.map((b, i) => (
           <g key={i}>
             <rect x={b.x} y={b.y} width={b.w} height={GROUND - b.y} />
@@ -43,17 +34,14 @@ export default function LagosSkyline({ className }: { className?: string }) {
           </g>
         ))}
 
-        {/* National Theatre: flared base, a wide dome, and a band of windows */}
         <path d="M118 300 142 258H282L306 300Z" />
         <path d="M134 258C138 202 178 172 212 172S286 202 290 258Z" />
         <rect x={126} y={254} width={172} height={8} />
         <path d="M212 172V150" stroke="#E01E1E" strokeWidth={4} />
 
-        {/* Eko Atlantic: one slanted-roof tower, one stepped, one cut at an angle */}
         <polygon points="820,300 820,124 868,92 868,300" />
         <polygon points="916,300 916,150 960,178 960,300" />
 
-        {/* the bridge: deck, piers, tower */}
         <rect x={458} y={262} width={306} height={8} />
         <rect x={478} y={270} width={10} height={30} />
         <rect x={734} y={270} width={10} height={30} />
@@ -61,13 +49,11 @@ export default function LagosSkyline({ className }: { className?: string }) {
         <rect x={596} y={58} width={30} height={6} />
       </g>
 
-      {/* lit windows, in orange */}
       <g fill="#F08A24" opacity="0.9">
         {BLOCKS.flatMap((b, i) => windows(b, 11 + i * 7).map(([x, y], k) => <rect key={`${i}-${k}`} x={x} y={y} width={4} height={6} />))}
         {Array.from({ length: 9 }, (_, i) => <rect key={`d${i}`} x={156 + i * 14} y={236} width={4} height={6} />)}
       </g>
 
-      {/* cable stays */}
       <g stroke="#E01E1E" strokeWidth={2} strokeLinecap="round">
         {cables.map((c, i) => (
           <g key={i}>

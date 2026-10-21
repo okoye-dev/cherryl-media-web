@@ -26,9 +26,7 @@ export function usePublishPipeline() {
       options: {
         inFlightUploads: number;
         coverUrl: string;
-        /** Stores any unsaved changes (only what changed) and returns the story's address */
         persist: () => Promise<string>;
-        /** The story is already live: save the changes and keep it live, no publish call */
         alreadyLive?: boolean;
       }
     ) => {
@@ -43,7 +41,6 @@ export function usePublishPipeline() {
         engine: "pending",
       });
 
-      // Step 1: Media check
       if (options.inFlightUploads > 0) {
         setErrorMessage(`Waiting for ${options.inFlightUploads} media asset(s) to finish upload...`);
         let attempts = 0;
@@ -64,7 +61,6 @@ export function usePublishPipeline() {
 
       await new Promise((r) => setTimeout(r, 350));
 
-      // Step 2: Editorial integrity
       if (!payload.title || !payload.title.trim()) {
         setStepStates((prev) => ({ ...prev, editorial: "error" }));
         setErrorMessage("Post title cannot be empty.");
@@ -74,7 +70,6 @@ export function usePublishPipeline() {
       setStepStates((prev) => ({ ...prev, editorial: "success", engine: "running" }));
       setStep("engine");
 
-      // Step 3: Engine sync
       try {
         const savedAt = await options.persist();
         setPublishedSlug(savedAt);

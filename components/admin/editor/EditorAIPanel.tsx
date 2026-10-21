@@ -37,7 +37,6 @@ export default function EditorAIPanel({
   onCopyContext,
   copiedAI,
 }: EditorAIPanelProps) {
-  // Folded on phones so it does not push the story down. Always open from sm.
   const [open, setOpen] = useState(false);
   const [showFormat, setShowFormat] = useState(false);
   const [formatCopied, setFormatCopied] = useState(false);

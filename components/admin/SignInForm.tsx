@@ -1,17 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { loginUser } from "@/lib/auth";
+import { loginUser } from "@/services/auth";
 import { Btn, Label, inputClass } from "@/components/admin/ui";
 
 interface SignInFormProps {
   onSignedIn: () => void;
-  /** A line shown above the fields, for example "Your session has expired." */
   notice?: string;
   autoFocus?: boolean;
 }
 
-/** Email and password. Used by the sign-in page and by the sign-in window. */
 export function SignInForm({ onSignedIn, notice, autoFocus }: SignInFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

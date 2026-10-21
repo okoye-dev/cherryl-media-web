@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { SESSION_EVENT, getStoredUser, logoutUser, type AuthUser } from "@/lib/auth";
+import { SESSION_EVENT, getStoredUser, type AuthUser } from "@/lib/session";
+import { logoutUser } from "@/services/auth";
 import { Btn } from "@/components/admin/ui";
-import { cn } from "@/utils";
+import { cn } from "@/lib/cn";
 
 const NAV = [
   { href: "/admin", label: "Stories" },
@@ -63,7 +64,6 @@ export default function AdminHeader() {
             </span>
           </Link>
 
-          {/* Navigation sits here from md up; on phones it moves to its own row below */}
           <nav aria-label="Admin" className="ml-2 hidden items-center gap-1 md:flex">
             {navLinks}
           </nav>
@@ -92,7 +92,6 @@ export default function AdminHeader() {
         </div>
       </div>
 
-      {/* Phone and small tablet navigation: one scrolling row, never wraps */}
       <nav
         aria-label="Admin"
         className="flex gap-1 overflow-x-auto border-t border-white/[0.06] px-4 py-1.5 [scrollbar-width:none] sm:px-6 md:hidden [&::-webkit-scrollbar]:hidden"
