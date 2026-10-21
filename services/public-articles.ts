@@ -2,7 +2,7 @@ import type { CanonicalArticle } from "@/lib/types";
 import { BACKEND_URL } from "@/lib/backend-url";
 import { getJson } from "@/lib/fetch-retry";
 
-export async function getAllArticles(): Promise<CanonicalArticle[]> {
+async function getAllArticles(): Promise<CanonicalArticle[]> {
   const res = await getJson<CanonicalArticle[]>("getAllArticles", `${BACKEND_URL}/api/articles?status=published&limit=50`);
   return Array.isArray(res?.data) ? res.data : [];
 }

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { checkSlugAvailability } from "@/services/articles";
 
-export type SlugCheckStatus = "idle" | "checking" | "available" | "unavailable";
+type SlugCheckStatus = "idle" | "checking" | "available" | "unavailable";
 
 export function useSlugAvailability(slug: string, excludeId?: string) {
   const [status, setStatus] = useState<SlugCheckStatus>("idle");

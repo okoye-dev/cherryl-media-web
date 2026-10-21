@@ -1,4 +1,4 @@
-export const TOKEN_KEY = "cherryl_newsroom_token";
+const TOKEN_KEY = "cherryl_newsroom_token";
 export const SESSION_EVENT = "cherryl:session-changed";
 const USER_KEY = "cherryl_newsroom_user";
 

@@ -13,7 +13,7 @@ interface ConfirmResponse {
   public_url: string;
 }
 
-export type UploadStage = "idle" | "compressing" | "requesting_url" | "uploading" | "confirming" | "done" | "error";
+type UploadStage = "idle" | "compressing" | "requesting_url" | "uploading" | "confirming" | "done" | "error";
 
 export interface UploadProgressInfo {
   stage: UploadStage;

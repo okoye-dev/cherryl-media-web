@@ -1,7 +1,7 @@
 import { request, requestPaged, type Paged } from "./api-client";
 import type { CanonicalArticle } from "@/lib/types";
 
-export interface SlugCheckResult {
+interface SlugCheckResult {
   slug: string;
   available: boolean;
 }

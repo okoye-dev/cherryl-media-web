@@ -21,13 +21,13 @@ export function slugify(text: string): string {
     .slice(0, 90);
 }
 
-export function categorySlugFor(raw?: string): string {
+function categorySlugFor(raw?: string): string {
   const name = formatCategoryName(raw);
   const match = SITE.categories.find((c) => c.name === name || c.slug === (raw || "").toLowerCase());
   return (match ?? SITE.categories[0]).slug;
 }
 
-export function leadBody(lead: RawLead): ContentBlock[] {
+function leadBody(lead: RawLead): ContentBlock[] {
   const draft = Array.isArray(lead.suggestedDraft) ? lead.suggestedDraft : [];
   const blocks: ContentBlock[] =
     draft.length > 0

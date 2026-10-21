@@ -8,7 +8,7 @@ const ART = {
   waveform: { Piece: Waveform, cls: "bd-drift left-[-6vw] top-[4vw] h-[26vw] w-[112vw] opacity-[0.06] fade-dr" },
 } as const;
 
-export type SectionArtName = keyof typeof ART;
+type SectionArtName = keyof typeof ART;
 
 export default function SectionArt({ name }: { name: SectionArtName }) {
   const { Piece, cls } = ART[name];
