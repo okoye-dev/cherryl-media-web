@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { SITE } from "@/config/site";
 import { cn } from "@/utils";
 import ThemeToggle from "./ThemeToggle";
+import SocialLinks from "./SocialLinks";
 
 export default function SiteHeader() {
   const [open, setOpen] = useState(false);
@@ -163,29 +164,17 @@ export default function SiteHeader() {
         </nav>
 
         <div className="flex flex-col gap-6 border-t border-ink/10 pt-6 text-[0.88rem] shrink-0 sm:flex-row sm:items-end sm:justify-between">
-          <div>
+          <div className="flex flex-col gap-1.5">
             <p className="label font-medium text-ink-soft">Cherryl Media Newsroom</p>
             <a
               href={`mailto:${SITE.email}`}
-              className="mt-1 inline-block text-ink transition-colors hover:text-brand-red"
+              className="block break-all text-ink transition-colors hover:text-brand-red"
             >
               {SITE.email}
             </a>
           </div>
 
-          <div className="flex flex-wrap items-center gap-4 text-ink-soft">
-            {SITE.socials.map((s) => (
-              <a
-                key={s.label}
-                href={s.href}
-                target="_blank"
-                rel="noreferrer"
-                className="transition-colors hover:text-brand-red"
-              >
-                {s.label}
-              </a>
-            ))}
-          </div>
+          <SocialLinks tone="page" />
         </div>
       </aside>
     </>

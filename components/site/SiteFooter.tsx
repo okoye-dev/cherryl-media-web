@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { SITE } from "@/config/site";
 import Pill from "./Pill";
+import SocialLinks from "./SocialLinks";
+import AdireBand from "./AdireBand";
 import { getEditorialCopy } from "@/lib/settings";
 
 export default async function SiteFooter() {
@@ -11,29 +13,27 @@ export default async function SiteFooter() {
       id="contact"
       className="mx-auto w-full max-w-[90rem] px-5 pb-6 pt-16 md:px-10 md:pb-10 md:pt-28 xl:px-16"
     >
-      <div className="rounded-[1.75rem] bg-night px-6 py-8 text-snow md:rounded-[2rem] md:p-12">
+      <div className="overflow-hidden rounded-[1.75rem] bg-night px-6 pt-8 text-snow md:rounded-[2rem] md:px-12 md:pt-12">
         <div className="flex flex-col justify-between gap-6 md:flex-row md:items-start">
-          <div className="max-w-xl">
-            <h2 className="font-area text-[clamp(1.8rem,4vw,3.4rem)] font-semibold leading-[0.98] tracking-[-0.03em] text-snow">
+          <div className="max-w-xl min-w-0">
+            <h2 className="font-area text-[clamp(1.8rem,4vw,3.4rem)] font-semibold leading-[0.98] tracking-[-0.03em] text-snow text-balance">
               Reporting the stories <em className="font-display italic font-light text-brand-red">shaping contemporary Africa.</em>
             </h2>
-            <p className="mt-4 text-sm font-light leading-relaxed text-snow/70">
+            <p className="mt-4 text-sm font-light leading-relaxed text-snow/70 text-pretty">
               {copy.footer.tagline || "Direct intelligence from sub-national corridors, enterprise hubs, and cultural frontiers."}
             </p>
           </div>
 
-          <div className="flex flex-col gap-3">
+          <div className="flex min-w-0 max-w-full flex-col items-start gap-3">
             <span className="label text-snow/50">NEWSROOM CONTACT</span>
-            <Pill href={`mailto:${copy.footer.contactEmail || SITE.email}`} variant="onDark">
+            <Pill
+              href={`mailto:${copy.footer.contactEmail || SITE.email}`}
+              variant="onDark"
+              className="max-w-full shrink whitespace-normal break-all"
+            >
               {copy.footer.contactEmail || SITE.email}
             </Pill>
-            <div className="flex flex-wrap gap-2">
-              {SITE.socials.map((s) => (
-                <Pill key={s.label} href={s.href} variant="onDark">
-                  {s.label}
-                </Pill>
-              ))}
-            </div>
+            <SocialLinks />
           </div>
         </div>
 
@@ -68,6 +68,7 @@ export default async function SiteFooter() {
             </ul>
           </div>
         </div>
+        <AdireBand className="-mx-6 mt-10 block w-[calc(100%+3rem)] md:-mx-12 md:mt-12 md:w-[calc(100%+6rem)]" />
       </div>
 
       <div className="mt-6 flex flex-wrap items-center justify-between gap-4 text-[0.8rem] text-ink-soft md:mt-8">

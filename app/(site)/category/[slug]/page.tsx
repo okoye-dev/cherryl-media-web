@@ -62,21 +62,7 @@ export default async function CategoryPage({ params }: { params: Params }) {
       />
 
       <div className="mx-auto w-full max-w-[90rem] px-5 pt-12 md:px-10 xl:px-16">
-        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-ink/10 pb-6">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="label text-ink-soft mr-2">Focus Areas:</span>
-            {category.subcategories.map((sub) => (
-              <span
-                key={sub}
-                className="rounded-full border border-ink/15 bg-paper-deep/60 px-3 py-1 text-xs text-ink"
-              >
-                {sub}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {articles.map((story, i) => (
             <FigureCard
               key={story.id || story.slug}

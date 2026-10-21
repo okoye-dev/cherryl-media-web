@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import PageHeader from "@/components/site/PageHeader";
 import Pill from "@/components/site/Pill";
+import { SocialIcon } from "@/components/site/SocialLinks";
 import ArticleBody from "@/components/site/ArticleBody";
 import { SITE } from "@/config/site";
 import { getAllArticleSlugs, getArticleBySlug } from "@/lib/news";
@@ -315,7 +316,7 @@ export default async function ArticlePage({ params }: { params: Params }) {
               <div className="mt-4 grid gap-4 text-xs sm:grid-cols-2">
                 {article.channelVariants.x && (
                   <div className="rounded-xl border border-ink/10 bg-paper/50 p-3.5">
-                    <span className="font-medium text-ink block mb-1">X (Twitter)</span>
+                    <span className="mb-1.5 block text-ink" role="img" aria-label="X"><SocialIcon name="x" /></span>
                     <p className="text-ink-soft leading-relaxed line-clamp-3">
                       {article.channelVariants.x}
                     </p>
@@ -323,7 +324,7 @@ export default async function ArticlePage({ params }: { params: Params }) {
                 )}
                 {article.channelVariants.linkedin && (
                   <div className="rounded-xl border border-ink/10 bg-paper/50 p-3.5">
-                    <span className="font-medium text-ink block mb-1">LinkedIn</span>
+                    <span className="mb-1.5 block text-ink" role="img" aria-label="LinkedIn"><SocialIcon name="linkedin" /></span>
                     <p className="text-ink-soft leading-relaxed line-clamp-3">
                       {article.channelVariants.linkedin}
                     </p>

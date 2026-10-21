@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { PILL_BASE } from "./Pill";
+import SocialLinks from "./SocialLinks";
+import SunriseLagos from "./SunriseLagos";
 import { cn } from "@/utils";
 
 export default function MediaDistributionStrip() {
@@ -23,15 +25,15 @@ export default function MediaDistributionStrip() {
       id="newsletter"
       className="mx-auto mt-16 w-full max-w-[90rem] px-5 md:mt-24 md:px-10 xl:px-16"
     >
-      <div className="rounded-[2rem] bg-night p-5 sm:p-7 text-snow md:p-14">
-        <div className="mx-auto max-w-3xl text-center">
+      <div className="overflow-hidden rounded-[2rem] bg-night text-snow">
+        <div className="mx-auto max-w-3xl px-5 pb-8 pt-10 text-center sm:px-7 md:px-14 md:pt-14">
           <span className="label text-brand-red font-medium">
             DAILY NEWSLETTER
           </span>
-          <h2 className="mt-3 font-area text-[clamp(1.75rem,3.2vw,2.75rem)] font-semibold leading-[1.05] tracking-[-0.025em] text-snow">
+          <h2 className="mt-3 font-area text-[clamp(1.75rem,3.2vw,2.75rem)] font-semibold leading-[1.05] tracking-[-0.025em] text-snow text-balance">
             Get the Cherryl Media <em className="font-display italic font-light text-brand-red">Morning Edition</em> in your inbox.
           </h2>
-          <p className="mt-4 text-sm md:text-base font-normal leading-relaxed text-snow/75">
+          <p className="mt-4 text-sm md:text-base font-normal leading-relaxed text-snow/75 text-balance">
             Key policy developments, practical consumer updates, and cultural essays delivered every morning at 6:00 AM.
           </p>
 
@@ -60,17 +62,12 @@ export default function MediaDistributionStrip() {
             )}
           </form>
 
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-[0.72rem] text-snow/50">
-            <span>Also publishing on:</span>
-            <span className="font-medium text-snow/80">Website</span>
-            <span>·</span>
-            <span className="font-medium text-snow/80">X</span>
-            <span>·</span>
-            <span className="font-medium text-snow/80">Facebook</span>
-            <span>·</span>
-            <span className="font-medium text-snow/80">LinkedIn</span>
+          <div className="mt-7 flex items-center justify-center gap-3">
+            <span className="text-[0.72rem] text-snow/50">Follow us</span>
+            <SocialLinks only={["x", "facebook", "linkedin"]} />
           </div>
         </div>
+        <SunriseLagos className="block h-44 w-full sm:h-56 md:h-72" />
       </div>
     </section>
   );
