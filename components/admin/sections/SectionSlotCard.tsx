@@ -20,8 +20,22 @@ interface SectionSlotCardProps {
   onRemoveSlot: (sectionKey: string, slotIndex: number) => void;
 }
 
-const iconBtn =
-  "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-zinc-300 transition-colors hover:bg-white/[0.09] hover:text-white disabled:cursor-not-allowed disabled:opacity-30";
+/** The pencil on the right of a row. It looks like the View / Edit / Change buttons and opens the options tray. */
+function PencilButton({ open }: { open: boolean }) {
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/10 text-zinc-200 transition-colors group-hover:bg-white/[0.09] group-hover:text-white",
+        open ? "bg-white/[0.12]" : "bg-white/[0.04]",
+      )}
+    >
+      <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z" />
+      </svg>
+    </span>
+  );
+}
 
 export function SectionSlotCard({
   sectionKey,
@@ -43,124 +57,114 @@ export function SectionSlotCard({
   const category = formatCategoryName(article?.categoryName || article?.category || "");
   const title = article?.title || `Article ${artId}`;
   const image = showImage ? article?.featuredImage?.url : undefined;
+  const feature = layout === "feature";
+  const first = slotIndex === 0;
+  const last = slotIndex === totalSlots - 1;
 
-  // The four buttons stay out of the way until someone wants to edit this story.
-  const [showOptions, setShowOptions] = useState(false);
+  // Every row is collapsed to a number (or picture) and a headline. Tap it to get the options.
+  const [open, setOpen] = useState(false);
+  const trayId = `slot-${sectionKey}-${slotIndex}`;
 
-  const actions = (
-    <div className="flex flex-col gap-2 sm:items-start">
-      <Btn variant="ghost" size="sm" className="!h-10 -ml-2 self-start" aria-expanded={showOptions} onClick={() => setShowOptions((o) => !o)}>
-        {showOptions ? "Hide options" : "Show options"}
-      </Btn>
-      {showOptions && (
-        <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
-          {slug && (
-            <Btn href={`/article/${slug}`} target="_blank" arrow="forward" size="sm" className="!h-10">
-              View
-            </Btn>
-          )}
-          {slug && (
-            <Btn href={`/admin/editor?slug=${slug}`} size="sm" className="!h-10">
-              Edit
-            </Btn>
-          )}
-          <Btn size="sm" className="!h-10" onClick={() => onOpenPicker(sectionKey, slotIndex)}>
-            Change
-          </Btn>
-          <Btn variant="danger" size="sm" className="!h-10" onClick={() => onRemoveSlot(sectionKey, slotIndex)}>
-            Clear
-          </Btn>
-        </div>
+  const picture = (cls: string, withNumber: boolean) => (
+    <span className={cn("relative block shrink-0 overflow-hidden rounded-lg bg-[#1A1D24]", cls)}>
+      {image ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={image} alt="" className="h-full w-full object-cover" />
+      ) : (
+        <span className="flex h-full w-full items-center justify-center text-xs text-zinc-500">No image</span>
       )}
+      {withNumber && (
+        <span className="absolute left-1.5 top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-black/70 px-1 text-[0.65rem] font-medium text-white">
+          {slotIndex + 1}
+        </span>
+      )}
+    </span>
+  );
+
+  const tray = open && (
+    <div id={trayId} className={cn("flex flex-wrap gap-2 pt-3", !feature && "pl-0")}>
+      {!feature && (
+        <>
+          <Btn size="sm" className="!h-10" disabled={first} onClick={() => onMoveSlot(sectionKey, slotIndex, slotIndex - 1)}>
+            <Arrow className="h-3 w-3 -rotate-90" />
+            Up
+          </Btn>
+          <Btn size="sm" className="!h-10" disabled={last} onClick={() => onMoveSlot(sectionKey, slotIndex, slotIndex + 1)}>
+            <Arrow className="h-3 w-3 rotate-90" />
+            Down
+          </Btn>
+        </>
+      )}
+      {slug && (
+        <Btn href={`/article/${slug}`} target="_blank" arrow="forward" size="sm" className="!h-10">
+          View
+        </Btn>
+      )}
+      {slug && (
+        <Btn href={`/admin/editor?slug=${slug}`} size="sm" className="!h-10">
+          Edit
+        </Btn>
+      )}
+      <Btn size="sm" className="!h-10" onClick={() => onOpenPicker(sectionKey, slotIndex)}>
+        Change
+      </Btn>
+      <Btn variant="danger" size="sm" className="!h-10" onClick={() => onRemoveSlot(sectionKey, slotIndex)}>
+        Remove
+      </Btn>
     </div>
   );
 
-  if (layout === "feature") {
+  const toggleProps = {
+    type: "button" as const,
+    "aria-expanded": open,
+    "aria-controls": trayId,
+    onClick: () => setOpen((o) => !o),
+  };
+
+  if (feature) {
     return (
-      <div className={cn("grid gap-4 rounded-lg border border-white/[0.07] bg-white/[0.02] p-3 sm:p-4", showImage && "md:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] md:items-stretch lg:grid-cols-[minmax(0,1fr)_minmax(0,30rem)]")}>
-        {/* Picture: on top on phones, on the right from md */}
-        {showImage && <div className="aspect-[16/9] overflow-hidden rounded-md border border-white/10 bg-[#1A1D24] md:order-2 md:aspect-auto md:min-h-[12rem]">
-          {image ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={image} alt="" className="h-full w-full object-cover" />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center text-sm text-zinc-500">No image</div>
-          )}
-        </div>}
-        <div className="flex min-w-0 flex-col justify-between gap-4 md:order-1 md:py-1">
-          <div className="min-w-0">
-            <p className="text-xs font-medium text-brand-red/90">{kicker || category}</p>
-            <h3 className="mt-1.5 text-lg font-medium leading-snug text-white md:text-xl">{title}</h3>
-            {deck && <p className="mt-2 line-clamp-4 text-sm leading-relaxed text-zinc-300">{deck}</p>}
-            <p className="mt-3 text-xs text-zinc-400">
-              By {author || TEAM_BYLINE}
-              {readTime && <span> &middot; {readTime}</span>}
-            </p>
-          </div>
-          {actions}
-        </div>
+      <div className="py-1">
+        <button {...toggleProps} className="group block w-full text-left">
+          {showImage && picture("aspect-[16/9] w-full", false)}
+          <span className={cn("flex items-start gap-3", showImage && "mt-3")}>
+            <span className="min-w-0 flex-1">
+              <span className="block text-xs font-medium text-brand-red/90">{kicker || category}</span>
+              <span className="mt-1 block text-lg font-medium leading-snug text-white">{title}</span>
+              {deck && <span className="mt-1.5 line-clamp-3 block text-sm leading-relaxed text-zinc-300">{deck}</span>}
+              <span className="mt-2 block text-xs text-zinc-400">
+                By {author || TEAM_BYLINE}
+                {readTime && <span> &middot; {readTime}</span>}
+              </span>
+            </span>
+            <PencilButton open={open} />
+          </span>
+        </button>
+        {tray}
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-3 rounded-lg border border-white/[0.07] bg-white/[0.02] p-3 sm:flex-row sm:items-center sm:gap-4">
-      <div className="flex min-w-0 flex-1 items-center gap-3">
-        {/* Order controls: one tight pair, stacked along the list direction */}
-        <div className="flex shrink-0 flex-col gap-1">
-          <button
-            type="button"
-            aria-label="Move up"
-            title="Move up"
-            onClick={() => onMoveSlot(sectionKey, slotIndex, slotIndex - 1)}
-            disabled={slotIndex === 0}
-            className={cn(iconBtn, "!h-10 !w-10")}
-          >
-            <Arrow className="h-3.5 w-3.5 -rotate-90" />
-          </button>
-          <button
-            type="button"
-            aria-label="Move down"
-            title="Move down"
-            onClick={() => onMoveSlot(sectionKey, slotIndex, slotIndex + 1)}
-            disabled={slotIndex === totalSlots - 1}
-            className={cn(iconBtn, "!h-10 !w-10")}
-          >
-            <Arrow className="h-3.5 w-3.5 rotate-90" />
-          </button>
-        </div>
-
+    <div className="py-3">
+      <button {...toggleProps} className="group flex w-full items-start gap-3 text-left">
         {showImage ? (
-          <div className="relative shrink-0">
-            {image ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={image} alt="" className="h-20 w-28 rounded-md border border-white/10 object-cover sm:h-20 sm:w-32" />
-            ) : (
-              <div className="flex h-20 w-28 items-center justify-center rounded-md border border-white/10 bg-white/[0.05] text-xs text-zinc-500 sm:w-32">
-                No image
-              </div>
-            )}
-            <span className="absolute left-1.5 top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-black/70 px-1 text-[0.65rem] font-medium text-white">
-              {slotIndex + 1}
-            </span>
-          </div>
+          picture("h-16 w-16 sm:h-20 sm:w-28", true)
         ) : (
-          <span className="flex h-6 min-w-6 shrink-0 items-center justify-center rounded-full bg-white/10 px-1 text-xs font-medium text-white">
+          <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/10 text-xs font-medium text-white">
             {slotIndex + 1}
           </span>
         )}
-
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-xs text-zinc-500">
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-xs text-zinc-500">
             {category}
             {readTime && <span> &middot; {readTime}</span>}
-          </p>
-          <h3 className="mt-0.5 line-clamp-3 text-sm font-medium leading-snug text-white">{title}</h3>
-          {author && <p className="mt-0.5 truncate text-xs text-zinc-400">By {author}</p>}
-        </div>
-      </div>
-
-      <div className="sm:shrink-0">{actions}</div>
+          </span>
+          <span className="mt-0.5 line-clamp-3 block text-sm font-medium leading-snug text-white">{title}</span>
+          {author && <span className="mt-0.5 block truncate text-xs text-zinc-400">By {author}</span>}
+        </span>
+        <PencilButton open={open} />
+      </button>
+      {tray}
     </div>
   );
 }
