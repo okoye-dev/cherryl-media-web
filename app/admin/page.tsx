@@ -145,7 +145,7 @@ export default function AdminDashboardPage() {
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {stats.map((s) => (
-          <div key={s.label} className="rounded-xl border border-white/[0.08] bg-[#16181D] px-4 py-3">
+          <div key={s.label} className="rounded-xl border border-white/[0.08] bg-[#16181D] px-3.5 py-2.5 sm:px-4 sm:py-3">
             <p className="text-xs text-zinc-400">{s.label}</p>
             <p className={`mt-0.5 font-num text-xl font-semibold ${s.tone}`}>{s.value}</p>
           </div>
@@ -240,22 +240,23 @@ export default function AdminDashboardPage() {
         ) : (
           <>
             {/* Card list below lg */}
-            <ul className="space-y-3 lg:hidden">
+            <ul className="space-y-2.5 sm:space-y-3 lg:hidden">
               {filteredArticles.map((a) => (
                 <li
                   key={a.id}
-                  className="relative rounded-xl border border-white/[0.08] bg-[#121317] p-4 transition-colors hover:bg-white/[0.04]"
+                  className="relative rounded-xl border border-white/[0.08] bg-[#121317] p-3 transition-colors hover:bg-white/[0.04] sm:p-4"
                 >
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="min-w-0 truncate text-xs font-medium text-brand-red">{niceCategory(a.categoryName)}</p>
+                  {/* The status sits right beside the category, not at the far edge, so it reads with the title below */}
+                  <div className="flex items-center gap-2">
                     <StatusBadge status={a.status} />
+                    <p className="min-w-0 truncate text-xs font-medium text-brand-red">{niceCategory(a.categoryName)}</p>
                   </div>
-                  <h3 className="mt-1 text-sm font-semibold leading-snug text-zinc-100">
+                  <h3 className="mt-1.5 text-sm font-semibold leading-snug text-zinc-100">
                     <Link href={`/admin/editor?slug=${encodeURIComponent(a.slug)}`} className="after:absolute after:inset-0 after:rounded-xl">
                       {a.title}
                     </Link>
                   </h3>
-                  <div className="mt-2 flex items-center justify-between gap-3 text-xs text-zinc-400">
+                  <div className="mt-1.5 flex items-center justify-between gap-3 text-xs text-zinc-400">
                     <span className="min-w-0 truncate">
                       {authorOf(a) ? `${authorOf(a)}, ` : ""}
                       {formatDate(a)}

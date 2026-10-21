@@ -99,13 +99,13 @@ export function Panel({
   return (
     <section
       className={cn(
-        "rounded-xl border p-4 sm:p-5",
+        "rounded-xl border p-3.5 sm:p-5",
         tone === "ai" ? "border-violet-400/25 bg-violet-500/[0.06]" : "border-white/[0.08] bg-[#16181D]",
         className,
       )}
     >
       {(title || actions) && (
-        <header className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <header className="mb-3 flex flex-col gap-2.5 sm:mb-4 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
           <div className="min-w-0">
             {title && <h2 className="text-base font-semibold tracking-tight text-white">{title}</h2>}
             {description && <p className="mt-1 text-xs leading-relaxed text-zinc-400">{description}</p>}
@@ -239,8 +239,22 @@ export function TextInput({ value, onChange, multiline = false, maxLength, alway
   const fit = useCallback(() => {
     const el = ref.current;
     if (!el) return;
+    // Measuring needs the box collapsed for a moment, which makes the page shorter and lets the
+    // browser throw the scroll position elsewhere. Remember it and put it back, without the
+    // site-wide smooth scrolling, so the page does not move at all.
+    const y = window.scrollY;
     el.style.height = "auto";
     el.style.height = `${el.scrollHeight + 2}px`;
+    el.scrollTop = 0;
+    if (window.scrollY !== y) window.scrollTo({ top: y, behavior: "instant" });
+
+    // While writing at the end of the text, keep the line being written in view above the
+    // fixed bar at the bottom of the screen: the page follows the typing.
+    if (document.activeElement === el && el.selectionStart === el.value.length) {
+      const room = window.innerHeight - 110;
+      const bottom = el.getBoundingClientRect().bottom;
+      if (bottom > room) window.scrollBy({ top: bottom - room, behavior: "instant" });
+    }
   }, []);
 
   // Fit on every value change, including changes made from outside (a restored draft, AI fill).
