@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import type { CuratedSection } from "@/services/contracts/ISectionService";
+import type { CuratedSection } from "@/config/sections";
 import type { CanonicalArticle } from "@/lib/types";
-import { SECTION_METADATA } from "@/lib/sections";
+import { SECTION_METADATA } from "@/config/sections";
 import Arrow from "@/components/site/Arrow";
 import { Badge, Btn } from "@/components/admin/ui";
 import { SectionSlotCard } from "./SectionSlotCard";

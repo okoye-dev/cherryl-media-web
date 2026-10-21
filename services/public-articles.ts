@@ -1,10 +1,6 @@
-// Canonical Article Client - Connected directly to Cherryl Media Engine & PostgreSQL DB
-import type { CanonicalArticle } from "./types";
-import { BACKEND_URL } from "./backend-url";
-import { getJson } from "./fetch-retry";
-
-// Empty array for backward compatibility; all data is fetched live from the database.
-export const CANONICAL_ARTICLES: CanonicalArticle[] = [];
+import type { CanonicalArticle } from "@/lib/types";
+import { BACKEND_URL } from "@/lib/backend-url";
+import { getJson } from "@/lib/fetch-retry";
 
 export async function getAllArticles(): Promise<CanonicalArticle[]> {
   const res = await getJson<CanonicalArticle[]>("getAllArticles", `${BACKEND_URL}/api/articles?status=published&limit=50`);
@@ -12,11 +8,10 @@ export async function getAllArticles(): Promise<CanonicalArticle[]> {
 }
 
 export async function getLeadStory(): Promise<CanonicalArticle | null> {
-  // 1. The featured story chosen by the backend. A 404 just means none is featured.
+  // A 404 just means no story is featured.
   const featuredRes = await getJson<CanonicalArticle>("getLeadStory", `${BACKEND_URL}/api/articles/featured`);
   if (featuredRes?.data?.slug) return featuredRes.data;
 
-  // 2. Fallback to latest lead story or first published story in database
   const all = await getAllArticles();
   const lead = all.find((a) => a.isLead);
   return lead || all[0] || null;

@@ -1,6 +1,6 @@
 import { SITE } from "@/config/site";
 import { PILL_BASE } from "./Pill";
-import { cn } from "@/utils";
+import { cn } from "@/lib/cn";
 
 // Outline icons from Tabler Icons (MIT licence).
 const ICONS: Record<string, React.ReactNode> = {

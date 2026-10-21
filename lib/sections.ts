@@ -1,75 +1,65 @@
-import type { CanonicalArticle } from "./types";
+import type { CanonicalArticle } from "@/lib/types";
 import {
-  SECTION_METADATA,
   DEFAULT_SECTION_KEYS,
+  SECTION_METADATA,
   type CuratedSection,
   type CuratedSectionsResponse,
-  fetchCuratedSections,
-  updateCuratedSections,
-} from "@/services/sections";
-import { searchArticles as serviceSearchArticles, fetchArticles } from "@/services/articles";
+} from "@/config/sections";
 
-export {
-  SECTION_METADATA,
-  DEFAULT_SECTION_KEYS,
-  type CuratedSection,
-  type CuratedSectionsResponse,
-};
-
-/** The stories for one homepage spot: exactly what is curated there, never more than the spot has room for. */
+/** The stories for one homepage spot, never more than the spot has room for. */
 export function sectionArticles(curated: CuratedSectionsResponse, key: string): CanonicalArticle[] {
   const max = SECTION_METADATA[key]?.maxSlots ?? Infinity;
   return (curated.byKey?.[key]?.articles || []).slice(0, max);
 }
 
-export async function getCuratedSections(): Promise<CuratedSectionsResponse> {
-  return fetchCuratedSections();
+/** The two Culture side cards used to be two sections. If the combined one is empty, build it from the old two. */
+export function mergeLegacySections<T extends CuratedSectionsResponse>(data: T): T {
+  const side = data.byKey?.dossier_side;
+  if (side && (side.articleIds?.length || 0) > 0) return data;
+  const parts = ["dossier_soundscapes", "dossier_gastronomy"].map((k) => data.byKey?.[k]);
+  const ids = parts.flatMap((p) => p?.articleIds || []);
+  if (ids.length === 0) return data;
+  const merged: CuratedSection = {
+    sectionKey: "dossier_side",
+    articleIds: ids,
+    articles: parts.flatMap((p) => p?.articles || []),
+  };
+  return {
+    ...data,
+    sections: [...(data.sections || []).filter((x) => x.sectionKey !== "dossier_side"), merged],
+    byKey: { ...data.byKey, dossier_side: merged },
+  };
 }
 
-export async function searchArticles(query: string, limit = 20): Promise<CanonicalArticle[]> {
-  try {
-    const results = await serviceSearchArticles(query, limit);
-    if (Array.isArray(results)) {
-      return results;
-    }
-  } catch (err) {
-    console.warn("searchArticles error:", err);
-  }
-  return [];
+/** Cuts every known section down to its slot count, so the data can never exceed what the page has room for. */
+export function enforceSectionLimits<T extends CuratedSectionsResponse>(data: T): T {
+  const trim = (sec: CuratedSection) => {
+    const max = SECTION_METADATA[sec.sectionKey]?.maxSlots;
+    if (!max) return sec;
+    return {
+      ...sec,
+      articleIds: (sec.articleIds || []).slice(0, max),
+      articles: (sec.articles || []).slice(0, max),
+    };
+  };
+  const byKey: Record<string, CuratedSection> = {};
+  for (const [k, v] of Object.entries(data.byKey || {})) byKey[k] = trim(v);
+  return { ...data, sections: (data.sections || []).map(trim), byKey };
 }
 
-export async function fetchAllArticles(): Promise<CanonicalArticle[]> {
-  try {
-    const list = await fetchArticles({ status: "all" });
-    if (Array.isArray(list)) {
-      return list;
-    }
-  } catch (err) {
-    console.warn("fetchAllArticles error:", err);
-  }
-  return [];
-}
+export function buildFallbackSections(): CuratedSectionsResponse {
+  const sections: CuratedSection[] = [];
+  const byKey: Record<string, CuratedSection> = {};
 
-export async function updateCuratedSection(
-  sectionKey: string,
-  articleIds: string[],
-  metadata: Record<string, unknown> = {}
-): Promise<boolean> {
-  try {
-    const res = await updateCuratedSections([{ sectionKey, articleIds, metadata }]);
-    return Boolean(res.success);
-  } catch {
-    return false;
+  for (const key of DEFAULT_SECTION_KEYS) {
+    const sec: CuratedSection = {
+      sectionKey: key,
+      articleIds: [],
+      articles: [],
+    };
+    sections.push(sec);
+    byKey[key] = sec;
   }
-}
 
-export async function updateAllCuratedSections(
-  sections: { sectionKey: string; articleIds: string[]; metadata?: Record<string, unknown> }[]
-): Promise<boolean> {
-  try {
-    const res = await updateCuratedSections(sections);
-    return Boolean(res.success);
-  } catch {
-    return false;
-  }
+  return { sections, byKey };
 }

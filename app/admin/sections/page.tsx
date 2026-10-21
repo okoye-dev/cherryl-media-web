@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { Btn, PageTitle } from "@/components/admin/ui";
-import { DEFAULT_SECTION_KEYS } from "@/lib/sections";
+import { DEFAULT_SECTION_KEYS } from "@/config/sections";
 import { useCuratedSections } from "@/hooks/useCuratedSections";
 import { SectionPanel } from "@/components/admin/sections/SectionPanel";
 import { ArticlePickerModal } from "@/components/admin/sections/ArticlePickerModal";

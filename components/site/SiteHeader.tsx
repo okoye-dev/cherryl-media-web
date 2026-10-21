@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { SITE } from "@/config/site";
-import { cn } from "@/utils";
+import { cn } from "@/lib/cn";
 import ThemeToggle from "./ThemeToggle";
 import SocialLinks from "./SocialLinks";
 import { Ripples, Cherries, CowrieRing, Contours, Sparkle } from "@/components/art";

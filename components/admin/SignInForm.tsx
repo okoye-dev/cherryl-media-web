@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { loginUser } from "@/lib/auth";
+import { loginUser } from "@/services/auth";
 import { Btn, Label, inputClass } from "@/components/admin/ui";
 
 interface SignInFormProps {

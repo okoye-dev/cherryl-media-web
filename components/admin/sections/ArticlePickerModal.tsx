@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import type { CanonicalArticle } from "@/lib/types";
-import { SECTION_METADATA } from "@/lib/sections";
-import { articleService } from "@/services";
+import { SECTION_METADATA } from "@/config/sections";
+import { setFeatured } from "@/services/articles";
 import { searchCurationPage } from "@/services/sections";
 import type { SlotTarget } from "@/hooks/useCuratedSections";
 import { SITE } from "@/config/site";
@@ -54,7 +54,7 @@ export function ArticlePickerModal({ picker, onSelect, onClose }: ArticlePickerM
 
   const handleSelectFeatured = async (art: CanonicalArticle) => {
     try {
-      await articleService.setFeatured(art.id, true).catch(() => {});
+      await setFeatured(art.id, true).catch(() => {});
     } catch {}
     onSelect(art);
   };

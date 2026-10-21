@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { cn } from "@/utils";
+import { cn } from "@/lib/cn";
 import Arrow from "./Arrow";
 
 /**

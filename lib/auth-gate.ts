@@ -6,7 +6,7 @@
  * Only the admin screen registers a handler, so on the public site a refusal is just an error.
  */
 
-import { clearSession, getStoredToken } from "./auth";
+import { clearSession, getStoredToken } from "./session";
 
 type AskToSignIn = (message: string) => Promise<boolean>;
 

@@ -3,10 +3,10 @@ import { SITE } from "@/config/site";
 import Pill from "./Pill";
 import SocialLinks from "./SocialLinks";
 import { AdirePattern, LagosSkyline } from "@/components/art";
-import { getEditorialCopy } from "@/lib/settings";
+import { fetchEditorialCopy } from "@/services/settings";
 
 export default async function SiteFooter() {
-  const copy = await getEditorialCopy();
+  const copy = await fetchEditorialCopy();
 
   return (
     <footer

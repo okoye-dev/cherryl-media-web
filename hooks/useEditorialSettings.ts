@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
-import { settingsService } from "@/services";
+import { fetchEditorialCopy, patchEditorialCopy } from "@/services/settings";
 import { changedNested, isEmpty } from "@/lib/diff";
-import { DEFAULT_EDITORIAL_COPY, type EditorialCopy } from "@/lib/settings";
+import { DEFAULT_EDITORIAL_COPY, type EditorialCopy } from "@/config/editorial-copy";
 
 export type SettingsTab = "hero" | "ticker" | "dossier" | "footer" | "subscribers";
 
@@ -40,8 +40,7 @@ export function useEditorialSettings() {
 
   useEffect(() => {
     let alive = true;
-    settingsService
-      .getEditorialCopy()
+    fetchEditorialCopy()
       .then((data) => {
         if (!alive) return;
         setCopy(data);
@@ -65,7 +64,7 @@ export function useEditorialSettings() {
         setTimeout(() => setStatusMessage(null), 3000);
         return;
       }
-      const saved = await settingsService.patchEditorialCopy(changes as Parameters<typeof settingsService.patchEditorialCopy>[0]);
+      const saved = await patchEditorialCopy(changes as Parameters<typeof patchEditorialCopy>[0]);
       setCopy(saved);
       setSavedCopy(saved);
       setStatusMessage({ text: "Saved. The site picks up the new text within a minute.", type: "success" });

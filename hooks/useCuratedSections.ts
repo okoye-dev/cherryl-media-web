@@ -1,10 +1,10 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { sectionService } from "@/services";
 import { fetchArticlesByIds } from "@/services/articles";
-import type { CuratedSection } from "@/services/contracts/ISectionService";
+import type { CuratedSection, CuratedSectionsResponse } from "@/config/sections";
 import type { CanonicalArticle } from "@/lib/types";
 import { request } from "@/services/api-client";
-import { enforceSectionLimits, mergeLegacySections, type CuratedSectionsResponse } from "@/services/sections";
+import { fetchCuratedSections, updateCuratedSections } from "@/services/sections";
+import { enforceSectionLimits, mergeLegacySections } from "@/lib/sections";
 
 type IdMap = Record<string, string[]>;
 
@@ -50,7 +50,7 @@ export function useCuratedSections() {
 
     async function loadData() {
       try {
-        const secData = await sectionService.getCuratedSections();
+        const secData = await fetchCuratedSections();
         const byKey = secData.byKey || {};
         const ids = [...new Set(Object.values(byKey).flatMap((s) => s.articleIds || []))];
         const known: Record<string, CanonicalArticle> = {};
@@ -203,7 +203,7 @@ export function useCuratedSections() {
     }
 
     try {
-      const res = await sectionService.updateCuratedSections(payload);
+      const res = await updateCuratedSections(payload);
       if (!res.success) {
         setSaveError("The server did not accept the layout. Nothing was saved.");
       } else {

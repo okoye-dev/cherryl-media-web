@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import type { CanonicalArticle } from "@/lib/types";
 import Arrow from "@/components/site/Arrow";
 import { Btn } from "@/components/admin/ui";
-import { cn } from "@/utils";
+import { cn } from "@/lib/cn";
 import { formatCategoryName, formatReadTime, authorName, TEAM_BYLINE } from "@/lib/formatters";
 
 interface SectionSlotCardProps {

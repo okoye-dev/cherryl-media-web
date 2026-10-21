@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
-import { cn } from "@/utils";
+import { cn } from "@/lib/cn";
 import Arrow from "@/components/site/Arrow";
 
 /**

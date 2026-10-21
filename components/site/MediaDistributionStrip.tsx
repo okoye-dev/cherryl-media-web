@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { subscriberService } from "@/services";
+import { addSubscriber } from "@/services/subscribers";
 import { PILL_BASE } from "./Pill";
 import SocialLinks from "./SocialLinks";
-import { cn } from "@/utils";
+import { cn } from "@/lib/cn";
 import { SunriseLagos, EditionStamp, Cherries, Sparkle, CowrieRing } from "@/components/art";
 
 type FormState = "idle" | "saving" | "done" | "error";
@@ -35,7 +35,7 @@ export default function MediaDistributionStrip() {
     setState("saving");
     setMessage("");
     try {
-      await subscriberService.addSubscriber(clean);
+      await addSubscriber(clean);
       setState("done");
       setEmail("");
     } catch (err) {

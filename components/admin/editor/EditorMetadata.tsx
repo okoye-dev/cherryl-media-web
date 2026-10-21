@@ -1,6 +1,6 @@
 import { AIChip, Btn, Label, Panel, Switch, TextInput, inputClass } from "@/components/admin/ui";
 import { LIMITS, normalizeSlug } from "./limits";
-import { cn } from "@/utils";
+import { cn } from "@/lib/cn";
 import type { PillarCategory } from "@/lib/types";
 
 const CATEGORIES: { slug: PillarCategory; label: string }[] = [

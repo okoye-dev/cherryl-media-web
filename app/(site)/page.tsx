@@ -8,13 +8,14 @@ import MediaDistributionStrip from "@/components/site/MediaDistributionStrip";
 import EditorialDossier from "@/components/site/EditorialDossier";
 import SectionHeader from "@/components/site/SectionHeader";
 import SectionArt from "@/components/site/SectionArt";
-import { getCuratedSections, sectionArticles } from "@/lib/sections";
+import { fetchCuratedSections } from "@/services/sections";
+import { sectionArticles } from "@/lib/sections";
 import { authorName } from "@/lib/formatters";
 
 export const revalidate = 30; // ISR revalidation every 30 seconds
 
 export default async function Home() {
-  const curated = await getCuratedSections();
+  const curated = await fetchCuratedSections();
 
   // Exactly what is curated for each spot, never more than the spot has room for.
   // These limits come from the same list the admin uses (services/sections.ts).

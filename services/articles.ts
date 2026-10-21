@@ -6,28 +6,6 @@ export interface SlugCheckResult {
   available: boolean;
 }
 
-export interface TagsResult {
-  tags: string[];
-}
-
-export interface ArticleQueryParams {
-  status?: string;
-  q?: string;
-  search?: string;
-  ids?: string[];
-  limit?: number;
-}
-
-export async function fetchArticles(params?: ArticleQueryParams): Promise<CanonicalArticle[]> {
-  const queryParams: Record<string, string | number | undefined> = {};
-  if (params?.status) queryParams.status = params.status;
-  if (params?.q || params?.search) queryParams.q = params?.q || params?.search;
-  if (params?.ids && params.ids.length > 0) queryParams.ids = params.ids.join(",");
-  if (params?.limit) queryParams.limit = params.limit;
-
-  return request<CanonicalArticle[]>("/api/articles", { params: queryParams });
-}
-
 /** One page of stories. status is "published", "draft" or "all". Search with q. Page numbers start at 1. */
 export async function fetchArticlesPage(params: {
   status?: string;
@@ -88,28 +66,18 @@ export async function publishArticle(slugOrId: string): Promise<{ success: boole
 }
 
 export async function checkSlugAvailability(slug: string, excludeId?: string): Promise<SlugCheckResult> {
-  // Use Next.js internal proxy route for seamless SSR/CSR fallback
-  const url = typeof window !== "undefined" ? "/api/articles/check-slug" : "/api/articles/check-slug";
-  return request<SlugCheckResult>(url, {
+  return request<SlugCheckResult>("/api/articles/check-slug", {
     params: { slug, excludeId },
     timeoutMs: 15000,
   });
 }
 
 export async function searchTags(query: string): Promise<string[]> {
-  const url = typeof window !== "undefined" ? "/api/tags" : "/api/tags";
-  const res = await request<TagsResult>(url, {
+  const res = await request<{ tags: string[] }>("/api/tags", {
     params: { q: query },
     timeoutMs: 15000,
   });
   return Array.isArray(res.tags) ? res.tags : [];
-}
-
-export async function searchArticles(query: string, limit = 20): Promise<CanonicalArticle[]> {
-  return request<CanonicalArticle[]>("/api/articles", {
-    params: { q: query, limit },
-    timeoutMs: 15000,
-  });
 }
 
 export interface LeadCandidate {
@@ -126,4 +94,11 @@ export interface LeadCandidate {
 
 export async function fetchCandidate(id: string): Promise<LeadCandidate> {
   return request<LeadCandidate>(`/api/candidates/${encodeURIComponent(id)}`);
+}
+
+export async function setFeatured(idOrSlug: string, isFeatured: boolean): Promise<void> {
+  await request(`/api/articles/${encodeURIComponent(idOrSlug)}/featured`, {
+    method: "POST",
+    body: JSON.stringify({ isFeatured }),
+  });
 }

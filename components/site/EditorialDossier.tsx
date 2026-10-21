@@ -1,8 +1,9 @@
 import Link from "next/link";
 import SectionHeader from "./SectionHeader";
 import SectionArt from "./SectionArt";
-import { getEditorialCopy } from "@/lib/settings";
-import { getCuratedSections, sectionArticles } from "@/lib/sections";
+import { fetchEditorialCopy } from "@/services/settings";
+import { fetchCuratedSections } from "@/services/sections";
+import { sectionArticles } from "@/lib/sections";
 import {
   formatDate,
   formatReadTime,
@@ -12,7 +13,7 @@ import {
 } from "@/lib/formatters";
 
 type Story = NonNullable<
-  Awaited<ReturnType<typeof getCuratedSections>>["byKey"][string]
+  Awaited<ReturnType<typeof fetchCuratedSections>>["byKey"][string]
 >["articles"][number];
 
 /** A small label above a title. Quiet on purpose, so the title leads. */
@@ -37,8 +38,8 @@ function Meta({ story }: { story: Story }) {
 
 export default async function EditorialDossier() {
   const [curated, copy] = await Promise.all([
-    getCuratedSections(),
-    getEditorialCopy(),
+    fetchCuratedSections(),
+    fetchEditorialCopy(),
   ]);
 
   const leadStory = sectionArticles(curated, "dossier_lead")[0];

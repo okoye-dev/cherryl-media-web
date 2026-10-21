@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { getStoredToken } from "@/lib/auth";
+import { getStoredToken } from "@/lib/session";
 import { registerSignInHandler } from "@/lib/auth-gate";
 import { Sheet } from "@/components/admin/ui";
 import { SignInForm } from "@/components/admin/SignInForm";

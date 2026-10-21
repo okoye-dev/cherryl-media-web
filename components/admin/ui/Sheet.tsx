@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { cn } from "@/utils";
+import { cn } from "@/lib/cn";
 
 /**
  * The one panel every admin screen uses when something opens on top of the page

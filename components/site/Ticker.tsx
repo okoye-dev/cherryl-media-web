@@ -1,13 +1,13 @@
 import Link from "next/link";
-import { getLeadStory, getDispatches } from "@/lib/news";
-import { getEditorialCopy } from "@/lib/settings";
+import { getLeadStory, getDispatches } from "@/services/public-articles";
+import { fetchEditorialCopy } from "@/services/settings";
 import { formatDate, formatCategoryName } from "@/lib/formatters";
 
 export default async function Ticker() {
   const [lead, dispatches, copy] = await Promise.all([
     getLeadStory(),
     getDispatches(),
-    getEditorialCopy(),
+    fetchEditorialCopy(),
   ]);
 
   const items = [

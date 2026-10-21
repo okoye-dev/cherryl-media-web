@@ -1,12 +1,13 @@
 import Link from "next/link";
-import { getOpinionColumns } from "@/lib/news";
-import { getCuratedSections, sectionArticles } from "@/lib/sections";
+import { getOpinionColumns } from "@/services/public-articles";
+import { fetchCuratedSections } from "@/services/sections";
+import { sectionArticles } from "@/lib/sections";
 import { formatCategoryName, authorName } from "@/lib/formatters";
 import SectionHeader from "./SectionHeader";
 
 export default async function FieldNotes() {
   const [curated, defaultOpinion] = await Promise.all([
-    getCuratedSections(),
+    fetchCuratedSections(),
     getOpinionColumns(),
   ]);
 

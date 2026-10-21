@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { SITE } from "@/config/site";
-import { cn } from "@/utils";
+import { cn } from "@/lib/cn";
 
 type Cat = (typeof SITE.categories)[number];
 

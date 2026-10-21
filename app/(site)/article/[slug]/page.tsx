@@ -6,7 +6,7 @@ import Pill from "@/components/site/Pill";
 import { SocialIcon } from "@/components/site/SocialLinks";
 import ArticleBody from "@/components/site/ArticleBody";
 import { SITE } from "@/config/site";
-import { getAllArticleSlugs, getArticleBySlug } from "@/lib/news";
+import { getAllArticleSlugs, getArticleBySlug } from "@/services/public-articles";
 import { resolveMediaUrl } from "@/lib/url-utils";
 import { formatDate, formatCategoryName, formatReadTime, authorName, TEAM_BYLINE } from "@/lib/formatters";
 

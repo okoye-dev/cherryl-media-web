@@ -1,5 +1,5 @@
 import React from "react";
-import type { EditorialCopy } from "@/lib/settings";
+import type { EditorialCopy } from "@/config/editorial-copy";
 import { Panel } from "@/components/admin/ui";
 import { Field } from "./Field";
 

@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { AIChip, Btn, Label, Switch, TextInput } from "@/components/admin/ui";
 import { LIMITS } from "./limits";
-import { cn } from "@/utils";
+import { cn } from "@/lib/cn";
 import { ChevronDown, ChevronUp, TrashIcon } from "./icons";
 import ImageUploadField from "@/components/admin/ImageUploadField";
 import type { ContentBlock } from "@/lib/types";
 import StoryPicker from "@/components/admin/StoryPicker";
 import EditorPickerSheet from "./EditorPickerSheet";
 import { getYouTubeEmbedUrl, resolveMediaUrl } from "@/lib/url-utils";
-import { uploadMediaFile } from "@/services/media";
+import { uploadMediaFile } from "@/lib/upload";
 
 const BLOCK_LABELS: Record<string, string> = {
   paragraph: "Paragraph",

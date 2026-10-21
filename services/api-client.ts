@@ -1,8 +1,3 @@
-/**
- * Centralized API Client for Cherryl Media
- * Handles base URLs, timeout, JSON serialization, and error normalization.
- */
-
 export class ApiError extends Error {
   constructor(
     message: string,
@@ -15,20 +10,15 @@ export class ApiError extends Error {
 }
 
 import { getBackendUrl } from "@/lib/backend-url";
-import { getStoredToken } from "@/lib/auth";
+import { getStoredToken } from "@/lib/session";
 import { isAuthRefusal, isSignInPath, recoverFromRefusal } from "@/lib/auth-gate";
-export { getBackendUrl };
 
 export interface RequestOptions extends RequestInit {
   timeoutMs?: number;
   params?: Record<string, string | number | boolean | undefined>;
 }
 
-/**
- * The reply body plus the response headers. Used where the headers carry information (paging).
- * If the backend says nobody is signed in, the sign-in window opens and the request is sent once more
- * after the person signs in.
- */
+/** Reply body plus headers. If nobody is signed in, the sign-in window opens and the request is retried once after sign-in. */
 export async function requestWithMeta<T>(
   path: string,
   options: RequestOptions = {}
@@ -97,7 +87,9 @@ async function send<T>(
       }
       const message =
         typeof errorData === "object" && errorData !== null && "error" in errorData
-          ? String((errorData as { error: unknown }).error)
+          ? typeof (errorData as { error: unknown }).error === "object"
+            ? (errorData as { error: { message?: string } }).error?.message || "API Error"
+            : String((errorData as { error: unknown }).error)
           : `HTTP ${response.status}: ${response.statusText}`;
       throw new ApiError(message, response.status, errorData);
     }
