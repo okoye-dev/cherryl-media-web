@@ -67,6 +67,7 @@ export function SectionPanel({
                   slotIndex={idx}
                   totalSlots={articleIds.length}
                   layout={meta.maxSlots === 1 ? "feature" : "row"}
+                  showImage={meta.showsImage}
                   article={article}
                   onMoveSlot={onMoveSlot}
                   onOpenPicker={onOpenPicker}
